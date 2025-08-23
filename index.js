@@ -1,5 +1,4 @@
 import multer from 'multer';
-import fs from 'fs/promises';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,7 +11,44 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+
+const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024); // 10MB default
+const allowedMimeTypes = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/csv',
+  'text/html',
+  'text/markdown',
+  'application/json',
+  'application/xml',
+  'text/xml',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'audio/mpeg',
+  'audio/wav',
+  'video/mp4',
+  'video/quicktime',
+]);
+
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (req, file, cb) => {
+    if (!allowedMimeTypes.has(file.mimetype)) {
+      const err = new Error('INVALID_FILE_TYPE');
+      err.code = 'INVALID_FILE_TYPE';
+      return cb(err);
+    }
+    cb(null, true);
+  },
+});
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -33,9 +69,39 @@ const clientDistPath = path.join(__dirname, 'client', 'dist');
 app.use(express.static(clientDistPath));
 app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
 
+const uploadMiddleware = (req, res, next) => {
+  upload.array('files')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      let errorResponse = {
+        status: 'error',
+        message: 'Parsing error',
+        errorCode: err.code,
+        error: err.message,
+        shortError: 'Upload error.',
+        tip: 'Check file size and type.',
+        line: 'Line number not available',
+        elementId: 'No element ID found',
+      };
+
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        errorResponse = {
+          ...errorResponse,
+          error: 'File is too large.',
+          shortError: 'File too large.',
+          tip: `Max size is ${Math.floor(MAX_FILE_SIZE / (1024 * 1024))}MB. Try a smaller file.`,
+        };
+      }
+
+      return res.status(400).json(errorResponse);
+    }
+
+    next(err);
+  });
+};
+
 app.post(
   '/api/formfill',
-  upload.array('files'),
+  uploadMiddleware,
   express.urlencoded({ extended: true }),
   async (req, res) => {
     const start = Date.now();

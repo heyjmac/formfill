@@ -142,7 +142,7 @@ export const FormFillDropdown = () => {
             {errorCode === 'INVALID_FILE_TYPE' && (
               <div>Unsupported file type. Please upload a valid document.</div>
             )}
-            {errorCode === 'FILE_TOO_LARGE' && (
+            {errorCode === 'LIMIT_FILE_SIZE' && (
               <div>File is too large. Please upload a smaller document.</div>
             )}
             {errorCode === 'NO_INPUT_PROVIDED' && (
