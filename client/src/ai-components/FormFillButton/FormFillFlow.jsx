@@ -156,9 +156,8 @@ export const FormFillFlow = () => {
           {Object.entries(fieldsFilled).map(([key, value]) => (
             <div
               key={key}
-              className={`flex justify-between items-center space-y-1 px-2 py-1 rounded ${
-                selectedFields[key] ? 'bg-green-50' : ''
-              }`}
+              className={`flex justify-between items-center space-y-1 px-2 py-1 rounded 
+                ${selectedFields[key] ? '' : ''}`}
             >
               <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
                 {fieldLabels[key] || key}
