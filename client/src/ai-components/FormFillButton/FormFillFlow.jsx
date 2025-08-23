@@ -67,6 +67,28 @@ export const FormFillFlow = () => {
 
   const handleClose = () => events.emit('formFill', { isOpen: false });
 
+  const TopNav = ({ handleBack, title }) => (
+    <div className="flex items-center justify-between mb-4 -mt-1">
+      <div>
+        {handleBack && (
+          <button
+            onClick={handleBack}
+            className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-sm"
+          >
+            <span className="material-symbols-outlined">arrow_back_ios</span>
+          </button>
+        )}
+      </div>
+      {title && <div className="text-md font-medium">{title}</div>}
+      <button
+        onClick={handleClose}
+        className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-base"
+      >
+        <span className="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  );
+
   if (status === 'loading') {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -81,24 +103,12 @@ export const FormFillFlow = () => {
   if (status === 'success') {
     return (
       <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={handleClear}
-            className="text-gray-700 hover:text-black transition-colors flex items-center text-sm"
-          >
-            <span className="material-symbols-outlined text-base">arrow_back_ios</span>
-          </button>
-          <div className="text-md font-medium">
-            {Object.keys(fieldsFilled).length} form field
-            {Object.keys(fieldsFilled).length !== 1 ? 's' : ''} found
-          </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-black transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">close</span>
-          </button>
-        </div>
+        <TopNav
+          handleBack={handleClear}
+          title={`${Object.keys(fieldsFilled).length} form field${
+            Object.keys(fieldsFilled).length !== 1 ? 's' : ''
+          } found`}
+        />
         <div className="text-sm text-gray-600 mb-4">
           Please review the information below before applying it.
         </div>
@@ -196,13 +206,7 @@ export const FormFillFlow = () => {
 
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div></div>
-        <div className="text-md font-medium">AI Form Auto-Fill</div>
-        <button onClick={handleClose} className="text-gray-400 hover:text-black transition-colors">
-          <span className="material-symbols-outlined text-base">close</span>
-        </button>
-      </div>
+      <TopNav title="AI Form Auto-Fill" />
       <div className="mb-3 relative">
         <label className="block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 hover:bg-gray-50 transition-colors mb-2">
           <span className="material-symbols-outlined mb-1">upload_file</span>
@@ -228,7 +232,7 @@ export const FormFillFlow = () => {
 
         {files.length > 0 && (
           <button
-            className="cursor-pointer px-4 absolute w-[18px] h-[18px] top-[-8px] right-[-8px] bg-gray-200 text-gray-700 rounded-full text-xs flex items-center justify-center hover:bg-red-400 hover:text-white"
+            className="cursor-pointer absolute w-[18px] h-[18px] top-[-8px] right-[-8px] bg-gray-200 text-gray-700 rounded-full text-xs flex items-center justify-center hover:bg-red-400 hover:text-white"
             onClick={() => setFiles([])}
             aria-label="Clear files"
           >
