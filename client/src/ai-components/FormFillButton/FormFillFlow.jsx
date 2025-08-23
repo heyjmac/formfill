@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { fillFormFields, getFormFieldLabels, getFormFields } from './utils';
 import { events } from '../utils/events';
+import { copy } from './copy';
 
 export const FormFillFlow = () => {
   const fileRef = useRef(null);
@@ -94,7 +95,7 @@ export const FormFillFlow = () => {
       <div className="w-full h-full flex items-center justify-center">
         <div className="p-4">
           <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-          <div className="text-sm text-gray-600">Analyzing your content...</div>
+          <div className="text-sm text-gray-600">{copy.processing}</div>
         </div>
       </div>
     );
@@ -105,13 +106,13 @@ export const FormFillFlow = () => {
       <div className="p-4">
         <TopNav
           handleBack={handleClear}
-          title={`${Object.keys(fieldsFilled).length} form field${
-            Object.keys(fieldsFilled).length !== 1 ? 's' : ''
-          } found`}
+          title={
+            Object.keys(fieldsFilled).length > 1
+              ? copy.fields_found.plural.replace('{{count}}', Object.keys(fieldsFilled).length)
+              : copy.fields_found.singular
+          }
         />
-        <div className="text-sm text-gray-600 mb-4">
-          Please review the information below before applying it.
-        </div>
+        <div className="text-sm text-gray-600 mb-4">{copy.review}</div>
         <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
           {Object.entries(fieldsFilled).map(([key, value]) => (
             <div key={key} className="flex justify-between items-center space-y-1">
@@ -134,11 +135,11 @@ export const FormFillFlow = () => {
         <div className="flex justify-between mb-4">
           <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
             <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-            Clear selection
+            {copy.clear_selection}
           </button>
           <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
             <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-            Select all
+            {copy.select_all}
           </button>
         </div>
 
@@ -150,14 +151,14 @@ export const FormFillFlow = () => {
                 onClick={handleUndo}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">undo</span>
-                <span>Undo</span>
+                <span>{copy.undo}</span>
               </div>
               <div
                 className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
                 onClick={handleClose}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">close</span>
-                <span>Close</span>
+                <span>{copy.close}</span>
               </div>
             </div>
           ) : (
@@ -166,7 +167,7 @@ export const FormFillFlow = () => {
               onClick={handleFill}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
-              <span>Confirm and apply selection</span>
+              <span>{copy.apply}</span>
             </div>
           )}
         </div>
@@ -182,22 +183,14 @@ export const FormFillFlow = () => {
             <span className="material-symbols-outlined">error</span>
           </div>
           <div className="text-sm text-gray-700 mb-3">
-            {errorCode === 'INVALID_FILE_TYPE' && (
-              <div>Unsupported file type. Please upload a valid document.</div>
-            )}
-            {errorCode === 'LIMIT_FILE_SIZE' && (
-              <div>File is too large. Please upload a smaller document.</div>
-            )}
-            {errorCode === 'NO_INPUT_PROVIDED' && (
-              <div>No input provided. Please upload a document or enter text.</div>
-            )}
-            {!errorCode && <div>Something went wrong while processing your request.</div>}
+            {copy.errors[errorCode] && <div>{copy.errors[errorCode]}</div>}
+            {!errorCode && <div>{copy.errors.DEFAULT}</div>}
           </div>
           <button
             className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
             onClick={handleClear}
           >
-            Try again
+            {copy.error_cta}
           </button>
         </div>
       </div>
@@ -211,14 +204,14 @@ export const FormFillFlow = () => {
         <label className="block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 hover:bg-gray-50 transition-colors mb-2">
           <span className="material-symbols-outlined mb-1">upload_file</span>
           <div className="block text-xs">
-            {files.length > 0
-              ? files.map((f) => f.name).join(', ')
-              : 'Drop document here or click to browse'}
+            {files.length > 0 ? files.map((f) => f.name).join(', ') : copy.drop_area}
           </div>
           <span className="block text-xs text-gray-500 mt-1">
             {files.length > 0
-              ? `${files.length} file(s) selected`
-              : 'Supported formats: PDF, DOCX, TXT'}
+              ? files.length > 1
+                ? copy.files_selected.plural.replace('{{count}}', files.length)
+                : copy.files_selected.singular
+              : copy.supported_formats}
           </span>
           <input
             type="file"

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FormFillDetails } from './FormFillDetails';
 import { useEffect } from 'react';
 import { events } from '../utils/events';
+import { copy } from './copy';
 
 export const FormFillButton = ({ floating, modal, ...rest }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +35,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-              Fill with AI
+              {copy.title}
             </div>
           ) : (
             <div
@@ -42,7 +43,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">close</span>
-              Close
+              {copy.close}
             </div>
           )
         ) : (
@@ -51,7 +52,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
             onClick={handleOpen}
           >
             <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-            Fill with AI
+            {copy.title}
           </div>
         )}
 
