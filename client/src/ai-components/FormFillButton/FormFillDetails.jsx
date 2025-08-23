@@ -1,11 +1,11 @@
 import { FormFillFlow } from './FormFillFlow';
 
-export const FormFillDetails = ({ modal, down, right }) => {
+export const FormFillDetails = ({ modal, down, right, ...rest }) => {
   if (modal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
         <div className="bg-white rounded-lg p-2 min-w-[400px] max-w-[600px]">
-          <FormFillFlow />
+          <FormFillFlow {...rest} />
         </div>
       </div>
     );
@@ -14,7 +14,7 @@ export const FormFillDetails = ({ modal, down, right }) => {
     return (
       <div className={`absolute top-[46px] ${right ? 'left-0' : 'right-0'}`}>
         <div className="w-72 p-6 text-center bg-white border border-gray-100 shadow-lg rounded-lg">
-          <FormFillFlow />
+          <FormFillFlow {...rest} />
         </div>
       </div>
     );
@@ -22,7 +22,7 @@ export const FormFillDetails = ({ modal, down, right }) => {
   return (
     <div className={`absolute bottom-[46px] ${right ? 'left-0' : 'right-0'}`}>
       <div className="w-72 text-center bg-white border border-gray-100 shadow-lg rounded-lg">
-        <FormFillFlow />
+        <FormFillFlow {...rest} />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { fillFormFields, getCleanData, getFormFieldLabels, getFormFields } from 
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillFlow = () => {
+export const FormFillFlow = ({ instruction }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -22,6 +22,7 @@ export const FormFillFlow = () => {
     setFieldLabels(formFieldLabels);
     const formData = new FormData();
     formData.append('formFields', JSON.stringify(formFields));
+    formData.append('instruction', instruction || '');
     files.forEach((f) => formData.append('files', f));
     formData.append('pastedText', text || '');
 

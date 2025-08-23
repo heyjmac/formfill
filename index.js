@@ -110,6 +110,7 @@ app.post(
     const start = Date.now();
     const files = req.files || [];
     const formFields = JSON.parse(req.body.formFillerData || req.body.formFields || '{}');
+    const instruction = req.body.instruction?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
 
     if (files.length === 0 && !pastedText) {
@@ -156,7 +157,9 @@ Do not explain or respond to the user. Just return the tool call with filled arg
 Do not ask questions. Only act.
 Do not fill fields with "null", "undefined", or "unknown".
 
-Today is ${new Date().toLocaleDateString()}`;
+Today is ${new Date().toLocaleDateString()}
+
+${instruction}`;
 
     try {
       const response = await ai.models.generateContent({
