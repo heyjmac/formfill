@@ -59,68 +59,68 @@ export const FormFillFlow = () => {
 
   if (status === 'loading') {
     return (
-      <div>
-        <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-        <div className="text-sm text-gray-600">Analyzing your content...</div>
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="p-4">
+          <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+          <div className="text-sm text-gray-600">Analyzing your content...</div>
+        </div>
       </div>
     );
   }
 
   if (status === 'success') {
     return (
-      <div>
-        <div className="p-4">
-          <div className="text-md font-medium mb-3">
-            {Object.keys(fieldsFilled).length} field
-            {Object.keys(fieldsFilled).length !== 1 ? 's' : ''} found!
-          </div>
+      <div className="p-4">
+        <div className="text-md font-medium mb-3">
+          {Object.keys(fieldsFilled).length} field
+          {Object.keys(fieldsFilled).length !== 1 ? 's' : ''} found!
+        </div>
 
-          <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
-            {Object.entries(fieldsFilled).map(([key, value]) => (
-              <div key={key} className="flex justify-between items-center space-y-1">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={key}
-                    defaultChecked
-                    className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
-                  />
-                  <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
-                    {fieldLabels[key] || key}
-                  </span>
-                </div>
-                <span className="text-gray-700 text-sm">{value}</span>
+        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
+          {Object.entries(fieldsFilled).map(([key, value]) => (
+            <div key={key} className="flex justify-between items-center space-y-1">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={key}
+                  defaultChecked
+                  className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
+                />
+                <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                  {fieldLabels[key] || key}
+                </span>
               </div>
-            ))}
+              <span className="text-gray-700 text-sm">{value}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-between mb-4">
+          <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
+            <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
+            Clear selection
+          </button>
+          <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
+            <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
+            Select all
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div
+            className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
+            onClick={handleFill}
+          >
+            <span className="material-symbols-outlined mr-1 text-sm">done</span>
+            <span>Fill selected fields</span>
           </div>
 
-          <div className="flex justify-between mb-4">
-            <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
-              <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-              Clear selection
-            </button>
-            <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
-              <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-              Select all
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            <div
-              className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
-              onClick={handleFill}
-            >
-              <span className="material-symbols-outlined mr-1 text-sm">done</span>
-              <span>Fill selected fields</span>
-            </div>
-
-            <div
-              className="w-full cursor-pointer py-2 bg-white text-gray-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
-              onClick={handleClear}
-            >
-              <span className="material-symbols-outlined mr-1 text-sm">add_circle</span>
-              <span>Try another file</span>
-            </div>
+          <div
+            className="w-full cursor-pointer py-2 bg-white text-gray-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
+            onClick={handleClear}
+          >
+            <span className="material-symbols-outlined mr-1 text-sm">add_circle</span>
+            <span>Try another file</span>
           </div>
         </div>
       </div>
