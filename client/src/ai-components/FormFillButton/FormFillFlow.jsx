@@ -117,17 +117,23 @@ export const FormFillFlow = () => {
         </div>
 
         <div className="space-y-3">
-          <div
-            className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
-            onClick={Object.keys(undoFields).length ? handleUndo : handleFill}
-          >
-            <span className="material-symbols-outlined mr-1 text-sm">
-              {Object.keys(undoFields).length ? 'undo' : 'done'}
-            </span>
-            <span>
-              {Object.keys(undoFields).length ? 'Confirm undo' : 'Confirm and apply selection'}
-            </span>
-          </div>
+          {Object.keys(undoFields).length ? (
+            <div
+              className="w-full cursor-pointer py-2 bg-white text-gray-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
+              onClick={handleUndo}
+            >
+              <span className="material-symbols-outlined mr-1 text-sm">undo</span>
+              <span>Undo</span>
+            </div>
+          ) : (
+            <div
+              className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
+              onClick={handleFill}
+            >
+              <span className="material-symbols-outlined mr-1 text-sm">done</span>
+              <span>Confirm and apply selection</span>
+            </div>
+          )}
 
           <div
             className="w-full cursor-pointer py-2 bg-white text-gray-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
@@ -229,7 +235,7 @@ export const FormFillFlow = () => {
         </div>
 
         <div
-          className={`w-full py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center ${
+          className={`w-full py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center ${
             files.length === 0 && !text ? 'opacity-50 cursor-default' : 'cursor-pointer'
           }`}
           onClick={handleSubmit}
