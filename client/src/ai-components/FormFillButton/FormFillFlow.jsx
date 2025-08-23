@@ -197,7 +197,7 @@ export const FormFillFlow = () => {
                 </div>
               )}
             </div>
-          ) : Object.keys(selectedFields).length ? (
+          ) : Object.values(selectedFields).some(Boolean) ? (
             <div
               className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
               onClick={handleApply}
