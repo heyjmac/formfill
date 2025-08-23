@@ -3,8 +3,8 @@ import { FormFillFlow } from './FormFillFlow';
 export const FormFillDetails = ({ modal, down, right }) => {
   if (modal) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white rounded-lg p-6">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
+        <div className="bg-white rounded-lg p-2 min-w-[400px]">
           <FormFillFlow />
         </div>
       </div>
