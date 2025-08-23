@@ -35,7 +35,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-              {copy.title}
+              {copy.ctas.button}
             </div>
           ) : (
             <div
@@ -43,7 +43,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">close</span>
-              {copy.close}
+              {copy.ctas.close}
             </div>
           )
         ) : (
@@ -52,7 +52,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
             onClick={handleOpen}
           >
             <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-            {copy.title}
+            {copy.ctas.button}
           </div>
         )}
 

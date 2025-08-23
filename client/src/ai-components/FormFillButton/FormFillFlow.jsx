@@ -95,7 +95,7 @@ export const FormFillFlow = () => {
       <div className="w-full h-full flex items-center justify-center">
         <div className="p-4">
           <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-          <div className="text-sm text-gray-600">{copy.processing}</div>
+          <div className="text-sm text-gray-600">{copy.titles.processing}</div>
         </div>
       </div>
     );
@@ -135,11 +135,11 @@ export const FormFillFlow = () => {
         <div className="flex justify-between mb-4">
           <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
             <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-            {copy.clear_selection}
+            {copy.ctas.clear_selection}
           </button>
           <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
             <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-            {copy.select_all}
+            {copy.ctas.select_all}
           </button>
         </div>
 
@@ -151,14 +151,14 @@ export const FormFillFlow = () => {
                 onClick={handleUndo}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">undo</span>
-                <span>{copy.undo}</span>
+                <span>{copy.ctas.undo}</span>
               </div>
               <div
                 className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
                 onClick={handleClose}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">close</span>
-                <span>{copy.close}</span>
+                <span>{copy.ctas.close}</span>
               </div>
             </div>
           ) : (
@@ -167,7 +167,7 @@ export const FormFillFlow = () => {
               onClick={handleFill}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
-              <span>{copy.apply}</span>
+              <span>{copy.ctas.apply}</span>
             </div>
           )}
         </div>
@@ -190,7 +190,7 @@ export const FormFillFlow = () => {
             className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
             onClick={handleClear}
           >
-            {copy.error_cta}
+            {copy.ctas.error}
           </button>
         </div>
       </div>
@@ -199,19 +199,19 @@ export const FormFillFlow = () => {
 
   return (
     <div className="p-4">
-      <TopNav title="AI Form Auto-Fill" />
+      <TopNav title={copy.titles.main} />
       <div className="mb-3 relative">
         <label className="block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 hover:bg-gray-50 transition-colors mb-2">
           <span className="material-symbols-outlined mb-1">upload_file</span>
           <div className="block text-xs">
-            {files.length > 0 ? files.map((f) => f.name).join(', ') : copy.drop_area}
+            {files.length > 0 ? files.map((f) => f.name).join(', ') : copy.text.drop_area}
           </div>
           <span className="block text-xs text-gray-500 mt-1">
             {files.length > 0
               ? files.length > 1
                 ? copy.files_selected.plural.replace('{{count}}', files.length)
                 : copy.files_selected.singular
-              : copy.supported_formats}
+              : copy.text.supported_formats}
           </span>
           <input
             type="file"
@@ -229,7 +229,7 @@ export const FormFillFlow = () => {
             onClick={() => setFiles([])}
             aria-label="Clear files"
           >
-            <span>×</span>
+            <span className="material-symbols-outlined">close</span>
           </button>
         )}
       </div>
@@ -243,14 +243,14 @@ export const FormFillFlow = () => {
       <div className="mb-3">
         <textarea
           className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-          placeholder="Paste your text here and let AI extract the information"
+          placeholder={copy.text.paste_text}
           value={text}
           onChange={(e) => setText(e.target.value)}
         ></textarea>
       </div>
 
       <div className="flex items-center text-xs text-gray-500 mb-4">
-        <p>Our AI will analyze your content and fill out the form automatically.</p>
+        <p>{copy.text.info}</p>
       </div>
 
       <div
