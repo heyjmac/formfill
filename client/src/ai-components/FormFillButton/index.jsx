@@ -17,7 +17,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
   }, []);
 
   const handleOpen = () => {
-    events.emit('formFill', { isOpen: true });
+    setIsOpen(true);
   };
 
   const handleClose = () => {

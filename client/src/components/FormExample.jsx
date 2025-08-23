@@ -233,7 +233,7 @@ export function FormExample() {
         </div>
         <div className="mt-6 flex justify-between gap-2">
           <FormFillButton modal />
-          <div className="gap-2">
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={handleClear}
