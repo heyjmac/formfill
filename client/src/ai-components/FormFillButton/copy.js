@@ -25,7 +25,7 @@ export const copy = {
     select_all: 'Select all',
     undo: 'Undo',
     close: 'Close',
-    stop: 'Stop analyzing',
+    stop: 'Stop',
   },
   text: {
     processing: 'Analyzing your content...',

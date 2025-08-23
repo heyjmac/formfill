@@ -131,7 +131,7 @@ export const FormFillFlow = () => {
           </div>
           <div className="text-sm text-gray-700 mb-3">{copy.text.processing}</div>
           <button
-            className="w-full py-2 bg-gray-300 text-gray-800 text-sm rounded-lg hover:bg-gray-400 transition-colors"
+            className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-400 transition-colors"
             onClick={handleClear}
           >
             {copy.cta.cancel || copy.cta.stop}
@@ -281,7 +281,11 @@ export const FormFillFlow = () => {
     <div className="p-4">
       <TopNav title={copy.title.main} />
       <div className="mb-3 relative">
-        <label className="block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 hover:bg-gray-50 transition-colors mb-2">
+        <label
+          className={`block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 transition-colors mb-2 ${
+            files.length > 0 ? 'bg-gray-100' : 'hover:bg-gray-50'
+          }`}
+        >
           <span className="material-symbols-outlined mb-1">upload_file</span>
           <div className="block text-xs">
             {files.length > 0 ? files.map((f) => f.name).join(', ') : copy.text.drop_area}
