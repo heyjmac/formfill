@@ -1,0 +1,29 @@
+{
+  "name": "blank",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "https://github.com/heyjmac",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm --prefix client run build",
+    "serve": "node index.js",
+    "start": "npm run build && node index.js",
+    "dev": "concurrently -k \"npm --prefix client run build -- --watch\" \"nodemon --watch index.js --watch tools.js --ext js,mjs --exec 'node index.js'\""
+  },
+  "dependencies": {
+    "@google/genai": "^1.15.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "multer": "^2.0.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.10.3",
+    "nodemon": "^3.1.10"
+  }
+}
