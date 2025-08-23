@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { fillFormFields, getFormFieldLabels, getFormFields } from './utils';
+import { events } from '../utils/events';
 
 export const FormFillFlow = () => {
   const fileRef = useRef(null);
@@ -78,6 +79,22 @@ export const FormFillFlow = () => {
   if (status === 'success') {
     return (
       <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={handleClear}
+            className="text-gray-700 hover:text-black transition-colors flex items-center text-sm"
+          >
+            <span className="material-symbols-outlined mr-1 text-base">arrow_back</span>
+            Back
+          </button>
+          <button
+            onClick={() => events.emit('formFill', { isOpen: false })}
+            className="text-gray-400 hover:text-black transition-colors"
+          >
+            <span className="material-symbols-outlined text-base">close</span>
+          </button>
+        </div>
+
         <div className="text-md font-medium mb-3">
           AI found {Object.keys(fieldsFilled).length} form field
           {Object.keys(fieldsFilled).length !== 1 ? 's' : ''}!

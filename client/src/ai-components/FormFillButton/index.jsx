@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import { FormFillDetails } from './FormFillDetails';
+import { useEffect } from 'react';
+import { events } from '../utils/events';
 
 export const FormFillButton = ({ modal, ...rest }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = events.on('formFill', ({ isOpen }) => {
+      setIsDropdownOpen(isOpen);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="fixed bottom-5 right-5">
