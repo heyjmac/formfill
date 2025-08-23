@@ -35,7 +35,7 @@ export const FormFillFlow = () => {
       if (response.ok && data?.data) {
         const cleanedData = Object.fromEntries(
           Object.entries(data.data).filter(
-            (pair) => pair[1] && pair[1].trim() && pair[1] !== 'null',
+            (pair) => pair[1] && pair[1]?.trim() && pair[1] !== 'null',
           ),
         );
         setFieldsFilled(cleanedData);
