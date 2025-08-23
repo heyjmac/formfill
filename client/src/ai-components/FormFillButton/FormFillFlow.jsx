@@ -90,6 +90,18 @@ export const FormFillFlow = () => {
 
   const handleClose = () => events.emit('formFill', { isOpen: false });
 
+  const handleSelectAll = () => {
+    const allSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, true]));
+    setSelectedFields(allSelected);
+    setIsDirty(true);
+  };
+
+  const handleClearSelection = () => {
+    const noneSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, false]));
+    setSelectedFields(noneSelected);
+    setIsDirty(true);
+  };
+
   const TopNav = ({ handleBack, title }) => (
     <div className="flex items-center justify-between mb-4 -mt-1">
       <div>
@@ -159,11 +171,17 @@ export const FormFillFlow = () => {
         </div>
 
         <div className="flex justify-between mb-4">
-          <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
+          <button
+            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
+            onClick={handleClearSelection}
+          >
             <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
             {copy.cta.clear_selection}
           </button>
-          <button className="text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors">
+          <button
+            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
+            onClick={handleSelectAll}
+          >
             <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
             {copy.cta.select_all}
           </button>
