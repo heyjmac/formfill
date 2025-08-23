@@ -72,8 +72,11 @@ export const FormFillFlow = () => {
     return (
       <div className="p-4">
         <div className="text-md font-medium mb-3">
-          {Object.keys(fieldsFilled).length} field
-          {Object.keys(fieldsFilled).length !== 1 ? 's' : ''} found!
+          AI found {Object.keys(fieldsFilled).length} form field
+          {Object.keys(fieldsFilled).length !== 1 ? 's' : ''}!
+          <div className="text-sm text-gray-600 mt-1">
+            Please review the information below before applying it.
+          </div>
         </div>
 
         <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
@@ -112,7 +115,7 @@ export const FormFillFlow = () => {
             onClick={handleFill}
           >
             <span className="material-symbols-outlined mr-1 text-sm">done</span>
-            <span>Fill selected fields</span>
+            <span>Confirm and apply selection</span>
           </div>
 
           <div
