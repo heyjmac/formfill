@@ -155,7 +155,7 @@ export const FormFillFlow = () => {
         <div className="text-sm text-gray-600 mb-4">{copy.text.review}</div>
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {Object.entries(fieldsFilled).map(([key, value]) => (
-            <div
+            <label
               key={key}
               className={`flex justify-between items-center px-2 py-2 rounded 
                 ${
@@ -184,7 +184,7 @@ export const FormFillFlow = () => {
                   className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
                 />
               </div>
-            </div>
+            </label>
           ))}
         </div>
 
