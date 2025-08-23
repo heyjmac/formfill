@@ -12,6 +12,7 @@ export const FormFillFlow = () => {
   const [fieldsFilled, setFieldsFilled] = useState({});
   const [errorCode, setErrorCode] = useState(null);
   const [undoFields, setUndoFields] = useState({});
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleSubmit = async () => {
     setStatus('loading');
@@ -61,14 +62,34 @@ export const FormFillFlow = () => {
     setStatus('idle');
   };
 
-  const handleFill = () => {
-    const previousValues = fillFormFields(fieldsFilled);
+  const handleApply = () => {
+    const selected = Object.fromEntries(
+      Object.entries(fieldsFilled).filter(([key]) => {
+        const checkbox = document.getElementById(key);
+        return checkbox?.checked;
+      }),
+    );
+    const previousValues = fillFormFields(selected);
     setUndoFields(previousValues);
+    setIsDirty(false);
   };
 
   const handleUndo = () => {
     fillFormFields(undoFields);
     setUndoFields({});
+  };
+
+  const handleReapply = () => {
+    fillFormFields(undoFields);
+    const selected = Object.fromEntries(
+      Object.entries(fieldsFilled).filter(([key]) => {
+        const checkbox = document.getElementById(key);
+        return checkbox?.checked;
+      }),
+    );
+    const previousValues = fillFormFields(selected);
+    setUndoFields(previousValues);
+    setIsDirty(false);
   };
 
   const handleClose = () => events.emit('formFill', { isOpen: false });
@@ -130,6 +151,7 @@ export const FormFillFlow = () => {
                   type="checkbox"
                   id={key}
                   defaultChecked
+                  onChange={() => setIsDirty(true)}
                   className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer px-4 transition-colors"
                 />
               </div>
@@ -158,18 +180,28 @@ export const FormFillFlow = () => {
                 <span className="material-symbols-outlined mr-1 text-sm">undo</span>
                 <span>{copy.cta.undo}</span>
               </div>
-              <div
-                className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-                onClick={handleClose}
-              >
-                <span className="material-symbols-outlined mr-1 text-sm">close</span>
-                <span>{copy.cta.close}</span>
-              </div>
+              {isDirty ? (
+                <div
+                  className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
+                  onClick={handleReapply}
+                >
+                  <span className="material-symbols-outlined mr-1 text-sm">refresh</span>
+                  <span>{copy.cta.reapply}</span>
+                </div>
+              ) : (
+                <div
+                  className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
+                  onClick={handleClose}
+                >
+                  <span className="material-symbols-outlined mr-1 text-sm">close</span>
+                  <span>{copy.cta.close}</span>
+                </div>
+              )}
             </div>
           ) : (
             <div
               className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-              onClick={handleFill}
+              onClick={handleApply}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
               <span>{copy.cta.apply}</span>

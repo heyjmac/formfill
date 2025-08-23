@@ -20,6 +20,7 @@ export const copy = {
   cta: {
     button: 'Fill with AI',
     apply: 'Confirm and apply selection',
+    reapply: 'Reapply',
     error: 'Try again',
     clear_selection: 'Clear selection',
     select_all: 'Select all',
