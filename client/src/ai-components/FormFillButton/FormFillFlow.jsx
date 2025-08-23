@@ -31,8 +31,11 @@ export const FormFillFlow = () => {
 
       const data = await response.json();
       if (response.ok && data?.data) {
-        setFieldsFilled(data.data);
-        console.log('Form filled successfully:', data.data);
+        const cleanedData = Object.fromEntries(
+          Object.entries(data.data).filter((pair) => pair[1] && pair[1] !== 'null'),
+        );
+        setFieldsFilled(cleanedData);
+        console.log('Form filled successfully:', cleanedData);
         setStatus('success');
       } else {
         console.error('Error filling form:', data);
