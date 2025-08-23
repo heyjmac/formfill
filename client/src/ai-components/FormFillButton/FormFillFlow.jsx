@@ -13,6 +13,7 @@ export const FormFillFlow = () => {
   const [errorCode, setErrorCode] = useState(null);
   const [undoFields, setUndoFields] = useState({});
   const [isDirty, setIsDirty] = useState(false);
+  const [selectedFields, setSelectedFields] = useState({});
 
   const handleSubmit = async () => {
     setStatus('loading');
@@ -38,6 +39,7 @@ export const FormFillFlow = () => {
           ),
         );
         setFieldsFilled(cleanedData);
+        setSelectedFields(Object.fromEntries(Object.keys(cleanedData).map((key) => [key, true])));
         console.log('Form filled successfully:', cleanedData);
         setStatus('success');
       } else {
@@ -64,10 +66,7 @@ export const FormFillFlow = () => {
 
   const handleApply = () => {
     const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(([key]) => {
-        const checkbox = document.getElementById(key);
-        return checkbox?.checked;
-      }),
+      Object.entries(fieldsFilled).filter(([key]) => selectedFields[key]),
     );
     const previousValues = fillFormFields(selected);
     setUndoFields(previousValues);
@@ -82,10 +81,7 @@ export const FormFillFlow = () => {
   const handleReapply = () => {
     fillFormFields(undoFields);
     const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(([key]) => {
-        const checkbox = document.getElementById(key);
-        return checkbox?.checked;
-      }),
+      Object.entries(fieldsFilled).filter(([key]) => selectedFields[key]),
     );
     const previousValues = fillFormFields(selected);
     setUndoFields(previousValues);
@@ -150,8 +146,11 @@ export const FormFillFlow = () => {
                 <input
                   type="checkbox"
                   id={key}
-                  defaultChecked
-                  onChange={() => setIsDirty(true)}
+                  checked={selectedFields[key] ?? true}
+                  onChange={(e) => {
+                    setSelectedFields((prev) => ({ ...prev, [key]: e.target.checked }));
+                    setIsDirty(true);
+                  }}
                   className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer px-4 transition-colors"
                 />
               </div>
@@ -198,13 +197,21 @@ export const FormFillFlow = () => {
                 </div>
               )}
             </div>
-          ) : (
+          ) : Object.keys(selectedFields).length ? (
             <div
               className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
               onClick={handleApply}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
               <span>{copy.cta.apply}</span>
+            </div>
+          ) : (
+            <div
+              className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
+              onClick={handleClose}
+            >
+              <span className="material-symbols-outlined mr-1 text-sm">close</span>
+              <span>{copy.cta.close}</span>
             </div>
           )}
         </div>
