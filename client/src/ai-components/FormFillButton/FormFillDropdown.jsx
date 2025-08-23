@@ -120,7 +120,7 @@ export const FormFillDropdown = () => {
                 onClick={handleClear}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">add_circle</span>
-                <span>Fill another form</span>
+                <span>Try another file</span>
               </div>
             </div>
           </div>
@@ -188,7 +188,9 @@ export const FormFillDropdown = () => {
           </div>
 
           <div
-            className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
+            className={`w-full py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center ${
+              files.length === 0 && !text ? 'opacity-50 cursor-default' : 'cursor-pointer'
+            }`}
             onClick={handleSubmit}
           >
             <span className="material-symbols-outlined mr-1 text-sm">auto_awesome</span>
