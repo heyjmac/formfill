@@ -3,7 +3,7 @@ import { FormFillDetails } from './FormFillDetails';
 import { useEffect } from 'react';
 import { events } from '../utils/events';
 
-export const FormFillButton = ({ modal, ...rest }) => {
+export const FormFillButton = ({ floating, modal, ...rest }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -16,14 +16,22 @@ export const FormFillButton = ({ modal, ...rest }) => {
     };
   }, []);
 
+  const handleOpen = () => {
+    events.emit('formFill', { isOpen: true });
+  };
+
+  const handleClose = () => {
+    events.emit('formFill', { isOpen: false });
+  };
+
   return (
-    <div className="fixed bottom-5 right-5">
+    <div className={floating ? 'fixed bottom-5 right-5' : ''}>
       <div className="relative">
         {isOpen ? (
           modal ? (
             <button
               className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
               Fill with AI
@@ -31,7 +39,7 @@ export const FormFillButton = ({ modal, ...rest }) => {
           ) : (
             <button
               className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">close</span>
               Close
@@ -40,7 +48,7 @@ export const FormFillButton = ({ modal, ...rest }) => {
         ) : (
           <button
             className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-            onClick={() => setIsOpen(true)}
+            onClick={handleOpen}
           >
             <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
             Fill with AI
