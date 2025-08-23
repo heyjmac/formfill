@@ -1,5 +1,6 @@
-import multer from 'multer';
+// 1. Imports and Setup
 import express from 'express';
+import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -12,7 +13,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// 2. Constants and Configs
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024); // 10MB default
+
 const allowedMimeTypes = new Set([
   'application/pdf',
   'application/msword',
@@ -52,23 +55,7 @@ const upload = multer({
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-if (process.env.NODE_ENV !== 'production') {
-  const livereload = (await import('livereload')).default;
-  const connectLivereload = (await import('connect-livereload')).default;
-
-  const liveReloadServer = livereload.createServer();
-  liveReloadServer.watch(path.join(__dirname, 'client/dist'));
-  app.use(connectLivereload());
-
-  liveReloadServer.server.once('connection', () => {
-    setTimeout(() => liveReloadServer.refresh('/'), 100);
-  });
-}
-
-const clientDistPath = path.join(__dirname, 'client', 'dist');
-app.use(express.static(clientDistPath));
-app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
-
+// 3. Middlewares
 const uploadMiddleware = (req, res, next) => {
   upload.array('files')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -99,6 +86,25 @@ const uploadMiddleware = (req, res, next) => {
   });
 };
 
+const clientDistPath = path.join(__dirname, 'client', 'dist');
+app.use(express.static(clientDistPath));
+app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
+
+// 4. Dev: LiveReload (non-prod)
+if (process.env.NODE_ENV !== 'production') {
+  const livereload = (await import('livereload')).default;
+  const connectLivereload = (await import('connect-livereload')).default;
+
+  const liveReloadServer = livereload.createServer();
+  liveReloadServer.watch(path.join(__dirname, 'client/dist'));
+  app.use(connectLivereload());
+
+  liveReloadServer.server.once('connection', () => {
+    setTimeout(() => liveReloadServer.refresh('/'), 100);
+  });
+}
+
+// 5. Endpoints
 app.post(
   '/api/formfill',
   uploadMiddleware,
@@ -218,8 +224,10 @@ Do not ask questions. Only act.`;
   },
 );
 
+// 6. Frontend Fallback
 app.get('/', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
+// 7. Start Server
 app.listen(3000, () => console.log('http://localhost:3000'));
