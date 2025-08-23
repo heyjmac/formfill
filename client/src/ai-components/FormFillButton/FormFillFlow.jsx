@@ -79,18 +79,18 @@ export const FormFillFlow = () => {
         <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
           {Object.entries(fieldsFilled).map(([key, value]) => (
             <div key={key} className="flex justify-between items-center space-y-1">
+              <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                {fieldLabels[key] || key}
+              </span>
               <div className="flex items-center space-x-2">
+                <span className="text-gray-700 text-sm">{value}</span>
                 <input
                   type="checkbox"
                   id={key}
                   defaultChecked
                   className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
                 />
-                <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
-                  {fieldLabels[key] || key}
-                </span>
               </div>
-              <span className="text-gray-700 text-sm">{value}</span>
             </div>
           ))}
         </div>
