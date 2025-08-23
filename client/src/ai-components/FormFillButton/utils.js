@@ -10,6 +10,24 @@ function unsnake(str = '') {
   return str.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
+export const getCleanData = (data) => {
+  const cleanedData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => {
+      const normalized = (v) =>
+        typeof v === 'string' && ['null', 'undefined', 'unknown'].includes(v.toLowerCase());
+      if (!value) return false;
+      if (typeof value === 'string') {
+        return value.trim() && !normalized(value);
+      }
+      if (Array.isArray(value)) {
+        return value.some((v) => !normalized(v));
+      }
+      return true;
+    }),
+  );
+  return cleanedData;
+};
+
 const getLabelText = (input) => {
   if (input.id) {
     const byFor = document.querySelector(`label[for="${input.id}"]`);

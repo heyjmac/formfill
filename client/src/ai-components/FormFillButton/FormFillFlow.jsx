@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { fillFormFields, getFormFieldLabels, getFormFields } from './utils';
+import { fillFormFields, getCleanData, getFormFieldLabels, getFormFields } from './utils';
 import { events } from '../utils/events';
 import { copy } from './copy';
 
@@ -33,16 +33,7 @@ export const FormFillFlow = () => {
 
       const data = await response.json();
       if (response.ok && data?.data) {
-        const cleanedData = Object.fromEntries(
-          Object.entries(data.data).filter(
-            (pair) =>
-              pair[1] &&
-              pair[1]?.trim() &&
-              pair[1].toLowerCase() !== 'null' &&
-              pair[1].toLowerCase() !== 'undefined' &&
-              pair[1].toLowerCase() !== 'unknown',
-          ),
-        );
+        const cleanedData = getCleanData(data.data);
         setFieldsFilled(cleanedData);
         setSelectedFields(Object.fromEntries(Object.keys(cleanedData).map((key) => [key, true])));
         console.log('Form filled successfully:', cleanedData);
