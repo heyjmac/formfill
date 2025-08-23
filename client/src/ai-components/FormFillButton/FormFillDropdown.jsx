@@ -113,7 +113,7 @@ export const FormFillDropdown = () => {
                 className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
                 onClick={handleFill}
               >
-                <span className="material-symbols-outlined mr-1 text-sm">fact_check</span>
+                <span className="material-symbols-outlined mr-1 text-sm">done</span>
                 <span>Fill selected fields</span>
               </div>
 
