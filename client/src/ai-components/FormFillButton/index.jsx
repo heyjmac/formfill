@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FormFillDropdown } from './FormFillDropdown';
+import { FormFillDetails } from './FormFillDetails';
 
 export const FormFillButton = () => {
   const [status, setStatus] = useState('idle');
@@ -39,7 +39,7 @@ export const FormFillButton = () => {
             <span className="relative">Form filled</span>
           </button>
         )}
-        {isDropdownOpen && <FormFillDropdown />}
+        {isDropdownOpen && <FormFillDetails />}
       </div>
     </div>
   );
