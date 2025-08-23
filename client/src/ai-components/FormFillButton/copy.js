@@ -1,7 +1,6 @@
 export const copy = {
   title: {
     main: 'AI Form Filler',
-    processing: 'Analyzing your content...',
   },
   fields_found: {
     singular: '1 form field found',
@@ -26,8 +25,10 @@ export const copy = {
     select_all: 'Select all',
     undo: 'Undo',
     close: 'Close',
+    stop: 'Stop analyzing',
   },
   text: {
+    processing: 'Analyzing your content...',
     info: 'Our AI will analyze your content and suggest how to fill the form fields',
     drop_area: 'Drop document here or click to browse',
     supported_formats: 'Supported formats: PDF, DOCX, TXT',

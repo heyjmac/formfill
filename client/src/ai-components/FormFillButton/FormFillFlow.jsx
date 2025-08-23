@@ -132,9 +132,19 @@ export const FormFillFlow = () => {
   if (status === 'loading') {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="p-4">
-          <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-          <div className="text-sm text-gray-600">{copy.title.processing}</div>
+        <div className="p-4 text-center">
+          <div className="text-blue-500 mb-2 text-3xl">
+            <span className="material-symbols-outlined animate-spin inline-block">
+              progress_activity
+            </span>
+          </div>
+          <div className="text-sm text-gray-700 mb-3">{copy.text.processing}</div>
+          <button
+            className="w-full py-2 bg-gray-300 text-gray-800 text-sm rounded-lg hover:bg-gray-400 transition-colors"
+            onClick={handleClear}
+          >
+            {copy.cta.cancel || copy.cta.stop}
+          </button>
         </div>
       </div>
     );
