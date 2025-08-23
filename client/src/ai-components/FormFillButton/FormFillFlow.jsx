@@ -35,7 +35,12 @@ export const FormFillFlow = () => {
       if (response.ok && data?.data) {
         const cleanedData = Object.fromEntries(
           Object.entries(data.data).filter(
-            (pair) => pair[1] && pair[1]?.trim() && pair[1] !== 'null',
+            (pair) =>
+              pair[1] &&
+              pair[1]?.trim() &&
+              pair[1].toLowerCase() !== 'null' &&
+              pair[1].toLowerCase() !== 'undefined' &&
+              pair[1].toLowerCase() !== 'unknown',
           ),
         );
         setFieldsFilled(cleanedData);
@@ -147,9 +152,14 @@ export const FormFillFlow = () => {
           }
         />
         <div className="text-sm text-gray-600 mb-4">{copy.text.review}</div>
-        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-1">
+        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
           {Object.entries(fieldsFilled).map(([key, value]) => (
-            <div key={key} className="flex justify-between items-center space-y-1">
+            <div
+              key={key}
+              className={`flex justify-between items-center space-y-1 px-2 py-1 rounded ${
+                selectedFields[key] ? 'bg-green-50' : ''
+              }`}
+            >
               <span className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium">
                 {fieldLabels[key] || key}
               </span>
@@ -163,7 +173,7 @@ export const FormFillFlow = () => {
                     setSelectedFields((prev) => ({ ...prev, [key]: e.target.checked }));
                     setIsDirty(true);
                   }}
-                  className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer px-4 transition-colors"
+                  className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
                 />
               </div>
             </div>
