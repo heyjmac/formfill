@@ -79,8 +79,6 @@ const uploadMiddleware = (req, res, next) => {
         error: err.message,
         shortError: 'Upload error.',
         tip: 'Check file size and type.',
-        line: 'Line number not available',
-        elementId: 'No element ID found',
       };
 
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -122,8 +120,6 @@ app.post(
         error: 'No file or pasted text was submitted.',
         shortError: 'No input provided.',
         tip: 'Upload a file or paste some text before submitting.',
-        line: 'Line number not available',
-        elementId: 'No element ID found',
       });
     }
 
@@ -157,7 +153,9 @@ Your task:
 3. Return the extracted data as the args to processFormFields.
 
 Do not explain or respond to the user. Just return the tool call with filled args.
-Do not ask questions. Only act.`;
+Do not ask questions. Only act.
+
+Today is ${new Date().toLocaleDateString()}`;
 
     try {
       const response = await ai.models.generateContent({

@@ -4,7 +4,7 @@ export const FormFillDetails = ({ modal, down, right }) => {
   if (modal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
-        <div className="bg-white rounded-lg p-2 min-w-[400px]">
+        <div className="bg-white rounded-lg p-2 min-w-[400px] max-w-[600px]">
           <FormFillFlow />
         </div>
       </div>
