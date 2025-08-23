@@ -8,6 +8,7 @@ export const FormFillDropdown = () => {
   const [status, setStatus] = useState(false);
   const [fieldLabels, setFieldLabels] = useState({});
   const [fieldsFilled, setFieldsFilled] = useState({});
+  const [errorCode, setErrorCode] = useState(null);
 
   const handleSubmit = async () => {
     setStatus('loading');
@@ -32,6 +33,7 @@ export const FormFillDropdown = () => {
         setStatus('success');
       } else {
         console.error('Error filling form:', data);
+        setErrorCode(data?.errorCode || null);
         setStatus('error');
       }
     } finally {
@@ -124,6 +126,36 @@ export const FormFillDropdown = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="absolute bottom-[46px] right-0">
+        <div className="w-72 p-6 text-center bg-white border border-red-200 shadow-lg rounded-lg">
+          <div className="text-red-500 mb-2 text-3xl">
+            <span className="material-symbols-outlined">error</span>
+          </div>
+          <div className="text-sm text-gray-700 mb-3">
+            {errorCode === 'INVALID_FILE_TYPE' && (
+              <div>Unsupported file type. Please upload a valid document.</div>
+            )}
+            {errorCode === 'FILE_TOO_LARGE' && (
+              <div>File is too large. Please upload a smaller document.</div>
+            )}
+            {errorCode === 'NO_INPUT_PROVIDED' && (
+              <div>No input provided. Please upload a document or enter text.</div>
+            )}
+            {!errorCode && <div>Something went wrong while processing your request.</div>}
+          </div>
+          <button
+            className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
+            onClick={handleClear}
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
