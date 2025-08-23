@@ -9,6 +9,7 @@ export const FormFillFlow = () => {
   const [fieldLabels, setFieldLabels] = useState({});
   const [fieldsFilled, setFieldsFilled] = useState({});
   const [errorCode, setErrorCode] = useState(null);
+  const [undoFields, setUndoFields] = useState({});
 
   const handleSubmit = async () => {
     setStatus('loading');
@@ -54,7 +55,13 @@ export const FormFillFlow = () => {
   };
 
   const handleFill = () => {
-    fillFormFields(fieldsFilled);
+    const previousValues = fillFormFields(fieldsFilled);
+    setUndoFields(previousValues);
+  };
+
+  const handleUndo = () => {
+    fillFormFields(undoFields);
+    setUndoFields({});
   };
 
   if (status === 'loading') {
@@ -112,10 +119,14 @@ export const FormFillFlow = () => {
         <div className="space-y-3">
           <div
             className="w-full cursor-pointer py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
-            onClick={handleFill}
+            onClick={Object.keys(undoFields).length ? handleUndo : handleFill}
           >
-            <span className="material-symbols-outlined mr-1 text-sm">done</span>
-            <span>Confirm and apply selection</span>
+            <span className="material-symbols-outlined mr-1 text-sm">
+              {Object.keys(undoFields).length ? 'undo' : 'done'}
+            </span>
+            <span>
+              {Object.keys(undoFields).length ? 'Confirm undo' : 'Confirm and apply selection'}
+            </span>
           </div>
 
           <div

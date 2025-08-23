@@ -132,6 +132,7 @@ export function getFormFields() {
 
 export function fillFormFields(data) {
   const els = document.querySelectorAll('[data-form-filler-description]');
+  const previousValues = {};
 
   els.forEach((el) => {
     const name = el.getAttribute('data-form-filler-name') || el.name || getLabelText(el);
@@ -139,6 +140,9 @@ export function fillFormFields(data) {
     if (value == null) return;
 
     if (el.tagName === 'SELECT') {
+      const selected = Array.from(el.selectedOptions).map((opt) => opt.value);
+      previousValues[name] = el.multiple ? selected : el.value;
+
       const options = Array.from(el.options).map((opt) => opt.value);
       if (el.multiple && Array.isArray(value)) {
         for (const v of value) {
@@ -151,6 +155,12 @@ export function fillFormFields(data) {
       }
     } else if (el.type === 'checkbox') {
       const checkboxes = document.querySelectorAll(`input[type="checkbox"][name="${el.name}"]`);
+      const old = [];
+      checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) old.push(checkbox.value);
+      });
+      previousValues[name] = old;
+
       checkboxes.forEach((checkbox) => {
         if (Array.isArray(value)) {
           checkbox.checked = value.includes(checkbox.value);
@@ -160,11 +170,17 @@ export function fillFormFields(data) {
       });
     } else if (el.type === 'radio') {
       const radios = document.querySelectorAll(`input[type="radio"][name="${el.name}"]`);
+      const old = Array.from(radios).find((r) => r.checked)?.value || null;
+      previousValues[name] = old;
+
       radios.forEach((radio) => {
         radio.checked = radio.value === value;
       });
     } else {
+      previousValues[name] = el.value;
       el.value = value;
     }
   });
+
+  return previousValues;
 }
