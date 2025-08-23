@@ -29,30 +29,30 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
       <div className="relative">
         {isOpen ? (
           modal ? (
-            <button
+            <div
               className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
               Fill with AI
-            </button>
+            </div>
           ) : (
-            <button
+            <div
               className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">close</span>
               Close
-            </button>
+            </div>
           )
         ) : (
-          <button
+          <div
             className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
             onClick={handleOpen}
           >
             <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
             Fill with AI
-          </button>
+          </div>
         )}
 
         {isOpen && <FormFillDetails modal={modal} {...rest} />}
