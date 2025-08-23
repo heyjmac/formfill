@@ -162,7 +162,7 @@ export const FormFillFlow = () => {
           }
         />
         <div className="text-sm text-gray-600 mb-4">{copy.text.review}</div>
-        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+        <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {Object.entries(fieldsFilled).map(([key, value]) => (
             <div
               key={key}
