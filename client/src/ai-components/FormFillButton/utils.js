@@ -198,6 +198,18 @@ export function fillFormFields(data) {
       previousValues[name] = el.value;
       el.value = value;
     }
+
+    el.style.transition = 'all 0.6s ease';
+    el.style.outline = '2px solid transparent';
+    requestAnimationFrame(() => {
+      el.style.outlineColor = '#3b82f6';
+      setTimeout(() => {
+        el.style.outlineColor = 'transparent';
+        setTimeout(() => {
+          el.style.outline = '';
+        }, 600);
+      }, 300);
+    });
   });
 
   return previousValues;
