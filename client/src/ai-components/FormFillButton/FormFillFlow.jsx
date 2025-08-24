@@ -3,7 +3,7 @@ import { fillFormFields, getCleanData, getFormFieldLabels, getFormFields } from 
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillFlow = ({ instruction }) => {
+export const FormFillFlow = ({ instruction, options }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -14,6 +14,7 @@ export const FormFillFlow = ({ instruction }) => {
   const [undoFields, setUndoFields] = useState({});
   const [isDirty, setIsDirty] = useState(false);
   const [selectedFields, setSelectedFields] = useState({});
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const handleSubmit = async () => {
     setStatus('loading');
@@ -22,7 +23,10 @@ export const FormFillFlow = ({ instruction }) => {
     setFieldLabels(formFieldLabels);
     const formData = new FormData();
     formData.append('formFields', JSON.stringify(formFields));
-    formData.append('instruction', instruction || '');
+    formData.append(
+      'instruction',
+      [instruction, selectedOption?.instruction].filter(Boolean).join(' '),
+    );
     files.forEach((f) => formData.append('files', f));
     formData.append('pastedText', text || '');
 
@@ -348,6 +352,30 @@ export const FormFillFlow = ({ instruction }) => {
       <div className="flex items-center text-xs text-gray-500 mb-4">
         <p>{copy.text.info}</p>
       </div>
+
+      {options && options.length > 0 && (
+        <div className="mb-3">
+          <h3 className="text-sm font-medium mb-2">{copy.text.options}</h3>
+          <div className="space-y-2">
+            {options.map((option, index) => (
+              <label
+                key={index}
+                className="flex items-center space-x-2 text-xs text-gray-700 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  name="options"
+                  value={option.value || option.label || option.instruction}
+                  className="h-3 w-3 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  checked={selectedOption === option}
+                  onChange={() => setSelectedOption(option)}
+                />
+                <span>{option.label || option.instruction}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       <button
         type="button"

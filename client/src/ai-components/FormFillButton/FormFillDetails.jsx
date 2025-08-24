@@ -21,7 +21,7 @@ export const FormFillDetails = ({ modal, down, right, ...rest }) => {
   }
   return (
     <div className={`absolute bottom-[46px] ${right ? 'left-0' : 'right-0'}`}>
-      <div className="w-72 text-center bg-white border border-gray-100 shadow-lg rounded-lg">
+      <div className="w-72 bg-white border border-gray-100 shadow-lg rounded-lg">
         <FormFillFlow {...rest} />
       </div>
     </div>

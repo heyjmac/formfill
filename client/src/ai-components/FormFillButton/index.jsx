@@ -4,7 +4,17 @@ import { useEffect } from 'react';
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillButton = ({ instruction, label, floating, modal, up, down, left, right }) => {
+export const FormFillButton = ({
+  instruction,
+  options,
+  label,
+  floating,
+  modal,
+  up,
+  down,
+  left,
+  right,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -58,8 +68,9 @@ export const FormFillButton = ({ instruction, label, floating, modal, up, down, 
 
         {isOpen && (
           <FormFillDetails
-            modal={modal}
             instruction={instruction}
+            options={options}
+            modal={modal}
             up={up}
             down={down}
             left={left}
