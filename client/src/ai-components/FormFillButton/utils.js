@@ -147,12 +147,12 @@ export function getFormFields() {
   return { properties, required };
 }
 
-export async function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
+export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const previousValues = {};
+  const processedGroups = new Set();
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
   const typeInto = async (el, text) => {
     const str = String(text ?? '');
     el.value = '';
@@ -164,7 +164,6 @@ export async function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = 
     }
     el.dispatchEvent(new Event('change', { bubbles: true }));
   };
-
   const flashOutline = (el) => {
     el.style.transition = 'all 0.6s ease';
     el.style.outline = '2px solid transparent';
@@ -179,66 +178,86 @@ export async function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = 
     });
   };
 
+  let chain = Promise.resolve();
+
   for (const el of els) {
     const name =
       el.getAttribute('data-form-filler-name') ||
       el.name ||
       (typeof getLabelText === 'function' ? getLabelText(el) : undefined);
+    if (!name) continue;
     const value = data?.[name];
     if (value == null) continue;
-
-    flashOutline(el);
 
     if (el.tagName === 'SELECT') {
       const selected = Array.from(el.selectedOptions).map((opt) => opt.value);
       previousValues[name] = el.multiple ? selected : el.value;
-
-      const options = Array.from(el.options).map((opt) => opt.value);
-      if (el.multiple && Array.isArray(value)) {
-        for (const opt of el.options) opt.selected = false;
-        for (const v of value)
-          if (options.includes(v)) el.querySelector(`option[value="${v}"]`).selected = true;
-      } else if (options.includes(value)) {
-        el.value = value;
-      }
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-      await sleep(perFieldDelay);
+      chain = chain.then(async () => {
+        flashOutline(el);
+        const options = Array.from(el.options).map((opt) => opt.value);
+        if (el.multiple && Array.isArray(value)) {
+          for (const opt of el.options) opt.selected = false;
+          for (const v of value)
+            if (options.includes(v)) el.querySelector(`option[value="${v}"]`).selected = true;
+        } else if (options.includes(value)) el.value = value;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        await sleep(perFieldDelay);
+      });
       continue;
     }
 
     if (el.type === 'checkbox') {
+      const groupKey = `checkbox:${el.name}`;
+      if (processedGroups.has(groupKey)) continue;
+      processedGroups.add(groupKey);
+
       const checkboxes = document.querySelectorAll(`input[type="checkbox"][name="${el.name}"]`);
       const old = [];
       checkboxes.forEach((c) => c.checked && old.push(c.value));
       previousValues[name] = old;
 
-      checkboxes.forEach((c) => {
-        if (Array.isArray(value)) c.checked = value.includes(c.value);
-        else c.checked = value === c.value;
-        c.dispatchEvent(new Event('change', { bubbles: true }));
+      chain = chain.then(async () => {
+        checkboxes.forEach((c) => flashOutline(c));
+        checkboxes.forEach((c) => {
+          if (Array.isArray(value)) c.checked = value.includes(c.value);
+          else c.checked = value === c.value;
+          c.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await sleep(perFieldDelay);
       });
-      await sleep(perFieldDelay);
       continue;
     }
 
     if (el.type === 'radio') {
+      const groupKey = `radio:${el.name}`;
+      if (processedGroups.has(groupKey)) continue;
+      processedGroups.add(groupKey);
+
       const radios = document.querySelectorAll(`input[type="radio"][name="${el.name}"]`);
       const old = Array.from(radios).find((r) => r.checked)?.value || null;
       previousValues[name] = old;
 
-      radios.forEach((r) => {
-        r.checked = r.value === value;
-        if (r.checked) r.dispatchEvent(new Event('change', { bubbles: true }));
+      chain = chain.then(async () => {
+        radios.forEach((r) => flashOutline(r));
+        radios.forEach((r) => {
+          r.checked = r.value === value;
+          if (r.checked) r.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await sleep(perFieldDelay);
       });
-      await sleep(perFieldDelay);
       continue;
     }
 
-    // Text-like inputs & textarea (typing effect)
+    // text-like inputs and textarea
     previousValues[name] = el.value;
-    await typeInto(el, value);
-    await sleep(perFieldDelay);
+    chain = chain.then(async () => {
+      flashOutline(el);
+      await typeInto(el, value);
+      await sleep(perFieldDelay);
+    });
   }
 
+  // run the chain without forcing callers to await; keep for debugging if needed
+  fillFormFields._running = chain.catch(() => {});
   return previousValues;
 }
