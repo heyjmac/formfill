@@ -23,7 +23,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="John Doe"
               data-form-filler-name="full_name"
-              data-form-filler-description="Complete name as appears on official documents"
+              data-form-filler-description="Complete name formatted in lowercase and first capital letter"
             />
           </div>
           <div className="md:col-span-6">
