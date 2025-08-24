@@ -214,47 +214,51 @@ export const FormFillFlow = ({ instruction }) => {
         <div className="space-y-3">
           {Object.keys(undoFields).length ? (
             <div className="flex justify-between">
-              <div
+              <button
+                type="button"
                 className="cursor-pointer px-4 py-2 bg-white text-red-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
                 onClick={handleUndo}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">undo</span>
                 <span>{copy.cta.undo}</span>
-              </div>
+              </button>
               {isDirty ? (
-                <div
+                <button
                   className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
                   onClick={handleReapply}
                 >
                   <span className="material-symbols-outlined mr-1 text-sm">refresh</span>
                   <span>{copy.cta.reapply}</span>
-                </div>
+                </button>
               ) : (
-                <div
+                <button
+                  type="button"
                   className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
                   onClick={handleClose}
                 >
                   <span className="material-symbols-outlined mr-1 text-sm">close</span>
                   <span>{copy.cta.close}</span>
-                </div>
+                </button>
               )}
             </div>
           ) : Object.values(selectedFields).some(Boolean) ? (
-            <div
+            <button
+              type="button"
               className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
               onClick={handleApply}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
               <span>{copy.cta.apply}</span>
-            </div>
+            </button>
           ) : (
-            <div
+            <button
+              type="button"
               className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
               onClick={handleClose}
             >
               <span className="material-symbols-outlined mr-1 text-sm">close</span>
               <span>{copy.cta.close}</span>
-            </div>
+            </button>
           )}
         </div>
       </div>
