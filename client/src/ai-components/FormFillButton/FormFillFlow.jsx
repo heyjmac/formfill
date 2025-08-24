@@ -3,7 +3,7 @@ import { fillFormFields, getCleanData, getFormFieldLabels, getFormFields } from 
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillFlow = ({ instruction, options }) => {
+export const FormFillFlow = ({ instruction, options, textarea }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -297,7 +297,7 @@ export const FormFillFlow = ({ instruction, options }) => {
       <TopNav title={copy.title.main} />
       <div className="mb-3 relative">
         <label
-          className={`block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 transition-colors mb-2 ${
+          className={`min-h-[100px] flex flex-col items-center justify-center block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 transition-colors mb-2 ${
             files.length > 0 ? 'bg-gray-100' : 'hover:bg-gray-50'
           }`}
         >
@@ -334,27 +334,26 @@ export const FormFillFlow = ({ instruction, options }) => {
         )}
       </div>
 
-      <div className="flex items-center my-3">
-        <div className="flex-1 h-px bg-gray-200"></div>
-        <span className="mx-3 text-xs text-gray-400 uppercase">or</span>
-        <div className="flex-1 h-px bg-gray-200"></div>
-      </div>
-
-      <div className="mb-3">
-        <textarea
-          className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-          placeholder={copy.text.paste_text}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        ></textarea>
-      </div>
-
-      <div className="flex items-center text-xs text-gray-500 mb-4">
-        <p>{copy.text.info}</p>
-      </div>
+      {textarea && (
+        <>
+          <div className="flex items-center my-3">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="mx-3 text-xs text-gray-400 uppercase">or</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+          <div className="mb-3">
+            <textarea
+              className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+              placeholder={copy.text.paste_text}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            ></textarea>
+          </div>
+        </>
+      )}
 
       {options && options.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-3 mx-2">
           <h3 className="text-sm font-medium mb-2">{copy.text.options}</h3>
           <div className="space-y-2">
             {options.map((option, index) => (
@@ -376,6 +375,10 @@ export const FormFillFlow = ({ instruction, options }) => {
           </div>
         </div>
       )}
+
+      <div className="flex items-center text-xs text-gray-500 mb-4">
+        <p>{copy.text.info}</p>
+      </div>
 
       <button
         type="button"

@@ -8,6 +8,7 @@ export const FormFillButton = ({
   instruction,
   options,
   label,
+  textarea,
   floating,
   modal,
   up,
@@ -70,6 +71,7 @@ export const FormFillButton = ({
           <FormFillDetails
             instruction={instruction}
             options={options}
+            textarea={textarea}
             modal={modal}
             up={up}
             down={down}
