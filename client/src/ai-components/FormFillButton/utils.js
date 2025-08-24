@@ -40,7 +40,7 @@ const getLabelText = (input) => {
 
 export function getFormFieldLabels() {
   const els = document.querySelectorAll('[data-form-filler-name]');
-  const labels = {};
+  const labels = [];
 
   els.forEach((el) => {
     const name = el.getAttribute('data-form-filler-name') || el.name;
@@ -53,12 +53,11 @@ export function getFormFieldLabels() {
       if (labelEl) label = labelEl.textContent.trim();
     }
 
-    // fallback for inline label-wrapped inputs
     if (!label && el.closest('label')) {
       label = el.closest('label').textContent.trim();
     }
 
-    labels[name] = label || unsnake(name);
+    labels.push({ name, label: label || unsnake(name) });
   });
 
   return labels;

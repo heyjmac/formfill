@@ -8,7 +8,7 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
   const [status, setStatus] = useState(false);
-  const [fieldLabels, setFieldLabels] = useState({});
+  const [fieldLabels, setFieldLabels] = useState([]);
   const [fieldsFilled, setFieldsFilled] = useState({});
   const [errorCode, setErrorCode] = useState(null);
   const [undoFields, setUndoFields] = useState({});
@@ -182,40 +182,42 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
         </div>
 
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
-          {Object.entries(fieldsFilled).map(([key, value]) => (
-            <label
-              key={key}
-              className={`flex wrap justify-between items-center px-2 py-2 rounded 
-                ${
-                  selectedFields[key]
-                    ? 'border border-blue-200 bg-blue-50 hover:bg-blue-100'
-                    : 'border border-gray-200 hover:border-gray-300'
-                }`}
-            >
-              <div className="flex-1 flex flex-wrap items-start justify-between gap-1">
-                <span
-                  className={`text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium ${
-                    selectedFields[key] ? 'bg-white' : 'bg-gray-100'
-                  }`}
-                >
-                  {fieldLabels[key] || key}
-                </span>
-                <span className="text-gray-700 text-sm ml-1">{value}</span>
-              </div>
-              <div className="flex items-center space-x-2 ml-2">
-                <input
-                  type="checkbox"
-                  id={key}
-                  checked={selectedFields[key] ?? true}
-                  onChange={(e) => {
-                    setSelectedFields((prev) => ({ ...prev, [key]: e.target.checked }));
-                    setIsDirty(true);
-                  }}
-                  className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
-                />
-              </div>
-            </label>
-          ))}
+          {fieldLabels
+            .filter(({ name }) => fieldsFilled[name])
+            .map(({ name, label }) => (
+              <label
+                key={name}
+                className={`flex wrap justify-between items-center px-2 py-2 rounded 
+              ${
+                selectedFields[name]
+                  ? 'border border-blue-200 bg-blue-50 hover:bg-blue-100'
+                  : 'border border-gray-200 hover:border-gray-300'
+              }`}
+              >
+                <div className="flex-1 flex flex-wrap items-start justify-between gap-1">
+                  <span
+                    className={`text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium ${
+                      selectedFields[name] ? 'bg-white' : 'bg-gray-100'
+                    }`}
+                  >
+                    {label || name}
+                  </span>
+                  <span className="text-gray-700 text-sm ml-1">{fieldsFilled[name]}</span>
+                </div>
+                <div className="flex items-center space-x-2 ml-2">
+                  <input
+                    type="checkbox"
+                    id={name}
+                    checked={selectedFields[name] ?? true}
+                    onChange={(e) => {
+                      setSelectedFields((prev) => ({ ...prev, [name]: e.target.checked }));
+                      setIsDirty(true);
+                    }}
+                    className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
+                  />
+                </div>
+              </label>
+            ))}
         </div>
 
         <div className="space-y-3">
