@@ -1,6 +1,20 @@
+import { useEffect } from 'react';
 import { FormFillFlow } from './FormFillFlow';
+import { events } from '../utils/events';
 
 export const FormFillDetails = ({ modal, down, right, ...rest }) => {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        events.emit('formFill', { isOpen: false });
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   if (modal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
