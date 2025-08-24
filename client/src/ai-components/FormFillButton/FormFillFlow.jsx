@@ -139,7 +139,7 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
           <div className="text-sm text-gray-700 mb-3">{copy.text.processing}</div>
           <button
             type="button"
-            className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-400 transition-colors"
+            className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors"
             onClick={handleClear}
           >
             {copy.cta.cancel || copy.cta.stop}
@@ -161,6 +161,25 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
           }
         />
         <div className="text-sm text-gray-600 mb-4">{copy.text.review}</div>
+
+        <div className="flex justify-between mb-4">
+          <button
+            type="button"
+            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
+            onClick={handleClearSelection}
+          >
+            <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
+            {copy.cta.clear_selection}
+          </button>
+          <button
+            type="button"
+            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
+            onClick={handleSelectAll}
+          >
+            <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
+            {copy.cta.select_all}
+          </button>
+        </div>
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {Object.entries(fieldsFilled).map(([key, value]) => (
             <label
@@ -194,25 +213,6 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
               </div>
             </label>
           ))}
-        </div>
-
-        <div className="flex justify-between mb-4">
-          <button
-            type="button"
-            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
-            onClick={handleClearSelection}
-          >
-            <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-            {copy.cta.clear_selection}
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
-            onClick={handleSelectAll}
-          >
-            <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-            {copy.cta.select_all}
-          </button>
         </div>
 
         <div className="space-y-3">
