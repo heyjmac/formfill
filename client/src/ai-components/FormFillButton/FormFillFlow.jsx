@@ -349,15 +349,16 @@ export const FormFillFlow = ({ instruction }) => {
         <p>{copy.text.info}</p>
       </div>
 
-      <div
+      <button
+        type="button"
         className={`w-full py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center ${
           files.length === 0 && !text ? 'opacity-50 cursor-default' : 'cursor-pointer px-4'
         }`}
         onClick={handleSubmit}
       >
         <span className="material-symbols-outlined mr-1 text-sm">auto_awesome</span>
-        <span>Extract fields</span>
-      </div>
+        <span>{copy.cta.extract}</span>
+      </button>
     </div>
   );
 };

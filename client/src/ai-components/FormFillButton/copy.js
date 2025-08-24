@@ -18,6 +18,7 @@ export const copy = {
   },
   cta: {
     button: 'Fill with AI',
+    extract: 'Extract fields',
     apply: 'Confirm and apply selection',
     reapply: 'Reapply',
     error: 'Try again',
