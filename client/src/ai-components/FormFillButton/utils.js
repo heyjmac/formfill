@@ -63,6 +63,37 @@ export function getFormFieldLabels() {
   return labels;
 }
 
+export function getFormFieldValues() {
+  const els = document.querySelectorAll('[data-form-filler-description]');
+  const values = {};
+
+  els.forEach((el) => {
+    const name = el.getAttribute('data-form-filler-name') || el?.name || getLabelText(el);
+    if (!name) return;
+
+    if (el.tagName === 'SELECT') {
+      if (el.multiple) {
+        values[name] = Array.from(el.selectedOptions).map((opt) => opt.value);
+      } else {
+        values[name] = el.value;
+      }
+    } else if (el.type === 'checkbox') {
+      const checkboxes = document.querySelectorAll(`input[type="checkbox"][name="${el.name}"]`);
+      values[name] = Array.from(checkboxes)
+        .filter((c) => c.checked)
+        .map((c) => c.value);
+    } else if (el.type === 'radio') {
+      const radios = document.querySelectorAll(`input[type="radio"][name="${el.name}"]`);
+      const checked = Array.from(radios).find((r) => r.checked);
+      values[name] = checked ? checked.value : null;
+    } else {
+      values[name] = el.value;
+    }
+  });
+
+  return values;
+}
+
 export function getFormFields() {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const properties = {};
@@ -76,7 +107,6 @@ export function getFormFields() {
 
     const fullDescription = [description];
     if (explicitFormat) fullDescription.push(`Expected format: ${explicitFormat}`);
-    if (el?.value) fullDescription.push(`Current value: ${el.value}`);
 
     if (el.tagName === 'SELECT') {
       const options = Array.from(el.options).map((opt) => ({ value: opt.value, text: opt.text }));

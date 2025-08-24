@@ -1,5 +1,11 @@
 import { useRef, useState } from 'react';
-import { fillFormFields, getCleanData, getFormFieldLabels, getFormFields } from './utils';
+import {
+  fillFormFields,
+  getCleanData,
+  getFormFieldLabels,
+  getFormFields,
+  getFormFieldValues,
+} from './utils';
 import { events } from '../utils/events';
 import { copy } from './copy';
 
@@ -9,6 +15,7 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
   const [text, setText] = useState('');
   const [status, setStatus] = useState(false);
   const [fieldLabels, setFieldLabels] = useState([]);
+  const [fieldValues, setFieldValues] = useState({});
   const [fieldsFilled, setFieldsFilled] = useState({});
   const [errorCode, setErrorCode] = useState(null);
   const [undoFields, setUndoFields] = useState({});
@@ -20,7 +27,9 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
     setStatus('loading');
     const formFields = getFormFields();
     const formFieldLabels = getFormFieldLabels();
+    const formFieldValues = getFormFieldValues();
     setFieldLabels(formFieldLabels);
+    setFieldValues(formFieldValues);
     const formData = new FormData();
     formData.append('formFields', JSON.stringify(formFields));
     formData.append(
@@ -202,7 +211,12 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
                   >
                     {label || name}
                   </span>
-                  <span className="text-gray-700 text-sm ml-1">{fieldsFilled[name]}</span>
+                  <div>
+                    <div className="text-gray-700 text-sm ml-1 line-through">
+                      {fieldValues[name]}
+                    </div>
+                    <div className="text-gray-700 text-sm ml-1">{fieldsFilled[name]}</div>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2 ml-2">
                   <input
