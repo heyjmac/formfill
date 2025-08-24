@@ -104,6 +104,7 @@ export const FormFillFlow = ({ instruction }) => {
       <div>
         {handleBack && (
           <button
+            type="button"
             onClick={handleBack}
             className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-sm"
           >
@@ -113,6 +114,7 @@ export const FormFillFlow = ({ instruction }) => {
       </div>
       {title && <div className="text-md font-medium">{title}</div>}
       <button
+        type="button"
         onClick={handleClose}
         className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-base"
       >
@@ -132,6 +134,7 @@ export const FormFillFlow = ({ instruction }) => {
           </div>
           <div className="text-sm text-gray-700 mb-3">{copy.text.processing}</div>
           <button
+            type="button"
             className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-400 transition-colors"
             onClick={handleClear}
           >
@@ -191,6 +194,7 @@ export const FormFillFlow = ({ instruction }) => {
 
         <div className="flex justify-between mb-4">
           <button
+            type="button"
             className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
             onClick={handleClearSelection}
           >
@@ -198,6 +202,7 @@ export const FormFillFlow = ({ instruction }) => {
             {copy.cta.clear_selection}
           </button>
           <button
+            type="button"
             className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
             onClick={handleSelectAll}
           >
@@ -268,6 +273,7 @@ export const FormFillFlow = ({ instruction }) => {
             {!errorCode && <div>{copy.error.DEFAULT}</div>}
           </div>
           <button
+            type="button"
             className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
             onClick={handleClear}
           >
@@ -310,6 +316,7 @@ export const FormFillFlow = ({ instruction }) => {
 
         {files.length > 0 && (
           <button
+            type="button"
             className="cursor-pointer absolute w-[18px] h-[18px] top-[-8px] right-[-8px] bg-gray-200 text-gray-700 rounded-full text-xs flex items-center justify-center hover:bg-red-400 hover:text-white"
             onClick={() => setFiles([])}
             aria-label="Clear files"
