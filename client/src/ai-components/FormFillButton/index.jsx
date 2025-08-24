@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillButton = ({ floating, modal, ...rest }) => {
+export const FormFillButton = ({ instruction, label, floating, modal, up, down, left, right }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
               onClick={handleClose}
             >
               <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-              {copy.cta.button}
+              {label || copy.cta.button}
             </div>
           ) : (
             <div
@@ -52,11 +52,20 @@ export const FormFillButton = ({ floating, modal, ...rest }) => {
             onClick={handleOpen}
           >
             <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-            {copy.cta.button}
+            {label || copy.cta.button}
           </div>
         )}
 
-        {isOpen && <FormFillDetails modal={modal} {...rest} />}
+        {isOpen && (
+          <FormFillDetails
+            modal={modal}
+            instruction={instruction}
+            up={up}
+            down={down}
+            left={left}
+            right={right}
+          />
+        )}
       </div>
     </div>
   );

@@ -232,7 +232,11 @@ export function FormExample() {
           />
         </div>
         <div className="mt-6 flex justify-between gap-2">
-          <FormFillButton modal />
+          <FormFillButton
+            modal
+            instruction="No matter what, set the full name to Ana Maria Braga"
+            label="Fill Ana Maria Braga"
+          />
           <div className="flex gap-2">
             <button
               type="button"

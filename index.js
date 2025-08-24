@@ -157,9 +157,7 @@ Do not explain or respond to the user. Just return the tool call with filled arg
 Do not ask questions. Only act.
 Do not fill fields with "null", "undefined", or "unknown".
 
-Today is ${new Date().toLocaleDateString()}
-
-${instruction}`;
+Today is ${new Date().toLocaleDateString()}`;
 
     try {
       const response = await ai.models.generateContent({
@@ -202,7 +200,9 @@ ${instruction}`;
           ],
           systemInstruction: {
             role: 'system',
-            parts: [{ text: systemInstructions }],
+            parts: [{ text: systemInstructions }, instruction && { text: instruction }].filter(
+              Boolean,
+            ),
           },
         },
       });
