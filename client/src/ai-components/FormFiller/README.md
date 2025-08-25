@@ -36,6 +36,16 @@ Sets the instruction for AI when extracting information. Test and adjust until i
 
 ---
 
+### `important` (string)
+
+Sets a short instruction for AI when extracting information that will be added to each and every field. Test and adjust until it meets your needs.
+
+```jsx
+<FormFillerFloater important="PLAINTIFF ONLY" />
+```
+
+---
+
 ### `options` (array of { label, instruction })
 
 Allow users to select between multiple instructions. It adds to the instruction, if one was passed.

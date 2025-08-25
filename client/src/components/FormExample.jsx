@@ -23,7 +23,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="John Doe"
               data-form-filler-name="full_name"
-              data-form-filler-description="Complete name of the person or company set in the instructions formatted in lowercase and first capital letter"
+              data-form-filler-description="Complete name of the person or company formatted in lowercase and first capital letter"
             />
           </div>
           <div className="md:col-span-6">
@@ -33,7 +33,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="john@example.com"
               data-form-filler-name="email"
-              data-form-filler-description="Email address of the person or company set in the instructions "
+              data-form-filler-description="Email address of the person or company"
             />
           </div>
           <div className="md:col-span-6">
@@ -41,7 +41,7 @@ export function FormExample() {
             <select
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="type"
-              data-form-filler-description="Type of the person or company set in the instructions"
+              data-form-filler-description="Type of the person or company"
             >
               <option value="">Select...</option>
               <option value="natural">Natural Person</option>
@@ -55,7 +55,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="MM/DD/YYYY"
               data-form-filler-name="date_of_birth"
-              data-form-filler-description="Birth date or establishment date in month/day/year format of the person or company set in the instructions"
+              data-form-filler-description="Birth date or establishment date in month/day/year format of the person or company"
               data-form-filler-format="MM/DD/YYYY"
             />
           </div>
@@ -66,7 +66,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Software Engineer"
               data-form-filler-name="profession"
-              data-form-filler-description="Current job title, profession or purpose of the person or company set in the instructions"
+              data-form-filler-description="Current job title, profession or purpose of the person or company"
             />
           </div>
           <div className="md:col-span-6">
@@ -76,7 +76,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Single"
               data-form-filler-name="marital_status"
-              data-form-filler-description="Current marital status of the person set in the instructions, if a natural person"
+              data-form-filler-description="Current marital status of the person, if a natural person"
             />
           </div>
           <div className="md:col-span-3">
@@ -86,7 +86,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="12345"
               data-form-filler-name="postal_code"
-              data-form-filler-description="Postal or ZIP code of the person or company set in the instructions"
+              data-form-filler-description="Postal or ZIP code of the person or company"
               data-form-filler-format="XXXXX-XXX"
             />
           </div>
@@ -95,7 +95,7 @@ export function FormExample() {
             <select
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="state"
-              data-form-filler-description="Brazilian state of the person or company set in the instructions"
+              data-form-filler-description="Brazilian state of the person or company"
             >
               <option value="">Select...</option>
               <option value="SP">São Paulo</option>
@@ -109,7 +109,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Enter city name"
               data-form-filler-name="city"
-              data-form-filler-description="Brazilian city name of the person or company set in the instructions"
+              data-form-filler-description="Brazilian city name of the person or company"
             />
           </div>
           <div className="md:col-span-3">
@@ -119,7 +119,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="123 Main St"
               data-form-filler-name="address"
-              data-form-filler-description="Street address with house/apartment/room number of the person or company set in the instructions"
+              data-form-filler-description="Street address with house/apartment/room number of the person or company"
             />
           </div>
           <div className="md:col-span-3">
@@ -129,7 +129,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_primary"
-              data-form-filler-description="Primary contact phone number of the person or company set in the instructions"
+              data-form-filler-description="Primary contact phone number of the person or company"
               data-form-filler-format="(XXX) XXX-XXXX"
               pattern="\(\d{3}\) \d{3}-\d{4}"
             />
@@ -141,7 +141,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_secondary"
-              data-form-filler-description="Alternative phone number (optional) of the person or company set in the instructions"
+              data-form-filler-description="Alternative phone number (optional) of the person or company"
               pattern="\(\d{3}\) \d{3}-\d{4}"
             />
           </div>
@@ -154,7 +154,7 @@ export function FormExample() {
                   name="gender"
                   value="male"
                   data-form-filler-name="gender"
-                  data-form-filler-description="Gender selection of the person set in the instructions, if a natural person"
+                  data-form-filler-description="Gender selection of the person, if a natural person"
                 />
                 Male
               </label>
@@ -172,7 +172,7 @@ export function FormExample() {
               max="120"
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="age"
-              data-form-filler-description="User age or time since establishment of the person or company set in the instructions"
+              data-form-filler-description="User age or time since establishment of the person or company"
             />
           </div>
           <div className="md:col-span-3">
@@ -183,7 +183,7 @@ export function FormExample() {
                   type="checkbox"
                   value="sports"
                   data-form-filler-name="hobbies"
-                  data-form-filler-description="Multiple hobbies selection of the person set in the instructions, if a natural person"
+                  data-form-filler-description="Multiple hobbies selection of the person, if a natural person"
                 />
                 Sports
               </label>
@@ -201,7 +201,7 @@ export function FormExample() {
               max="10"
               className="w-full"
               data-form-filler-name="satisfaction"
-              data-form-filler-description="Satisfaction level from 1 to 10 of the person or company set in the instructions"
+              data-form-filler-description="Satisfaction level from 1 to 10 of the person or company"
             />
           </div>
           <div className="md:col-span-3">
@@ -228,7 +228,7 @@ export function FormExample() {
             className="w-full p-2 border border-gray-200 rounded text-sm h-20"
             placeholder="Additional information..."
             data-form-filler-name="notes"
-            data-form-filler-description="Additional information or special requests of the person or company set in the instructions"
+            data-form-filler-description="Additional information or special requests of the person or company"
           />
         </div>
         <div className="mt-6 flex justify-between gap-2">
@@ -237,12 +237,14 @@ export function FormExample() {
               document="complaint"
               modal
               instruction="Your most important task is to find the PLAINTIFF and fill the form using ONLY their data. Follow these steps precisely: 1. **IDENTIFY THE PLAINTIFF:** Scan the document to find the party labeled 'AUTOR(A)' or 'REQUERENTE'. This is the only entity you should focus on. 2. **IDENTIFY THE DEFENDANT:** Locate the party labeled 'RÉ(U)' or 'REQUERIDO'. All information associated with this entity is FORBIDDEN and MUST BE IGNORED. 3. **EXTRACT PLAINTIFF DATA:** Based on your identification in Step 1, extract the required information for the plaintiff. 4. **VALIDATE:** Before finalizing, ensure that none of the information you extracted belongs to the defendant identified in Step 2. If you are in doubt about any field, leave it empty."
+              important="PLAINTIFF ONLY"
               label="Fill with plaintiff info"
             />
             <FormFillerWrapper
               document="complaint"
               modal
               instruction="Your most important task is to find the DEFENDANT and fill the form using ONLY their data. Follow these steps precisely: 1. **IDENTIFY THE DEFENDANT:** Scan the document to find the party labeled 'RÉ(U)' or 'REQUERIDO'. This is the only entity you should focus on. 2. **IDENTIFY THE PLAINTIFF:** Locate the party labeled 'AUTOR(A)' or 'REQUERENTE'. All information associated with this entity is FORBIDDEN and MUST BE IGNORED. 3. **EXTRACT DEFENDANT DATA:** Based on your identification in Step 1, extract the required information for the defendant. 4. **VALIDATE:** Before finalizing, ensure that none of the information you extracted belongs to the plaintiff identified in Step 2. If you are in doubt about any field, leave it empty."
+              important="DEFENDANT ONLY"
               label="Fill with defendant info"
             >
               <div className="m-2 flex gap-2 items-center justify-center cursor-pointer">

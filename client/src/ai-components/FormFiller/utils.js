@@ -121,7 +121,7 @@ export function getFormFieldValues() {
   return values;
 }
 
-export function getFormFields() {
+export function getFormFields(important) {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const properties = {};
   const required = [];
@@ -132,7 +132,9 @@ export function getFormFields() {
     const explicitFormat = el.getAttribute('data-form-filler-format'); // manual override
     const optionValues = [];
 
-    const fullDescription = [description];
+    const qualifiedDescription = important ? `${important}: ${description}` : description;
+
+    const fullDescription = [qualifiedDescription];
     if (explicitFormat) fullDescription.push(`Expected format: ${explicitFormat}`);
 
     if (el.tagName === 'SELECT') {

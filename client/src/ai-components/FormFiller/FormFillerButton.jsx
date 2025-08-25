@@ -5,6 +5,7 @@ export const FormFillerButton = ({
   copy,
   document,
   instruction,
+  important,
   options,
   label,
   textarea,
@@ -20,6 +21,7 @@ export const FormFillerButton = ({
       copy={copy}
       document={document}
       instruction={instruction}
+      important={important}
       options={options}
       textarea={textarea}
       floating={floating}

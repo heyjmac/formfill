@@ -7,6 +7,7 @@ export const FormFillerWrapper = ({
   copy,
   document,
   instruction,
+  important,
   options,
   textarea,
   modal,
@@ -46,6 +47,7 @@ export const FormFillerWrapper = ({
           copy={copy}
           document={document}
           instruction={instruction}
+          important={important}
           options={options}
           textarea={textarea}
           modal={modal}

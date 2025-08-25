@@ -7,6 +7,7 @@ import { FormFillerWrapper } from './FormFillerWrapper';
 export const FormFillerFloater = ({
   document,
   instruction,
+  important,
   options,
   label,
   textarea,
@@ -33,6 +34,7 @@ export const FormFillerFloater = ({
       <FormFillerWrapper
         document={document}
         instruction={instruction}
+        important={important}
         options={options}
         textarea={textarea}
         modal={modal}

@@ -10,7 +10,7 @@ import {
 import { events } from '../utils/events';
 import { defaultCopy } from './defaultCopy';
 
-export const FormFillerFlow = ({ copy, document, instruction, options, textarea }) => {
+export const FormFillerFlow = ({ copy, document, instruction, important, options, textarea }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -26,7 +26,7 @@ export const FormFillerFlow = ({ copy, document, instruction, options, textarea 
 
   const handleSubmit = async () => {
     setStatus('loading');
-    const formFields = getFormFields();
+    const formFields = getFormFields(important || selectedOption?.important);
     const formFieldLabels = getFormFieldLabels();
     const formFieldValues = getFormFieldValues();
     setFieldLabels(formFieldLabels);
