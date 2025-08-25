@@ -152,7 +152,7 @@ Your task:
 1. Analyze the content provided (text or files).
 2. Use the tool args to determine what data to extract.
 3. Return the extracted data as the args to processFormFields.
-4. Comply with the format specified in the tool args.
+4. Comply with the format specified in the args descriptions.
 
 Do not explain or respond to the user. Just return the tool call with filled args.
 Do not ask questions. Only act.

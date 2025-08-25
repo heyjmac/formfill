@@ -76,7 +76,9 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
 
   const handleApply = () => {
     const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(([key]) => selectedFields[key]),
+      Object.entries(fieldsFilled).filter(
+        ([key]) => selectedFields[key] && fieldsFilled[key] !== fieldValues[key],
+      ),
     );
     const previousValues = fillFormFields(selected);
     setUndoFields(previousValues);
@@ -192,7 +194,7 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
 
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {fieldLabels
-            .filter(({ name }) => fieldsFilled[name])
+            .filter(({ name }) => fieldsFilled[name] && fieldsFilled[name] !== fieldValues[name])
             .map(({ name, label }) => (
               <label
                 key={name}
