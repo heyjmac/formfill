@@ -37,6 +37,7 @@ export default [
       'optimize-regex': optimizeRegex,
     },
     rules: {
+      'func-style': ['error', 'expression'],
       'prettier/prettier': 'error',
       'import/no-default-export': 'error',
       'import/default': 'error',
@@ -98,6 +99,7 @@ export default [
     rules: {
       ...react.configs.recommended.rules,
       ...reactHooks.configs['recommended'].rules,
+      'func-style': ['error', 'expression'],
 
       'import/no-duplicates': 'error',
       'react/display-name': 'off',

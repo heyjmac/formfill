@@ -8,9 +8,9 @@ const typeToMcpFormat = {
   'datetime-local': 'date-time',
 };
 
-function unsnake(str = '') {
+const unsnake = (str = '') => {
   return str.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-}
+};
 
 export const getCopy = (address, copy) => {
   const keys = address.split('.');
@@ -39,15 +39,15 @@ export const getCopy = (address, copy) => {
 
 export const getCleanData = (data) => {
   const cleanedData = Object.fromEntries(
-    Object.entries(data).filter(([_, value]) => {
+    Object.entries(data).filter((entry) => {
       const normalized = (v) =>
         typeof v === 'string' && ['null', 'undefined', 'unknown'].includes(v.toLowerCase());
-      if (!value) return false;
+      if (!entry.value) return false;
       if (typeof value === 'string') {
-        return value.trim() && !normalized(value);
+        return entry.value.trim() && !normalized(entry.value);
       }
-      if (Array.isArray(value)) {
-        return value.some((v) => !normalized(v));
+      if (Array.isArray(entry.value)) {
+        return entry.value.some((v) => !normalized(v));
       }
       return true;
     }),
@@ -65,7 +65,7 @@ const getLabelText = (input) => {
   return input.getAttribute('aria-label') || input.placeholder || input.value || '';
 };
 
-export function getFormFieldLabels() {
+export const getFormFieldLabels = () => {
   const els = document.querySelectorAll('[data-form-filler-name]');
   const labels = [];
 
@@ -88,9 +88,9 @@ export function getFormFieldLabels() {
   });
 
   return labels;
-}
+};
 
-export function getFormFieldValues() {
+export const getFormFieldValues = () => {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const values = {};
 
@@ -119,9 +119,9 @@ export function getFormFieldValues() {
   });
 
   return values;
-}
+};
 
-export function getFormFields(important) {
+export const getFormFields = (important) => {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const properties = {};
   const required = [];
@@ -205,10 +205,10 @@ export function getFormFields(important) {
   });
 
   return { properties, required };
-}
+};
 
 // TO-DO: implement form data validation
-export function validateFormData(data) {
+export const validateFormData = (data) => {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const errors = [];
   const fieldStatus = {}; // { [name]: { valid: boolean, failed: string[] } }
@@ -315,9 +315,9 @@ export function validateFormData(data) {
 
   const valid = errors.length === 0;
   return { valid, errors, fields: fieldStatus };
-}
+};
 
-export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
+export const fillFormFields = (data, { speed = 25, perFieldDelay = 80 } = {}) => {
   const validated = validateFormData(data);
   console.log('Validation result:', validated);
 
@@ -456,4 +456,4 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
 
   fillFormFields._running = chain.catch(() => {});
   return previousValues;
-}
+};

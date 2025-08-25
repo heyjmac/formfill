@@ -1,45 +1,45 @@
-import { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { FormFillerButton, FormFillerWrapper } from '../ai-components/FormFiller';
 
-export function FormExample() {
+export const FormExample = React.memo(() => {
   const formRef = useRef(null);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     if (formRef.current) formRef.current.reset();
-  };
+  }, []);
 
   return (
     <div className="bg-white p-6">
       <form ref={formRef}>
-        <h1 className="text-2xl font-bold mb-4">Form Example</h1>
-        <div className="border-b border-emerald-500 w-12 mb-6"></div>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <h1 className="mb-4 text-2xl font-bold">Form Example</h1>
+        <div className="mb-6 w-12 border-b border-emerald-500"></div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">
+            <label className="mb-1 block text-xs font-medium text-gray-700">
               Full name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="John Doe"
               data-form-filler-name="full_name"
               data-form-filler-description="Complete name of the person or company formatted in lowercase and first capital letter"
             />
           </div>
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Email</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Email</label>
             <input
               type="email"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="john@example.com"
               data-form-filler-name="email"
               data-form-filler-description="Email address of the person or company"
             />
           </div>
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Type</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Type</label>
             <select
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               data-form-filler-name="type"
               data-form-filler-description="Type of the person or company"
             >
@@ -49,10 +49,10 @@ export function FormExample() {
             </select>
           </div>
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Date of birth</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Date of birth</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="MM/DD/YYYY"
               data-form-filler-name="date_of_birth"
               data-form-filler-description="Birth date or establishment date in month/day/year format of the person or company"
@@ -60,30 +60,30 @@ export function FormExample() {
             />
           </div>
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Profession</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Profession</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="Software Engineer"
               data-form-filler-name="profession"
               data-form-filler-description="Current job title, profession or purpose of the person or company"
             />
           </div>
           <div className="md:col-span-6">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Marital status</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Marital status</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="Single"
               data-form-filler-name="marital_status"
               data-form-filler-description="Current marital status of the person, if a natural person"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Postal code</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Postal code</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="12345"
               data-form-filler-name="postal_code"
               data-form-filler-description="Postal or ZIP code of the person or company"
@@ -91,9 +91,9 @@ export function FormExample() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">State</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">State</label>
             <select
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               data-form-filler-name="state"
               data-form-filler-description="Brazilian state of the person or company"
             >
@@ -103,30 +103,30 @@ export function FormExample() {
             </select>
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">City</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">City</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="Enter city name"
               data-form-filler-name="city"
               data-form-filler-description="Brazilian city name of the person or company"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Address</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Address</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="123 Main St"
               data-form-filler-name="address"
               data-form-filler-description="Street address with house/apartment/room number of the person or company"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Phone 1</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Phone 1</label>
             <input
               type="tel"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_primary"
               data-form-filler-description="Primary contact phone number of the person or company"
@@ -135,10 +135,10 @@ export function FormExample() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Phone 2</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Phone 2</label>
             <input
               type="tel"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_secondary"
               data-form-filler-description="Alternative phone number (optional) of the person or company"
@@ -146,7 +146,7 @@ export function FormExample() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Gender</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Gender</label>
             <div className="flex gap-4 text-sm">
               <label className="flex items-center gap-1">
                 <input
@@ -165,18 +165,18 @@ export function FormExample() {
             </div>
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Age</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Age</label>
             <input
               type="number"
               min="0"
               max="120"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               data-form-filler-name="age"
               data-form-filler-description="User age or time since establishment of the person or company"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Hobbies</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Hobbies</label>
             <div className="flex gap-4 text-sm">
               <label className="flex items-center gap-1">
                 <input
@@ -194,7 +194,7 @@ export function FormExample() {
             </div>
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Satisfaction</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Satisfaction</label>
             <input
               type="range"
               min="1"
@@ -205,27 +205,27 @@ export function FormExample() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Meeting Date</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Date</label>
             <input
               type="date"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               data-form-filler-name="meeting_date"
               data-form-filler-description="Date document was signed"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs font-medium mb-1 text-gray-700">Meeting Time</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Time</label>
             <input
               type="time"
-              className="w-full p-2 border border-gray-200 rounded text-sm"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
               data-form-filler-name="meeting_time"
               data-form-filler-description="Time document was signed, if available"
             />
           </div>
         </div>
-        <div className="md:col-span-12 mt-4">
+        <div className="mt-4 md:col-span-12">
           <textarea
-            className="w-full p-2 border border-gray-200 rounded text-sm h-20"
+            className="h-20 w-full rounded border border-gray-200 p-2 text-sm"
             placeholder="Additional information..."
             data-form-filler-name="notes"
             data-form-filler-description="Additional information or special requests of the person or company"
@@ -247,8 +247,8 @@ export function FormExample() {
               important="DEFENDANT ONLY"
               label="Fill with defendant info"
             >
-              <div className="m-2 flex gap-2 items-center justify-center cursor-pointer">
-                <span className="mr-1 text-lg material-symbols-outlined">auto_awesome</span>
+              <div className="m-2 flex cursor-pointer items-center justify-center gap-2">
+                <span className="material-symbols-outlined mr-1 text-lg">auto_awesome</span>
                 Fill with defendant info
               </div>
             </FormFillerWrapper>
@@ -257,11 +257,11 @@ export function FormExample() {
             <button
               type="button"
               onClick={handleClear}
-              className="bg-red-500 text-white py-2 px-6 rounded hover:bg-red-400 text-sm font-medium"
+              className="rounded bg-red-500 px-6 py-2 text-sm font-medium text-white hover:bg-red-400"
             >
               CLEAR
             </button>
-            <button className="bg-gray-800 text-white py-2 px-6 rounded hover:bg-gray-700 text-sm font-medium">
+            <button className="rounded bg-gray-800 px-6 py-2 text-sm font-medium text-white hover:bg-gray-700">
               SAVE
             </button>
           </div>
@@ -269,4 +269,4 @@ export function FormExample() {
       </form>
     </div>
   );
-}
+});
