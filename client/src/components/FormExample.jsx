@@ -23,7 +23,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="John Doe"
               data-form-filler-name="full_name"
-              data-form-filler-description="Complete name of the person or company formatted in lowercase and first capital letter"
+              data-form-filler-description="Complete name of the person or company set in the instructions formatted in lowercase and first capital letter"
             />
           </div>
           <div className="md:col-span-6">
@@ -33,7 +33,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="john@example.com"
               data-form-filler-name="email"
-              data-form-filler-description="Active email address for communications"
+              data-form-filler-description="Email address of the person or company set in the instructions "
             />
           </div>
           <div className="md:col-span-6">
@@ -41,7 +41,7 @@ export function FormExample() {
             <select
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="type"
-              data-form-filler-description="Category selection from dropdown menu"
+              data-form-filler-description="Type of the person or company set in the instructions"
             >
               <option value="">Select...</option>
               <option value="natural">Natural Person</option>
@@ -55,7 +55,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="MM/DD/YYYY"
               data-form-filler-name="date_of_birth"
-              data-form-filler-description="Birth date in month/day/year format"
+              data-form-filler-description="Birth date or establishment date in month/day/year format of the person or company set in the instructions"
               data-form-filler-format="MM/DD/YYYY"
             />
           </div>
@@ -66,7 +66,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Software Engineer"
               data-form-filler-name="profession"
-              data-form-filler-description="Current job title or profession"
+              data-form-filler-description="Current job title, profession or purpose of the person or company set in the instructions"
             />
           </div>
           <div className="md:col-span-6">
@@ -76,7 +76,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Single"
               data-form-filler-name="marital_status"
-              data-form-filler-description="Current marital status"
+              data-form-filler-description="Current marital status of the person set in the instructions, if a natural person"
             />
           </div>
           <div className="md:col-span-3">
@@ -86,7 +86,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="12345"
               data-form-filler-name="postal_code"
-              data-form-filler-description="Postal or ZIP code"
+              data-form-filler-description="Postal or ZIP code of the person or company set in the instructions"
               data-form-filler-format="XXXXX-XXX"
             />
           </div>
@@ -95,7 +95,7 @@ export function FormExample() {
             <select
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="state"
-              data-form-filler-description="Brazilian state"
+              data-form-filler-description="Brazilian state of the person or company set in the instructions"
             >
               <option value="">Select...</option>
               <option value="SP">São Paulo</option>
@@ -109,7 +109,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="Enter city name"
               data-form-filler-name="city"
-              data-form-filler-description="Brazilian city name"
+              data-form-filler-description="Brazilian city name of the person or company set in the instructions"
             />
           </div>
           <div className="md:col-span-3">
@@ -119,7 +119,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="123 Main St"
               data-form-filler-name="address"
-              data-form-filler-description="Street address with house/apartment number"
+              data-form-filler-description="Street address with house/apartment/room number of the person or company set in the instructions"
             />
           </div>
           <div className="md:col-span-3">
@@ -129,7 +129,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_primary"
-              data-form-filler-description="Primary contact phone number"
+              data-form-filler-description="Primary contact phone number of the person or company set in the instructions"
               data-form-filler-format="(XXX) XXX-XXXX"
               pattern="\(\d{3}\) \d{3}-\d{4}"
             />
@@ -141,7 +141,7 @@ export function FormExample() {
               className="w-full p-2 border border-gray-200 rounded text-sm"
               placeholder="(123) 456-7890"
               data-form-filler-name="phone_secondary"
-              data-form-filler-description="Alternative phone number (optional)"
+              data-form-filler-description="Alternative phone number (optional) of the person or company set in the instructions"
               pattern="\(\d{3}\) \d{3}-\d{4}"
             />
           </div>
@@ -154,7 +154,7 @@ export function FormExample() {
                   name="gender"
                   value="male"
                   data-form-filler-name="gender"
-                  data-form-filler-description="Gender selection"
+                  data-form-filler-description="Gender selection of the person set in the instructions, if a natural person"
                 />
                 Male
               </label>
@@ -172,7 +172,7 @@ export function FormExample() {
               max="120"
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="age"
-              data-form-filler-description="User age"
+              data-form-filler-description="User age or time since establishment of the person or company set in the instructions"
             />
           </div>
           <div className="md:col-span-3">
@@ -183,7 +183,7 @@ export function FormExample() {
                   type="checkbox"
                   value="sports"
                   data-form-filler-name="hobbies"
-                  data-form-filler-description="Multiple hobbies selection"
+                  data-form-filler-description="Multiple hobbies selection of the person set in the instructions, if a natural person"
                 />
                 Sports
               </label>
@@ -201,7 +201,7 @@ export function FormExample() {
               max="10"
               className="w-full"
               data-form-filler-name="satisfaction"
-              data-form-filler-description="Satisfaction level from 1 to 10"
+              data-form-filler-description="Satisfaction level from 1 to 10 of the person or company set in the instructions"
             />
           </div>
           <div className="md:col-span-3">
@@ -210,7 +210,7 @@ export function FormExample() {
               type="date"
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="meeting_date"
-              data-form-filler-description="Meeting date"
+              data-form-filler-description="Date document was signed"
             />
           </div>
           <div className="md:col-span-3">
@@ -219,7 +219,7 @@ export function FormExample() {
               type="time"
               className="w-full p-2 border border-gray-200 rounded text-sm"
               data-form-filler-name="meeting_time"
-              data-form-filler-description="Meeting time"
+              data-form-filler-description="Time document was signed, if available"
             />
           </div>
         </div>
@@ -228,7 +228,7 @@ export function FormExample() {
             className="w-full p-2 border border-gray-200 rounded text-sm h-20"
             placeholder="Additional information..."
             data-form-filler-name="notes"
-            data-form-filler-description="Additional information or special requests"
+            data-form-filler-description="Additional information or special requests of the person or company set in the instructions"
           />
         </div>
         <div className="mt-6 flex justify-between gap-2">
@@ -236,13 +236,13 @@ export function FormExample() {
             <FormFillButton
               document="complaint"
               modal
-              instruction="Only fill the form with the plaintiff information. Never use the defendant's information. Don't mix them."
+              instruction="Only fill the form with the plaintiff information. Never use the defendant's information."
               label="Fill with plaintiff info"
             />
             <FormFillButton
               document="complaint"
               modal
-              instruction="Only fill the form with the defendant information. Never use the plaintiff's information. Don't mix them."
+              instruction="Only fill the form with the defendant information. Never use the plaintiff's information."
               label="Fill with defendant info"
             />
           </div>
