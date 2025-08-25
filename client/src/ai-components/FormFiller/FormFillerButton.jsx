@@ -1,8 +1,5 @@
-import { useState } from 'react';
-import { FormFillerDetails } from './FormFillerDetails';
-import { useEffect } from 'react';
-import { events } from '../utils/events';
 import { copy } from './copy';
+import { FormFillerWrapper } from './FormFillerWrapper';
 
 export const FormFillerButton = ({
   document,
@@ -17,71 +14,23 @@ export const FormFillerButton = ({
   left,
   right,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = events.on('formFill', ({ isOpen }) => {
-      setIsOpen(isOpen);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const handleOpen = () => {
-    setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    events.emit('formFill', { isOpen: false });
-  };
-
   return (
-    <div className={floating ? 'fixed bottom-5 right-5' : ''}>
-      <div className="relative">
-        {isOpen ? (
-          modal ? (
-            <div
-              className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-              onClick={handleClose}
-            >
-              <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-              {label || copy.cta.button}
-            </div>
-          ) : (
-            <div
-              className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-              onClick={handleClose}
-            >
-              <span className="mr-2 text-lg material-symbols-outlined">close</span>
-              {copy.cta.close}
-            </div>
-          )
-        ) : (
-          <div
-            className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50"
-            onClick={handleOpen}
-          >
-            <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
-            {label || copy.cta.button}
-          </div>
-        )}
-
-        {isOpen && (
-          <FormFillerDetails
-            document={document}
-            instruction={instruction}
-            options={options}
-            textarea={textarea}
-            modal={modal}
-            up={up}
-            down={down}
-            left={left}
-            right={right}
-          />
-        )}
+    <FormFillerWrapper
+      document={document}
+      instruction={instruction}
+      options={options}
+      textarea={textarea}
+      floating={floating}
+      modal={modal}
+      up={up}
+      down={down}
+      left={left}
+      right={right}
+    >
+      <div className="cursor-pointer inline-flex items-center px-6 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-full transition-transform hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50">
+        <span className="mr-2 text-lg material-symbols-outlined">auto_awesome</span>
+        {label || copy.cta.button}
       </div>
-    </div>
+    </FormFillerWrapper>
   );
 };

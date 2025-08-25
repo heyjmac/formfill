@@ -1,13 +1,12 @@
 import { FormExample } from './components/FormExample';
-import { FormFillerButton } from './ai-components/FormFiller';
+import { FormFillerFloater } from './ai-components/FormFiller/FormFillerFloater';
 
 function App() {
   return (
     <div className="w-full h-screen flex items-center justify-center bg-white">
       <FormExample />
-      <FormFillerButton
+      <FormFillerFloater
         document="complaint"
-        floating
         options={[
           {
             instruction:
