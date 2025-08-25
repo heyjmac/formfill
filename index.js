@@ -212,8 +212,9 @@ Today is ${new Date().toLocaleDateString()}`;
       console.log(response?.candidates?.[0]?.content?.parts?.[0]?.functionCall);
 
       const args = response?.candidates?.[0]?.content?.parts?.[0]?.functionCall?.args;
-      const durationMs = Date.now() - start;
-      res.json({ status: 'ok', data: args, duration: durationMs });
+      const duration = Date.now() - start;
+      const tokens = response?.usageMetadata;
+      res.json({ status: 'ok', data: args, duration, tokens });
     } catch (err) {
       res.status(500).json({
         status: 'error',
