@@ -177,7 +177,119 @@ export function getFormFields() {
   return { properties, required };
 }
 
+export function validateFormData(data) {
+  const els = document.querySelectorAll('[data-form-filler-description]');
+  const errors = [];
+  const fieldStatus = {}; // { [name]: { valid: boolean, failed: string[] } }
+
+  const toNumber = (v) => (v === '' || v == null ? NaN : Number(v));
+  const approxMod = (val, step) => {
+    const q = Math.round(val / step);
+    return Math.abs(val - q * step) < 1e-9;
+  };
+
+  const ensureField = (name) => (fieldStatus[name] ||= { valid: true, failed: [] });
+  const fail = (name, rule, message) => {
+    ensureField(name).valid = false;
+    ensureField(name).failed.push(rule);
+    errors.push({ name, rule, message });
+  };
+
+  for (const el of els) {
+    const name = el.getAttribute('data-form-filler-name') || el?.name || getLabelText(el);
+    if (!name) continue;
+    const inputValue = data?.[name];
+    if (inputValue == null) continue; // not validating missing fields here
+
+    // Normalize value(s)
+    let values = [];
+    if (el.tagName === 'SELECT' && el.multiple)
+      values = Array.isArray(inputValue) ? inputValue : [inputValue];
+    else if (el.type === 'checkbox') values = Array.isArray(inputValue) ? inputValue : [inputValue];
+    else values = [inputValue];
+
+    // pattern (text-like)
+    if (el.pattern) {
+      const re = new RegExp(`^(?:${el.pattern})$`);
+      for (const v of values) {
+        if (typeof v === 'string') {
+          if (!re.test(v))
+            fail(name, 'pattern', `Value "${v}" does not match pattern ${el.pattern}.`);
+        }
+      }
+    }
+
+    // maxlength / minlength (strings only)
+    const maxLength = el.maxLength && el.maxLength !== -1 ? el.maxLength : null;
+    const minLength = el.minLength && el.minLength !== -1 ? el.minLength : null;
+    if (maxLength != null) {
+      for (const v of values) {
+        if (typeof v === 'string' && v.length > maxLength)
+          fail(name, 'maxlength', `Length ${v.length} exceeds maxlength ${maxLength}.`);
+      }
+    }
+    if (minLength != null) {
+      for (const v of values) {
+        if (typeof v === 'string' && v.length < minLength)
+          fail(name, 'minlength', `Length ${v.length} is less than minlength ${minLength}.`);
+      }
+    }
+
+    // min / max / step (numbers only per spec for this validator)
+    if (el.tagName === 'INPUT' && (el.type === 'number' || el.type === 'range')) {
+      const hasMin = el.min !== '';
+      const hasMax = el.max !== '';
+      const min = hasMin ? Number(el.min) : NaN;
+      const max = hasMax ? Number(el.max) : NaN;
+      const hasStep = el.step && el.step !== 'any';
+      const step = hasStep ? Number(el.step) : NaN;
+      const base = hasMin ? min : 0;
+
+      for (const v of values) {
+        const num = toNumber(v);
+        if (Number.isNaN(num)) {
+          fail(name, 'type', `Value "${v}" is not a valid number.`);
+          continue;
+        }
+        if (hasMin && num < min) fail(name, 'min', `Value ${num} is less than min ${min}.`);
+        if (hasMax && num > max) fail(name, 'max', `Value ${num} is greater than max ${max}.`);
+        if (hasStep && !approxMod(num - base, step))
+          fail(name, 'step', `Value ${num} is not aligned to step ${step} from base ${base}.`);
+      }
+    }
+
+    // For selects / radios / checkboxes: ensure values are among available options
+    if (el.tagName === 'SELECT') {
+      const options = new Set(Array.from(el.options).map((o) => o.value));
+      for (const v of values) {
+        if (!options.has(String(v))) fail(name, 'enum', `Value "${v}" is not a valid option.`);
+      }
+    } else if (el.type === 'radio') {
+      const radios = document.querySelectorAll(`input[type="radio"][name="${el.name}"]`);
+      const options = new Set(Array.from(radios).map((r) => r.value));
+      for (const v of values) {
+        if (v != null && v !== '' && !options.has(String(v)))
+          fail(name, 'enum', `Value "${v}" is not a valid option.`);
+      }
+    } else if (el.type === 'checkbox') {
+      const checkboxes = document.querySelectorAll(`input[type="checkbox"][name="${el.name}"]`);
+      const options = new Set(Array.from(checkboxes).map((c) => c.value));
+      for (const v of values)
+        if (!options.has(String(v))) fail(name, 'enum', `Value "${v}" is not a valid option.`);
+    }
+
+    // Mark field as valid if no failures recorded
+    ensureField(name);
+  }
+
+  const valid = errors.length === 0;
+  return { valid, errors, fields: fieldStatus };
+}
+
 export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
+  const validated = validateFormData(data);
+  console.log('Validation result:', validated);
+
   const els = document.querySelectorAll('[data-form-filler-description]');
   const previousValues = {};
   const processedGroups = new Set();

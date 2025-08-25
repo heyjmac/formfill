@@ -143,15 +143,16 @@ app.post(
 You cannot reply or assist directly. 
 You must process the provided inputs using that tool and return only the correct arguments needed to call it.
 
-The tool receives:
-- formFields: structured form field definitions (as JSON)
-- pastedText: optional text content pasted by the user
-- files: optional list of uploaded files with metadata (name, type, etc.)
+You'll receive
+- list of args accepted by the tool with descriptions
+- optional text content pasted by the user
+- optional list of uploaded files
 
 Your task:
 1. Analyze the content provided (text or files).
-2. Use the formFields to determine what data to extract.
+2. Use the tool args to determine what data to extract.
 3. Return the extracted data as the args to processFormFields.
+4. Comply with the format specified in the tool args.
 
 Do not explain or respond to the user. Just return the tool call with filled args.
 Do not ask questions. Only act.
