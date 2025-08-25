@@ -9,7 +9,7 @@ import {
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillFlow = ({ document, instruction, options, textarea }) => {
+export const FormFillerFlow = ({ document, instruction, options, textarea }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');

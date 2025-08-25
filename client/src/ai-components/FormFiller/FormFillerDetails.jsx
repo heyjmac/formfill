@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { FormFillFlow } from './FormFillFlow';
+import { FormFillerFlow } from './FormFillerFlow';
 import { events } from '../utils/events';
 
-export const FormFillDetails = ({ modal, down, right, ...rest }) => {
+export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -19,7 +19,7 @@ export const FormFillDetails = ({ modal, down, right, ...rest }) => {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
         <div className="bg-white rounded-lg p-2 min-w-[400px] max-w-[600px]">
-          <FormFillFlow {...rest} />
+          <FormFillerFlow {...rest} />
         </div>
       </div>
     );
@@ -28,7 +28,7 @@ export const FormFillDetails = ({ modal, down, right, ...rest }) => {
     return (
       <div className={`absolute top-[46px] ${right ? 'left-0' : 'right-0'}`}>
         <div className="w-72 p-6 text-center bg-white border border-gray-100 shadow-lg rounded-lg">
-          <FormFillFlow {...rest} />
+          <FormFillerFlow {...rest} />
         </div>
       </div>
     );
@@ -36,7 +36,7 @@ export const FormFillDetails = ({ modal, down, right, ...rest }) => {
   return (
     <div className={`absolute bottom-[46px] ${right ? 'left-0' : 'right-0'}`}>
       <div className="w-72 bg-white border border-gray-100 shadow-lg rounded-lg">
-        <FormFillFlow {...rest} />
+        <FormFillerFlow {...rest} />
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { FormFillDetails } from './FormFillDetails';
+import { FormFillerDetails } from './FormFillerDetails';
 import { useEffect } from 'react';
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillButton = ({
+export const FormFillerButton = ({
   document,
   instruction,
   options,
@@ -69,7 +69,7 @@ export const FormFillButton = ({
         )}
 
         {isOpen && (
-          <FormFillDetails
+          <FormFillerDetails
             document={document}
             instruction={instruction}
             options={options}

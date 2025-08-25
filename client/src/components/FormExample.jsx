@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { FormFillButton } from '../ai-components/FormFillButton';
+import { FormFillerButton } from '../ai-components/FormFiller';
 
 export function FormExample() {
   const formRef = useRef(null);
@@ -233,13 +233,13 @@ export function FormExample() {
         </div>
         <div className="mt-6 flex justify-between gap-2">
           <div className="flex gap-2">
-            <FormFillButton
+            <FormFillerButton
               document="complaint"
               modal
               instruction="Only fill the form with the plaintiff information. Never use the defendant's information."
               label="Fill with plaintiff info"
             />
-            <FormFillButton
+            <FormFillerButton
               document="complaint"
               modal
               instruction="Only fill the form with the defendant information. Never use the plaintiff's information."
