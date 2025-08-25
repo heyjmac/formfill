@@ -1,4 +1,4 @@
-export const copy = {
+export const defaultCopy = {
   title: {
     main: 'AI Form Filler',
   },
