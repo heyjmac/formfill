@@ -1,3 +1,6 @@
+// To customize the text, pass a `copy` prop to the FormFiller component of your choice.
+// It should follow the same structure as the `defaultCopy` object below.
+
 export const defaultCopy = {
   title: {
     main: 'AI Form Filler',
