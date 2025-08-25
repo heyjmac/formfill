@@ -241,7 +241,11 @@ Today is ${new Date().toLocaleDateString()}`;
         },
       });
 
-      console.log(response?.candidates?.[0]?.content?.parts?.[0]?.functionCall);
+      if (response?.candidates?.[0]?.content?.parts?.[0]?.functionCall) {
+        console.log(response?.candidates?.[0]?.content?.parts?.[0]?.functionCall);
+      } else {
+        console.dir(response, { depth: null });
+      }
 
       const args = response?.candidates?.[0]?.content?.parts?.[0]?.functionCall?.args;
       const duration = Date.now() - start;

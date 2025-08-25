@@ -78,7 +78,7 @@ export const FormFillerFlow = ({ copy, document, instruction, important, options
   const handleApply = () => {
     const selected = Object.fromEntries(
       Object.entries(fieldsFilled).filter(
-        ([key]) => selectedFields[key] && fieldsFilled[key] !== fieldValues[key],
+        ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
       ),
     );
     const previousValues = fillFormFields(selected);
@@ -94,7 +94,9 @@ export const FormFillerFlow = ({ copy, document, instruction, important, options
   const handleReapply = () => {
     fillFormFields(undoFields);
     const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(([key]) => selectedFields[key]),
+      Object.entries(fieldsFilled).filter(
+        ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
+      ),
     );
     const previousValues = fillFormFields(selected);
     setUndoFields(previousValues);
@@ -198,7 +200,10 @@ export const FormFillerFlow = ({ copy, document, instruction, important, options
 
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {fieldLabels
-            .filter(({ name }) => fieldsFilled[name] && fieldsFilled[name] !== fieldValues[name])
+            .filter(
+              ({ name }) =>
+                fieldsFilled[name] && String(fieldsFilled[name]) !== String(fieldValues[name]),
+            )
             .map(({ name, label }) => (
               <label
                 key={name}

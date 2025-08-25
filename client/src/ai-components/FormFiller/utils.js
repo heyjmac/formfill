@@ -325,6 +325,8 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
   const previousValues = {};
   const processedGroups = new Set();
 
+  const isBlank = (v) => v == null || (Array.isArray(v) ? v.length === 0 : String(v).trim() === '');
+
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const typeInto = async (el, text) => {
     const str = String(text ?? '');
@@ -350,6 +352,14 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
       }, 300);
     });
   };
+  const arr = (x) => (Array.isArray(x) ? x.slice() : [x].filter((v) => v != null));
+  const sameSet = (a, b) => {
+    const A = new Set(arr(a)),
+      B = new Set(arr(b));
+    if (A.size !== B.size) return false;
+    for (const v of A) if (!B.has(v)) return false;
+    return true;
+  };
 
   let chain = Promise.resolve();
 
@@ -359,12 +369,20 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
       el.name ||
       (typeof getLabelText === 'function' ? getLabelText(el) : undefined);
     if (!name) continue;
+
     const value = data?.[name];
-    if (value == null) continue;
+    if (isBlank(value)) continue; // <-- skip empty/blank incoming values entirely
 
     if (el.tagName === 'SELECT') {
       const selected = Array.from(el.selectedOptions).map((opt) => opt.value);
       previousValues[name] = el.multiple ? selected : el.value;
+
+      if (
+        (!el.multiple && String(el.value) === String(value)) ||
+        (el.multiple && sameSet(selected, value))
+      )
+        continue;
+
       chain = chain.then(async () => {
         flashOutline(el);
         const options = Array.from(el.options).map((opt) => opt.value);
@@ -389,6 +407,8 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
       checkboxes.forEach((c) => c.checked && old.push(c.value));
       previousValues[name] = old;
 
+      if (sameSet(old, value)) continue;
+
       chain = chain.then(async () => {
         checkboxes.forEach((c) => flashOutline(c));
         checkboxes.forEach((c) => {
@@ -410,6 +430,8 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
       const old = Array.from(radios).find((r) => r.checked)?.value || null;
       previousValues[name] = old;
 
+      if (String(old) === String(value)) continue;
+
       chain = chain.then(async () => {
         radios.forEach((r) => flashOutline(r));
         radios.forEach((r) => {
@@ -423,6 +445,8 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
 
     // text-like inputs and textarea
     previousValues[name] = el.value;
+    if (String(el.value) === String(value)) continue;
+
     chain = chain.then(async () => {
       flashOutline(el);
       await typeInto(el, value);
@@ -430,7 +454,6 @@ export function fillFormFields(data, { speed = 25, perFieldDelay = 80 } = {}) {
     });
   }
 
-  // run the chain without forcing callers to await; keep for debugging if needed
   fillFormFields._running = chain.catch(() => {});
   return previousValues;
 }
