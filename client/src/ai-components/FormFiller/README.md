@@ -108,7 +108,7 @@ Choose one in the vertical axis and one in the horizontal axis.
 
 ### `label` (string)
 
-Sets the text for the main button. Overrides the default button label.
+Sets the text for the main button. Overrides the default button label. Prop not available for FormFillerWrapper.
 
 ```jsx
 <FormFillerFloater label="Fill with your document" />
