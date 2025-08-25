@@ -139,7 +139,8 @@ export function getFormFields() {
       if (constraints.length) fullDescription.push(`Constraints: ${constraints.join(', ')}`);
     }
 
-    if (el?.placeholder) fullDescription.push(`Placeholder: ${el.placeholder}`);
+    // if (el?.value) fullDescription.push(`Current calue: ${el.value}`);
+    // if (el?.placeholder) fullDescription.push(`Placeholder: ${el.placeholder}`);
 
     properties[name] = { description: fullDescription.join('; ') };
 

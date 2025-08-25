@@ -236,13 +236,13 @@ export function FormExample() {
             <FormFillButton
               document="complaint"
               modal
-              instruction="Only fill the form with the plaintiff information. Never use the defendant's information."
+              instruction="Only fill the form with the plaintiff information. Never use the defendant's information. Don't mix them."
               label="Fill with plaintiff info"
             />
             <FormFillButton
               document="complaint"
               modal
-              instruction="Only fill the form with the defendant information. Never use the plaintiff's information."
+              instruction="Only fill the form with the defendant information. Never use the plaintiff's information. Don't mix them."
               label="Fill with defendant info"
             />
           </div>

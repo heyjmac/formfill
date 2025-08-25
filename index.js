@@ -156,7 +156,7 @@ Your task:
 
 Do not explain or respond to the user. Just return the tool call with filled args.
 Do not ask questions. Only act.
-Do not fill fields with "null", "undefined", or "unknown".
+Do not fill fields with "null", "undefined", or "unknown". When in doubt, leave the field blank.
 
 Today is ${new Date().toLocaleDateString()}`;
 
