@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import {
   fillFormFields,
   getCleanData,
+  getCopy,
   getFormFieldLabels,
   getFormFields,
   getFormFieldValues,
@@ -9,7 +10,7 @@ import {
 import { events } from '../utils/events';
 import { defaultCopy } from './defaultCopy';
 
-export const FormFillerFlow = ({ document, instruction, options, textarea }) => {
+export const FormFillerFlow = ({ copy, document, instruction, options, textarea }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -147,13 +148,13 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
               progress_activity
             </span>
           </div>
-          <div className="text-sm text-gray-700 mb-3">{defaultCopy.text.processing}</div>
+          <div className="text-sm text-gray-700 mb-3">{getCopy('text.processing', copy)}</div>
           <button
             type="button"
             className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors"
             onClick={handleClear}
           >
-            {defaultCopy.cta.cancel || defaultCopy.cta.stop}
+            {getCopy('cta.cancel', copy) || getCopy('cta.stop', copy)}
           </button>
         </div>
       </div>
@@ -174,7 +175,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
               : defaultCopy.fields_found.singular
           }
         />
-        <div className="text-sm text-gray-600 mb-4">{defaultCopy.text.review}</div>
+        <div className="text-sm text-gray-600 mb-4">{getCopy('text.review', copy)}</div>
 
         <div className="flex justify-between mb-4">
           <button
@@ -183,7 +184,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
             onClick={handleClearSelection}
           >
             <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-            {defaultCopy.cta.clear_selection}
+            {getCopy('cta.clear_selection', copy)}
           </button>
           <button
             type="button"
@@ -191,7 +192,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
             onClick={handleSelectAll}
           >
             <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-            {defaultCopy.cta.select_all}
+            {getCopy('cta.select_all', copy)}
           </button>
         </div>
 
@@ -248,7 +249,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
                 onClick={handleUndo}
               >
                 <span className="material-symbols-outlined mr-1 text-sm">undo</span>
-                <span>{defaultCopy.cta.undo}</span>
+                <span>{getCopy('cta.undo', copy)}</span>
               </button>
               {isDirty ? (
                 <button
@@ -256,7 +257,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
                   onClick={handleReapply}
                 >
                   <span className="material-symbols-outlined mr-1 text-sm">refresh</span>
-                  <span>{defaultCopy.cta.reapply}</span>
+                  <span>{getCopy('cta.reapply', copy)}</span>
                 </button>
               ) : (
                 <button
@@ -265,7 +266,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
                   onClick={handleClose}
                 >
                   <span className="material-symbols-outlined mr-1 text-sm">close</span>
-                  <span>{defaultCopy.cta.close}</span>
+                  <span>{getCopy('cta.close', copy)}</span>
                 </button>
               )}
             </div>
@@ -276,7 +277,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
               onClick={handleApply}
             >
               <span className="material-symbols-outlined mr-1 text-sm">done</span>
-              <span>{defaultCopy.cta.apply}</span>
+              <span>{getCopy('cta.apply', copy)}</span>
             </button>
           ) : (
             <button
@@ -285,7 +286,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
               onClick={handleClose}
             >
               <span className="material-symbols-outlined mr-1 text-sm">close</span>
-              <span>{defaultCopy.cta.close}</span>
+              <span>{getCopy('cta.close', copy)}</span>
             </button>
           )}
         </div>
@@ -302,14 +303,14 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
           </div>
           <div className="text-sm text-gray-700 mb-3">
             {defaultCopy.error[errorCode] && <div>{defaultCopy.error[errorCode]}</div>}
-            {!errorCode && <div>{defaultCopy.error.DEFAULT}</div>}
+            {!errorCode && <div>{getCopy('error.DEFAULT', copy)}</div>}
           </div>
           <button
             type="button"
             className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
             onClick={handleClear}
           >
-            {defaultCopy.cta.error}
+            {getCopy('cta.error', copy)}
           </button>
         </div>
       </div>
@@ -318,7 +319,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
 
   return (
     <div className="p-4">
-      <TopNav title={defaultCopy.title.main} />
+      <TopNav title={getCopy('title.main', copy)} />
       <div className="mb-3 relative">
         <label
           className={`min-h-[100px] flex flex-col items-center justify-center block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 transition-colors mb-2 ${
@@ -329,14 +330,14 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
           <div className="block text-xs">
             {files.length > 0
               ? files.map((f) => f.name).join(', ')
-              : defaultCopy.text.drop_area.replace('{{document}}', document || 'document')}
+              : getCopy('text.drop_area', copy)?.replace('{{document}}', document || 'document')}
           </div>
           <span className="block text-xs text-gray-500 mt-1">
             {files.length > 0
               ? files.length > 1
-                ? defaultCopy.files_selected.plural.replace('{{count}}', files.length)
-                : defaultCopy.files_selected.singular
-              : defaultCopy.text.supported_formats}
+                ? getCopy('files_selected.plural', copy)?.replace('{{count}}', files.length)
+                : getCopy('files_selected.singular', copy)
+              : getCopy('text.supported_formats', copy)}
           </span>
           <input
             type="file"
@@ -370,7 +371,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
           <div className="mb-3">
             <textarea
               className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-              placeholder={defaultCopy.text.paste_text}
+              placeholder={getCopy('text.paste_text', copy)}
               value={text}
               onChange={(e) => setText(e.target.value)}
             ></textarea>
@@ -380,7 +381,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
 
       {options && options.length > 0 && (
         <div className="mb-3 mx-2">
-          <h3 className="text-sm font-medium mb-2">{defaultCopy.text.options}</h3>
+          <h3 className="text-sm font-medium mb-2">{getCopy('text.options', copy)}</h3>
           <div className="space-y-2">
             {options.map((option, index) => (
               <label
@@ -403,7 +404,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
       )}
 
       <div className="flex items-center text-xs text-gray-500 mb-4">
-        <p>{defaultCopy.text.info}</p>
+        <p>{getCopy('text.info', copy)}</p>
       </div>
 
       <button
@@ -414,7 +415,7 @@ export const FormFillerFlow = ({ document, instruction, options, textarea }) => 
         onClick={handleSubmit}
       >
         <span className="material-symbols-outlined mr-1 text-sm">auto_awesome</span>
-        <span>{defaultCopy.cta.extract}</span>
+        <span>{getCopy('cta.extract', copy)}</span>
       </button>
     </div>
   );

@@ -1,3 +1,5 @@
+import { defaultCopy } from './defaultCopy';
+
 const typeToMcpFormat = {
   email: 'email',
   url: 'uri',
@@ -9,6 +11,31 @@ const typeToMcpFormat = {
 function unsnake(str = '') {
   return str.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 }
+
+export const getCopy = (address, copy) => {
+  const keys = address.split('.');
+  let current = copy;
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      current = null;
+      break;
+    }
+  }
+
+  if (current !== null) return current;
+
+  current = defaultCopy;
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+};
 
 export const getCleanData = (data) => {
   const cleanedData = Object.fromEntries(

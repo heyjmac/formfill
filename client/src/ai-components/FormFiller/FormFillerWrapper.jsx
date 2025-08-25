@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { events } from '../utils/events';
 
 export const FormFillerWrapper = ({
+  copy,
   document,
   instruction,
   options,
@@ -42,6 +43,7 @@ export const FormFillerWrapper = ({
       <div onClick={handleOpenClose}>{children}</div>
       {isOpen && (
         <FormFillerDetails
+          copy={copy}
           document={document}
           instruction={instruction}
           options={options}
