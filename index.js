@@ -188,10 +188,11 @@ Today is ${new Date().toLocaleDateString()}`;
                   parameters: {
                     type: 'object',
                     properties: {
+                      // eslint-disable-next-line camelcase
                       ai_reason: {
                         type: 'string',
                         description:
-                          'Reason for selecting this option, with explanation of why it complies with all the instructions',
+                          "Reason for selecting the tools's arguments, with explanation of why it complies with all the instructions",
                       },
                       ...formFields.properties,
                     },

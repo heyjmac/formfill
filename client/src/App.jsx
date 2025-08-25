@@ -12,13 +12,13 @@ const App = () => {
         options={[
           {
             instruction:
-              "Your most important task is to find the PLAINTIFF (AUTOR, REQUERENTE) and fill the form using ONLY their data. Don't include any information about the DEFENDANT (RÉU, REQUERIDO).",
+              'Your most important task is to find the PLAINTIFF (AUTOR, REQUERENTE) and fill the form using ONLY their data. Dont include any information about the DEFENDANT (REU, REQUERIDO).',
             important: 'PLAINTIFF ONLY',
             label: 'Fill with plaintiff info',
           },
           {
             instruction:
-              "Your most important task is to find the DEFENDANT (RÉU, REQUERIDO) and fill the form using ONLY their data. Don't include any information about the PLAINTIFF (AUTOR, REQUERENTE).",
+              'Your most important task is to find the DEFENDANT (REU, REQUERIDO) and fill the form using ONLY their data. Dont include any information about the PLAINTIFF (AUTOR, REQUERENTE).',
             important: 'DEFENDANT ONLY',
             label: 'Fill with defendant info',
           },
