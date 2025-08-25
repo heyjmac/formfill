@@ -27,15 +27,9 @@ export const FormFillerWrapper = ({
     };
   }, []);
 
-  const handleOpen = () => {
-    setIsOpen(true);
+  const handleOpenClose = () => {
+    events.emit('formFill', { isOpen: !isOpen });
   };
-
-  const handleClose = () => {
-    events.emit('formFill', { isOpen: false });
-  };
-
-  const handleOpenClose = () => (isOpen ? handleClose() : handleOpen());
 
   return (
     <div className="relative" onClick={handleOpenClose}>
