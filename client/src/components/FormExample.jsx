@@ -234,11 +234,13 @@ export function FormExample() {
         <div className="mt-6 flex justify-between gap-2">
           <div className="flex gap-2">
             <FormFillButton
+              document="complaint"
               modal
               instruction="Only fill the form with the plaintiff information. Never use the defendant's information."
               label="Fill with plaintiff info"
             />
             <FormFillButton
+              document="complaint"
               modal
               instruction="Only fill the form with the defendant information. Never use the plaintiff's information."
               label="Fill with defendant info"

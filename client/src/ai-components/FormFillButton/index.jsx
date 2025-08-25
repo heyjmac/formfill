@@ -5,6 +5,7 @@ import { events } from '../utils/events';
 import { copy } from './copy';
 
 export const FormFillButton = ({
+  document,
   instruction,
   options,
   label,
@@ -69,6 +70,7 @@ export const FormFillButton = ({
 
         {isOpen && (
           <FormFillDetails
+            document={document}
             instruction={instruction}
             options={options}
             textarea={textarea}

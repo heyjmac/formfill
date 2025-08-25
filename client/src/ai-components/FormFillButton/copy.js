@@ -31,7 +31,7 @@ export const copy = {
   text: {
     processing: 'Analyzing your content...',
     info: 'Our AI will analyze your content and suggest how to fill the form fields',
-    drop_area: 'Drop document here or click to browse',
+    drop_area: 'Drop {{document}} here or click to browse',
     supported_formats: 'Supported formats: PDF, DOCX, TXT',
     paste_text: 'Paste your text here and let AI extract the information',
     review: 'Please review the information below before applying it.',

@@ -9,7 +9,7 @@ import {
 import { events } from '../utils/events';
 import { copy } from './copy';
 
-export const FormFillFlow = ({ instruction, options, textarea }) => {
+export const FormFillFlow = ({ document, instruction, options, textarea }) => {
   const fileRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [text, setText] = useState('');
@@ -324,7 +324,9 @@ export const FormFillFlow = ({ instruction, options, textarea }) => {
         >
           <span className="material-symbols-outlined mb-1">upload_file</span>
           <div className="block text-xs">
-            {files.length > 0 ? files.map((f) => f.name).join(', ') : copy.text.drop_area}
+            {files.length > 0
+              ? files.map((f) => f.name).join(', ')
+              : copy.text.drop_area.replace('{{document}}', document || 'document')}
           </div>
           <span className="block text-xs text-gray-500 mt-1">
             {files.length > 0

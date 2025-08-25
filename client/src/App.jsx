@@ -6,6 +6,7 @@ function App() {
     <div className="w-full h-screen flex items-center justify-center bg-white">
       <FormExample />
       <FormFillButton
+        document="complaint"
         floating
         options={[
           {
