@@ -1,29 +1,58 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import js from '@eslint/js';
+import globals from 'globals';
+import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactMemo from 'eslint-plugin-react-memo';
+import reactPerf from 'eslint-plugin-react-perf';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import tailwindcss from 'eslint-plugin-tailwindcss';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'build']),
   {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
-    ],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parserOptions: {
-        ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+      },
+      globals: globals.browser,
+    },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      'react-memo': reactMemo,
+      'react-perf': reactPerf,
+      'react-refresh': reactRefresh,
+      'jsx-a11y': jsxA11y,
+      tailwindcss,
+    },
+    settings: {
+      react: {
+        version: 'detect',
       },
     },
     rules: {
+      ...react.configs.recommended.rules,
+      ...reactHooks.configs['recommended'].rules,
+
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-memo/require-memo': 'warn',
+      'react-memo/require-usememo': 'warn',
+      'react-perf/jsx-no-new-function-as-prop': 'warn',
+      'react-perf/jsx-no-new-object-as-prop': 'warn',
+      'react-perf/jsx-no-new-array-as-prop': 'warn',
+
+      'jsx-a11y/alt-text': 'warn',
+
+      'tailwindcss/classnames-order': 'warn',
+      'tailwindcss/no-custom-classname': ['warn', { whitelist: ['custom\\-.*'] }],
+      'tailwindcss/enforces-shorthand': 'warn',
+
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
-])
+]);

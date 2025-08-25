@@ -18,7 +18,7 @@ export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
   if (modal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000020]">
-        <div className="bg-white rounded-lg p-2 min-w-[400px] max-w-[600px]">
+        <div className="min-w-[400px] max-w-[600px] rounded-lg bg-white p-2">
           <FormFillerFlow {...rest} />
         </div>
       </div>
@@ -27,7 +27,7 @@ export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
   if (down) {
     return (
       <div className={`absolute top-[46px] ${right ? 'left-0' : 'right-0'}`}>
-        <div className="w-72 p-6 text-center bg-white border border-gray-100 shadow-lg rounded-lg">
+        <div className="w-72 rounded-lg border border-gray-100 bg-white p-6 text-center shadow-lg">
           <FormFillerFlow {...rest} />
         </div>
       </div>
@@ -35,7 +35,7 @@ export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
   }
   return (
     <div className={`absolute bottom-[46px] ${right ? 'left-0' : 'right-0'}`}>
-      <div className="w-72 bg-white border border-gray-100 shadow-lg rounded-lg">
+      <div className="w-72 rounded-lg border border-gray-100 bg-white shadow-lg">
         <FormFillerFlow {...rest} />
       </div>
     </div>
