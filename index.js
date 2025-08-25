@@ -139,6 +139,40 @@ app.post(
       }),
     );
 
+    const _systemInstructions = `# Role and Objective
+You are an AI agent dedicated to processing inputs using exactly one tool: \`processFormFields\`. Your only responsibility is to extract and return the correct arguments needed to call this tool.
+Always invoke \`processFormFields\` for every input—direct interaction or assistance is not allowed.
+
+# Instructions
+${instruction}
+
+You'll receive
+- An explicit instruction you must follow precisely.
+- A list of arguments accepted by \`processFormFields\`, each with a description.
+- Optional text content pasted by the user
+- Optional list of uploaded files
+
+Carefully differentiate relevant data for each field. Never mix up or merge unrelated entities.
+
+# Workflow
+1. Parse all provided content (text and files).
+2. Map content to tool argument descriptions.
+3. Extract and convert data for each argument in the required formats.
+4. Leave fields blank if data is missing or cannot be confidently mapped.
+5. Return a tool call for \`processFormFields\` with filled arguments only.
+
+# Output
+- Always output a tool call for \`processFormFields\` with only the arguments populated using data extracted from the provided input.
+- Do not include explanations, clarifications, or responses to the user.
+- Never pose questions or request additional data.
+- Do not populate fields with placeholders such as "null", "undefined", "none", "N/A", or "unknown".
+- Only use information extracted directly from the input; do not apply external knowledge or assumptions.
+- If a required field cannot be confidently filled from the provided data, leave it blank.
+
+# Stop Conditions
+- Task is complete when a valid \`processFormFields\` tool call is returned with appropriately extracted data.
+Today is ${new Date().toLocaleDateString()}`;
+
     const systemInstructions = `You are an AI that must always call exactly one tool called "processFormFields". 
 You cannot reply or assist directly. 
 You must process the provided inputs using that tool and return only the correct arguments needed to call it.
@@ -149,12 +183,10 @@ You'll receive
 - optional text content pasted by the user
 - optional list of uploaded files
 
-Your instruction:
-${instruction}
-
 The text and the list may have information to entities unrelated to your instruction. Don't mix up entities.
 
 Your task:
+${instruction}
 1. Analyze the content provided (text or files).
 2. Use the tool args to determine what data to extract.
 3. Convert the extracted data to the format required in the args descriptions.
