@@ -150,9 +150,10 @@ You'll receive
 
 Your task:
 1. Analyze the content provided (text or files).
-2. Use the tool args to determine what data to extract.
-3. Return the extracted data as the args to processFormFields.
-4. Comply with the format specified in the args descriptions.
+2. If there are more than one entity, decide which one to extract.
+3. Use the tool args to determine what data to extract.
+4. Convert the extracted data to the format specified in the args descriptions.
+5. Return the extracted data as the args to processFormFields.
 
 Do not explain or respond to the user. Just return the tool call with filled args.
 Do not ask questions. Only act.
@@ -181,21 +182,14 @@ Today is ${new Date().toLocaleDateString()}`;
                   parameters: {
                     type: 'object',
                     properties: {
-                      ...formFields.properties,
-                      files: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            name: { type: 'string', description: 'File name' },
-                            type: { type: 'string', description: 'File MIME type' },
-                            size: { type: 'integer', description: 'File size in bytes' },
-                          },
-                        },
-                        description: 'List of uploaded files with metadata',
+                      ai_reason: {
+                        type: 'string',
+                        description:
+                          'Reason for selecting this option, with explanation of why it complies with all the instructions',
                       },
+                      ...formFields.properties,
                     },
-                    required: ['full_name', 'files'],
+                    required: ['ai_reason'],
                   },
                 },
               ],
