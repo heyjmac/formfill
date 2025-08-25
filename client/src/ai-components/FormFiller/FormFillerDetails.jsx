@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { FormFillerFlow } from './FormFillerFlow';
 import { events } from '../utils/events';
 
-export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
+import PropTypes from 'prop-types';
+
+export const FormFillerDetails = React.memo(({ modal, down, right, ...rest }) => {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -40,4 +42,10 @@ export const FormFillerDetails = ({ modal, down, right, ...rest }) => {
       </div>
     </div>
   );
+});
+
+FormFillerDetails.propTypes = {
+  modal: PropTypes.bool,
+  down: PropTypes.bool,
+  right: PropTypes.bool,
 };

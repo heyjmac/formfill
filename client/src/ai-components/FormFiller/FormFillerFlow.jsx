@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   fillFormFields,
   getCleanData,
@@ -10,418 +10,416 @@ import {
 import { events } from '../utils/events';
 import { defaultCopy } from './defaultCopy';
 
-export const FormFillerFlow = ({ copy, document, instruction, important, options, textarea }) => {
-  const fileRef = useRef(null);
-  const [files, setFiles] = useState([]);
-  const [text, setText] = useState('');
-  const [status, setStatus] = useState(false);
-  const [fieldLabels, setFieldLabels] = useState([]);
-  const [fieldValues, setFieldValues] = useState({});
-  const [fieldsFilled, setFieldsFilled] = useState({});
-  const [errorCode, setErrorCode] = useState(null);
-  const [undoFields, setUndoFields] = useState({});
-  const [isDirty, setIsDirty] = useState(false);
-  const [selectedFields, setSelectedFields] = useState({});
-  const [selectedOption, setSelectedOption] = useState(null);
+import PropTypes from 'prop-types';
+import { FormFillerTopNav } from './FormFillerTopNav';
 
-  const handleSubmit = async () => {
-    setStatus('loading');
-    const formFields = getFormFields(important || selectedOption?.important);
-    const formFieldLabels = getFormFieldLabels();
-    const formFieldValues = getFormFieldValues();
-    setFieldLabels(formFieldLabels);
-    setFieldValues(formFieldValues);
-    const formData = new FormData();
-    formData.append('formFields', JSON.stringify(formFields));
-    formData.append(
-      'instruction',
-      [instruction, selectedOption?.instruction].filter(Boolean).join(' '),
-    );
-    files.forEach((f) => formData.append('files', f));
-    formData.append('pastedText', text || '');
+export const FormFillerFlow = React.memo(
+  ({ copy, document, instruction, important, options, textarea }) => {
+    const fileRef = useRef(null);
+    const [files, setFiles] = useState([]);
+    const [text, setText] = useState('');
+    const [status, setStatus] = useState(false);
+    const [fieldLabels, setFieldLabels] = useState([]);
+    const [fieldValues, setFieldValues] = useState({});
+    const [fieldsFilled, setFieldsFilled] = useState({});
+    const [errorCode, setErrorCode] = useState(null);
+    const [undoFields, setUndoFields] = useState({});
+    const [isDirty, setIsDirty] = useState(false);
+    const [selectedFields, setSelectedFields] = useState({});
+    const [selectedOption, setSelectedOption] = useState(null);
 
-    try {
-      const response = await fetch('/api/formfill', {
-        method: 'POST',
-        body: formData,
-      });
+    const handleSubmit = useCallback(async () => {
+      setStatus('loading');
+      const formFields = getFormFields(important || selectedOption?.important);
+      const formFieldLabels = getFormFieldLabels();
+      const formFieldValues = getFormFieldValues();
+      setFieldLabels(formFieldLabels);
+      setFieldValues(formFieldValues);
+      const formData = new FormData();
+      formData.append('formFields', JSON.stringify(formFields));
+      formData.append(
+        'instruction',
+        [instruction, selectedOption?.instruction].filter(Boolean).join(' '),
+      );
+      files.forEach((f) => formData.append('files', f));
+      formData.append('pastedText', text || '');
 
-      const data = await response.json();
-      if (response.ok && data?.data) {
-        const cleanedData = getCleanData(data.data);
-        setFieldsFilled(cleanedData);
-        setSelectedFields(Object.fromEntries(Object.keys(cleanedData).map((key) => [key, true])));
-        console.log('Form filled successfully:', cleanedData);
-        setStatus('success');
-      } else {
-        console.error('Error filling form:', data);
-        setErrorCode(data?.errorCode || null);
-        setStatus('error');
+      try {
+        const response = await fetch('/api/formfill', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (response.ok && data?.data) {
+          const cleanedData = getCleanData(data.data);
+          setFieldsFilled(cleanedData);
+          setSelectedFields(Object.fromEntries(Object.keys(cleanedData).map((key) => [key, true])));
+          console.log('Form filled successfully:', cleanedData);
+          setStatus('success');
+        } else {
+          console.error('Error filling form:', data);
+          setErrorCode(data?.errorCode || null);
+          setStatus('error');
+        }
+      } finally {
+        setFiles([]);
+        setText('');
       }
-    } finally {
+    }, [
+      files,
+      important,
+      instruction,
+      selectedOption?.important,
+      selectedOption?.instruction,
+      text,
+    ]);
+
+    const handleFileChange = useCallback((e) => {
+      const selectedFiles = Array.from(e.target.files || []);
+      if (selectedFiles.length) setFiles(selectedFiles);
+    }, []);
+
+    const handleClear = useCallback(() => {
       setFiles([]);
       setText('');
-    }
-  };
+      setStatus('idle');
+    }, []);
 
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    if (selectedFiles.length) setFiles(selectedFiles);
-  };
+    const handleApply = useCallback(() => {
+      const selected = Object.fromEntries(
+        Object.entries(fieldsFilled).filter(
+          ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
+        ),
+      );
+      const previousValues = fillFormFields(selected);
+      setUndoFields(previousValues);
+      setIsDirty(false);
+    }, [fieldValues, fieldsFilled, selectedFields]);
 
-  const handleClear = () => {
-    setFiles([]);
-    setText('');
-    setStatus('idle');
-  };
+    const handleUndo = useCallback(() => {
+      fillFormFields(undoFields);
+      setUndoFields({});
+    }, [undoFields]);
 
-  const handleApply = () => {
-    const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(
-        ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
-      ),
-    );
-    const previousValues = fillFormFields(selected);
-    setUndoFields(previousValues);
-    setIsDirty(false);
-  };
+    const handleReapply = useCallback(() => {
+      fillFormFields(undoFields);
+      const selected = Object.fromEntries(
+        Object.entries(fieldsFilled).filter(
+          ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
+        ),
+      );
+      const previousValues = fillFormFields(selected);
+      setUndoFields(previousValues);
+      setIsDirty(false);
+    }, [undoFields, fieldsFilled, selectedFields, fieldValues]);
 
-  const handleUndo = () => {
-    fillFormFields(undoFields);
-    setUndoFields({});
-  };
+    const handleClose = useCallback(() => events.emit('formFill', { isOpen: false }), []);
 
-  const handleReapply = () => {
-    fillFormFields(undoFields);
-    const selected = Object.fromEntries(
-      Object.entries(fieldsFilled).filter(
-        ([key]) => selectedFields[key] && String(fieldsFilled[key]) !== String(fieldValues[key]),
-      ),
-    );
-    const previousValues = fillFormFields(selected);
-    setUndoFields(previousValues);
-    setIsDirty(false);
-  };
+    const handleSelectAll = useCallback(() => {
+      const allSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, true]));
+      setSelectedFields(allSelected);
+      setIsDirty(true);
+    }, [fieldsFilled]);
 
-  const handleClose = () => events.emit('formFill', { isOpen: false });
+    const handleClearSelection = useCallback(() => {
+      const noneSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, false]));
+      setSelectedFields(noneSelected);
+      setIsDirty(true);
+    }, [fieldsFilled]);
 
-  const handleSelectAll = () => {
-    const allSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, true]));
-    setSelectedFields(allSelected);
-    setIsDirty(true);
-  };
-
-  const handleClearSelection = () => {
-    const noneSelected = Object.fromEntries(Object.keys(fieldsFilled).map((key) => [key, false]));
-    setSelectedFields(noneSelected);
-    setIsDirty(true);
-  };
-
-  const TopNav = ({ handleBack, title }) => (
-    <div className="flex items-center justify-between mb-4 -mt-1">
-      <div>
-        {handleBack && (
-          <button
-            type="button"
-            onClick={handleBack}
-            className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-sm"
-          >
-            <span className="material-symbols-outlined">arrow_back_ios</span>
-          </button>
-        )}
-      </div>
-      {title && <div className="text-md font-medium">{title}</div>}
-      <button
-        type="button"
-        onClick={handleClose}
-        className="cursor-pointer text-gray-400 hover:text-black transition-colors flex items-center text-base"
-      >
-        <span className="material-symbols-outlined">close</span>
-      </button>
-    </div>
-  );
-
-  if (status === 'loading') {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="p-4 text-center">
-          <div className="text-blue-500 mb-2 text-3xl">
-            <span className="material-symbols-outlined animate-spin inline-block">
-              progress_activity
-            </span>
+    if (status === 'loading') {
+      return (
+        <div className="flex size-full items-center justify-center">
+          <div className="p-4 text-center">
+            <div className="mb-2 text-3xl text-blue-500">
+              <span className="material-symbols-outlined inline-block animate-spin">
+                progress_activity
+              </span>
+            </div>
+            <div className="mb-3 text-sm text-gray-700">{getCopy('text.processing', copy)}</div>
+            <button
+              type="button"
+              className="w-full rounded-lg border border-gray-200 bg-white py-2 text-sm text-gray-800 transition-colors hover:bg-gray-50"
+              onClick={handleClear}
+            >
+              {getCopy('cta.cancel', copy) || getCopy('cta.stop', copy)}
+            </button>
           </div>
-          <div className="text-sm text-gray-700 mb-3">{getCopy('text.processing', copy)}</div>
-          <button
-            type="button"
-            className="w-full py-2 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition-colors"
-            onClick={handleClear}
-          >
-            {getCopy('cta.cancel', copy) || getCopy('cta.stop', copy)}
-          </button>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (status === 'success') {
-    return (
-      <div className="p-4">
-        <TopNav
-          handleBack={handleClear}
-          title={
-            Object.keys(fieldsFilled).length > 1
-              ? defaultCopy.fields_found.plural.replace(
-                  '{{count}}',
-                  Object.keys(fieldsFilled).length,
-                )
-              : defaultCopy.fields_found.singular
-          }
-        />
-        <div className="text-sm text-gray-600 mb-4">{getCopy('text.review', copy)}</div>
+    if (status === 'success') {
+      return (
+        <div className="p-4">
+          <FormFillerTopNav
+            handleBack={handleClear}
+            handleClose={handleClose}
+            title={
+              Object.keys(fieldsFilled).length > 1
+                ? defaultCopy.fields_found.plural.replace(
+                    '{{count}}',
+                    Object.keys(fieldsFilled).length,
+                  )
+                : defaultCopy.fields_found.singular
+            }
+          />
+          <div className="mb-4 text-sm text-gray-600">{getCopy('text.review', copy)}</div>
 
-        <div className="flex justify-between mb-4">
-          <button
-            type="button"
-            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
-            onClick={handleClearSelection}
-          >
-            <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
-            {getCopy('cta.clear_selection', copy)}
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer text-xs text-gray-600 hover:text-gray-900 flex items-center transition-colors"
-            onClick={handleSelectAll}
-          >
-            <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
-            {getCopy('cta.select_all', copy)}
-          </button>
-        </div>
+          <div className="mb-4 flex justify-between">
+            <button
+              type="button"
+              className="flex cursor-pointer items-center text-xs text-gray-600 transition-colors hover:text-gray-900"
+              onClick={handleClearSelection}
+            >
+              <span className="material-symbols-outlined mr-1 text-sm">deselect</span>
+              {getCopy('cta.clear_selection', copy)}
+            </button>
+            <button
+              type="button"
+              className="flex cursor-pointer items-center text-xs text-gray-600 transition-colors hover:text-gray-900"
+              onClick={handleSelectAll}
+            >
+              <span className="material-symbols-outlined mr-1 text-sm">select_all</span>
+              {getCopy('cta.select_all', copy)}
+            </button>
+          </div>
 
-        <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
-          {fieldLabels
-            .filter(
-              ({ name }) =>
-                fieldsFilled[name] && String(fieldsFilled[name]) !== String(fieldValues[name]),
-            )
-            .map(({ name, label }) => (
-              <label
-                key={name}
-                className={`flex wrap justify-between items-center px-2 py-2 rounded 
+          <div className="mb-4 max-h-60 space-y-2 overflow-y-auto">
+            {fieldLabels
+              .filter(
+                ({ name }) =>
+                  fieldsFilled[name] && String(fieldsFilled[name]) !== String(fieldValues[name]),
+              )
+              .map(({ name, label }) => (
+                <label
+                  key={name}
+                  className={`wrap flex items-center justify-between rounded p-2 
               ${
                 selectedFields[name]
                   ? 'border border-blue-200 bg-blue-50 hover:bg-blue-100'
                   : 'border border-gray-200 hover:border-gray-300'
               }`}
-              >
-                <div className="flex-1 flex flex-wrap items-start justify-between gap-1">
-                  <span
-                    className={`text-gray-700 text-xs px-2 py-0.5 rounded-full font-medium ${
-                      selectedFields[name] ? 'bg-white' : 'bg-gray-100'
-                    }`}
-                  >
-                    {label || name}
-                  </span>
-                  <div>
-                    <div className="text-gray-700 text-sm ml-1 line-through">
-                      {fieldValues[name]}
-                    </div>
-                    <div className="text-gray-700 text-sm ml-1">{fieldsFilled[name]}</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 ml-2">
-                  <input
-                    type="checkbox"
-                    id={name}
-                    checked={selectedFields[name] ?? true}
-                    onChange={(e) => {
-                      setSelectedFields((prev) => ({ ...prev, [name]: e.target.checked }));
-                      setIsDirty(true);
-                    }}
-                    className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors"
-                  />
-                </div>
-              </label>
-            ))}
-        </div>
-
-        <div className="space-y-3">
-          {Object.keys(undoFields).length ? (
-            <div className="flex justify-between">
-              <button
-                type="button"
-                className="cursor-pointer px-4 py-2 bg-white text-red-700 text-sm rounded-lg hover:border-gray-300 border border-gray-200 transition-colors flex items-center justify-center"
-                onClick={handleUndo}
-              >
-                <span className="material-symbols-outlined mr-1 text-sm">undo</span>
-                <span>{getCopy('cta.undo', copy)}</span>
-              </button>
-              {isDirty ? (
-                <button
-                  className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-                  onClick={handleReapply}
                 >
-                  <span className="material-symbols-outlined mr-1 text-sm">refresh</span>
-                  <span>{getCopy('cta.reapply', copy)}</span>
-                </button>
-              ) : (
+                  <div className="flex flex-1 flex-wrap items-start justify-between gap-1">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium text-gray-700 ${
+                        selectedFields[name] ? 'bg-white' : 'bg-gray-100'
+                      }`}
+                    >
+                      {label || name}
+                    </span>
+                    <div>
+                      <div className="ml-1 text-sm text-gray-700 line-through">
+                        {fieldValues[name]}
+                      </div>
+                      <div className="ml-1 text-sm text-gray-700">{fieldsFilled[name]}</div>
+                    </div>
+                  </div>
+                  <div className="ml-2 flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={name}
+                      checked={selectedFields[name] ?? true}
+                      onChange={(e) => {
+                        setSelectedFields((prev) => ({ ...prev, [name]: e.target.checked }));
+                        setIsDirty(true);
+                      }}
+                      className="size-4 cursor-pointer rounded border-gray-300 text-blue-500 transition-colors focus:ring-blue-500"
+                    />
+                  </div>
+                </label>
+              ))}
+          </div>
+
+          <div className="space-y-3">
+            {Object.keys(undoFields).length ? (
+              <div className="flex justify-between">
                 <button
                   type="button"
-                  className="cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-                  onClick={handleClose}
+                  className="flex cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-red-700 transition-colors hover:border-gray-300"
+                  onClick={handleUndo}
                 >
-                  <span className="material-symbols-outlined mr-1 text-sm">close</span>
-                  <span>{getCopy('cta.close', copy)}</span>
+                  <span className="material-symbols-outlined mr-1 text-sm">undo</span>
+                  <span>{getCopy('cta.undo', copy)}</span>
                 </button>
-              )}
+                {isDirty ? (
+                  <button
+                    className="flex cursor-pointer items-center justify-center rounded-lg border border-blue-900 bg-blue-900 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-800"
+                    onClick={handleReapply}
+                  >
+                    <span className="material-symbols-outlined mr-1 text-sm">refresh</span>
+                    <span>{getCopy('cta.reapply', copy)}</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex cursor-pointer items-center justify-center rounded-lg border border-blue-900 bg-blue-900 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-800"
+                    onClick={handleClose}
+                  >
+                    <span className="material-symbols-outlined mr-1 text-sm">close</span>
+                    <span>{getCopy('cta.close', copy)}</span>
+                  </button>
+                )}
+              </div>
+            ) : Object.values(selectedFields).some(Boolean) ? (
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-center justify-center rounded-lg border border-blue-900 bg-blue-900 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-800"
+                onClick={handleApply}
+              >
+                <span className="material-symbols-outlined mr-1 text-sm">done</span>
+                <span>{getCopy('cta.apply', copy)}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-center justify-center rounded-lg border border-blue-900 bg-blue-900 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-800"
+                onClick={handleClose}
+              >
+                <span className="material-symbols-outlined mr-1 text-sm">close</span>
+                <span>{getCopy('cta.close', copy)}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (status === 'error') {
+      return (
+        <div className="flex size-full items-center justify-center">
+          <div className="p-4">
+            <div className="mb-2 text-3xl text-red-500">
+              <span className="material-symbols-outlined">error</span>
             </div>
-          ) : Object.values(selectedFields).some(Boolean) ? (
+            <div className="mb-3 text-sm text-gray-700">
+              {defaultCopy.error[errorCode] && <div>{defaultCopy.error[errorCode]}</div>}
+              {!errorCode && <div>{getCopy('error.DEFAULT', copy)}</div>}
+            </div>
             <button
               type="button"
-              className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-              onClick={handleApply}
+              className="w-full rounded-lg bg-red-600 py-2 text-sm text-white transition-colors hover:bg-red-500"
+              onClick={handleClear}
             >
-              <span className="material-symbols-outlined mr-1 text-sm">done</span>
-              <span>{getCopy('cta.apply', copy)}</span>
+              {getCopy('cta.error', copy)}
             </button>
-          ) : (
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-4">
+        <FormFillerTopNav handleClose={handleClose} title={getCopy('title.main', copy)} />
+        <div className="relative mb-3">
+          <label
+            className={`mb-2 block flex min-h-[100px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 px-4 py-3 text-center transition-colors ${
+              files.length > 0 ? 'bg-gray-100' : 'hover:bg-gray-50'
+            }`}
+          >
+            <span className="material-symbols-outlined mb-1">upload_file</span>
+            <div className="block text-xs">
+              {files.length > 0
+                ? files.map((f) => f.name).join(', ')
+                : getCopy('text.drop_area', copy)?.replace('{{document}}', document || 'document')}
+            </div>
+            <span className="mt-1 block text-xs text-gray-500">
+              {files.length > 0
+                ? files.length > 1
+                  ? getCopy('files_selected.plural', copy)?.replace('{{count}}', files.length)
+                  : getCopy('files_selected.singular', copy)
+                : getCopy('text.supported_formats', copy)}
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              ref={fileRef}
+              multiple
+              accept=".pdf,.doc,.docx,.txt,.xlsx,.xls,.ppt,.pptx,.csv,.html,.md,.json,.xml,.png,.jpg,.jpeg,.webp,.mp3,.wav,.mp4,.mov"
+              onChange={handleFileChange}
+            />
+          </label>
+
+          {files.length > 0 && (
             <button
               type="button"
-              className="w-full cursor-pointer px-4 py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center"
-              onClick={handleClose}
+              className="absolute right-[-8px] top-[-8px] flex size-[18px] cursor-pointer items-center justify-center rounded-full bg-gray-200 text-xs text-gray-700 hover:bg-red-400 hover:text-white"
+              onClick={() => setFiles([])}
+              aria-label="Clear files"
             >
-              <span className="material-symbols-outlined mr-1 text-sm">close</span>
-              <span>{getCopy('cta.close', copy)}</span>
+              <span className="material-symbols-outlined">close</span>
             </button>
           )}
         </div>
-      </div>
-    );
-  }
 
-  if (status === 'error') {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="p-4">
-          <div className="text-red-500 mb-2 text-3xl">
-            <span className="material-symbols-outlined">error</span>
-          </div>
-          <div className="text-sm text-gray-700 mb-3">
-            {defaultCopy.error[errorCode] && <div>{defaultCopy.error[errorCode]}</div>}
-            {!errorCode && <div>{getCopy('error.DEFAULT', copy)}</div>}
-          </div>
-          <button
-            type="button"
-            className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-500 transition-colors"
-            onClick={handleClear}
-          >
-            {getCopy('cta.error', copy)}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4">
-      <TopNav title={getCopy('title.main', copy)} />
-      <div className="mb-3 relative">
-        <label
-          className={`min-h-[100px] flex flex-col items-center justify-center block w-full py-3 px-4 text-center border border-dashed border-gray-300 rounded-lg cursor-pointer px-4 transition-colors mb-2 ${
-            files.length > 0 ? 'bg-gray-100' : 'hover:bg-gray-50'
-          }`}
-        >
-          <span className="material-symbols-outlined mb-1">upload_file</span>
-          <div className="block text-xs">
-            {files.length > 0
-              ? files.map((f) => f.name).join(', ')
-              : getCopy('text.drop_area', copy)?.replace('{{document}}', document || 'document')}
-          </div>
-          <span className="block text-xs text-gray-500 mt-1">
-            {files.length > 0
-              ? files.length > 1
-                ? getCopy('files_selected.plural', copy)?.replace('{{count}}', files.length)
-                : getCopy('files_selected.singular', copy)
-              : getCopy('text.supported_formats', copy)}
-          </span>
-          <input
-            type="file"
-            className="hidden"
-            ref={fileRef}
-            multiple
-            accept=".pdf,.doc,.docx,.txt,.xlsx,.xls,.ppt,.pptx,.csv,.html,.md,.json,.xml,.png,.jpg,.jpeg,.webp,.mp3,.wav,.mp4,.mov"
-            onChange={handleFileChange}
-          />
-        </label>
-
-        {files.length > 0 && (
-          <button
-            type="button"
-            className="cursor-pointer absolute w-[18px] h-[18px] top-[-8px] right-[-8px] bg-gray-200 text-gray-700 rounded-full text-xs flex items-center justify-center hover:bg-red-400 hover:text-white"
-            onClick={() => setFiles([])}
-            aria-label="Clear files"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
+        {textarea && (
+          <>
+            <div className="my-3 flex items-center">
+              <div className="h-px flex-1 bg-gray-200"></div>
+              <span className="mx-3 text-xs uppercase text-gray-400">or</span>
+              <div className="h-px flex-1 bg-gray-200"></div>
+            </div>
+            <div className="mb-3">
+              <textarea
+                className="h-24 w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder={getCopy('text.paste_text', copy)}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              ></textarea>
+            </div>
+          </>
         )}
-      </div>
 
-      {textarea && (
-        <>
-          <div className="flex items-center my-3">
-            <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="mx-3 text-xs text-gray-400 uppercase">or</span>
-            <div className="flex-1 h-px bg-gray-200"></div>
+        {options && options.length > 0 && (
+          <div className="mx-2 mb-3">
+            <h3 className="mb-2 text-sm font-medium">{getCopy('text.options', copy)}</h3>
+            <div className="space-y-2">
+              {options.map((option, index) => (
+                <label
+                  key={index}
+                  className="flex cursor-pointer items-center space-x-2 text-xs text-gray-700"
+                >
+                  <input
+                    type="radio"
+                    name="options"
+                    value={option.value || option.label || option.instruction}
+                    className="size-3 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={selectedOption === option}
+                    onChange={() => setSelectedOption(option)}
+                  />
+                  <span>{option.label || option.instruction}</span>
+                </label>
+              ))}
+            </div>
           </div>
-          <div className="mb-3">
-            <textarea
-              className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-              placeholder={getCopy('text.paste_text', copy)}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            ></textarea>
-          </div>
-        </>
-      )}
+        )}
 
-      {options && options.length > 0 && (
-        <div className="mb-3 mx-2">
-          <h3 className="text-sm font-medium mb-2">{getCopy('text.options', copy)}</h3>
-          <div className="space-y-2">
-            {options.map((option, index) => (
-              <label
-                key={index}
-                className="flex items-center space-x-2 text-xs text-gray-700 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="options"
-                  value={option.value || option.label || option.instruction}
-                  className="h-3 w-3 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  checked={selectedOption === option}
-                  onChange={() => setSelectedOption(option)}
-                />
-                <span>{option.label || option.instruction}</span>
-              </label>
-            ))}
-          </div>
+        <div className="mb-4 flex items-center text-xs text-gray-500">
+          <p>{getCopy('text.info', copy)}</p>
         </div>
-      )}
 
-      <div className="flex items-center text-xs text-gray-500 mb-4">
-        <p>{getCopy('text.info', copy)}</p>
+        <button
+          type="button"
+          className={`flex w-full items-center justify-center rounded-lg border border-blue-900 bg-blue-900 py-2 text-sm text-white transition-colors hover:bg-blue-800 ${
+            files.length === 0 && !text ? 'cursor-default opacity-50' : 'cursor-pointer px-4'
+          }`}
+          onClick={handleSubmit}
+        >
+          <span className="material-symbols-outlined mr-1 text-sm">auto_awesome</span>
+          <span>{getCopy('cta.extract', copy)}</span>
+        </button>
       </div>
+    );
+  },
+);
 
-      <button
-        type="button"
-        className={`w-full py-2 bg-blue-900 text-white text-sm rounded-lg hover:bg-blue-800 border border-blue-900 transition-colors flex items-center justify-center ${
-          files.length === 0 && !text ? 'opacity-50 cursor-default' : 'cursor-pointer px-4'
-        }`}
-        onClick={handleSubmit}
-      >
-        <span className="material-symbols-outlined mr-1 text-sm">auto_awesome</span>
-        <span>{getCopy('cta.extract', copy)}</span>
-      </button>
-    </div>
-  );
+FormFillerFlow.propTypes = {
+  copy: PropTypes.object.isRequired,
+  document: PropTypes.object.isRequired,
+  instruction: PropTypes.string.isRequired,
+  important: PropTypes.bool.isRequired,
+  options: PropTypes.arrayOf(PropTypes.object).isRequired,
+  textarea: PropTypes.bool.isRequired,
 };

@@ -102,6 +102,9 @@ app.use(express.static(clientDistPath));
 app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
 
 // 5. Endpoints
+
+// TO-DO:
+// be prepared for candidates: [ { finishReason: 'MALFORMED_FUNCTION_CALL', index: 0 } ],
 app.post(
   '/api/formfill',
   uploadMiddleware,

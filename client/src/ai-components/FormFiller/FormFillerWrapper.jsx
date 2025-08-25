@@ -1,62 +1,80 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FormFillerDetails } from './FormFillerDetails';
-import { useEffect } from 'react';
 import { events } from '../utils/events';
 
-export const FormFillerWrapper = ({
-  copy,
-  document,
-  instruction,
-  important,
-  options,
-  textarea,
-  modal,
-  up,
-  down,
-  left,
-  right,
-  children,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
+import PropTypes from 'prop-types';
 
-  useEffect(() => {
-    const unsubscribe = events.on('formFill', ({ isOpen }) => {
-      setIsOpen(isOpen);
-    });
+export const FormFillerWrapper = React.memo(
+  ({
+    copy,
+    document,
+    instruction,
+    important,
+    options,
+    textarea,
+    modal,
+    up,
+    down,
+    left,
+    right,
+    children,
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    useEffect(() => {
+      const unsubscribe = events.on('formFill', ({ isOpen }) => {
+        setIsOpen(isOpen);
+      });
 
-  const handleOpen = () => {
-    setIsOpen(true);
-  };
+      return () => {
+        unsubscribe();
+      };
+    }, []);
 
-  const handleClose = () => {
-    events.emit('formFill', { isOpen: false });
-  };
+    const handleOpen = useCallback(() => {
+      setIsOpen(true);
+    }, []);
 
-  const handleOpenClose = () => (isOpen ? handleClose() : handleOpen());
+    const handleClose = useCallback(() => {
+      events.emit('formFill', { isOpen: false });
+    }, []);
 
-  return (
-    <div className="relative">
-      <div onClick={handleOpenClose}>{children}</div>
-      {isOpen && (
-        <FormFillerDetails
-          copy={copy}
-          document={document}
-          instruction={instruction}
-          important={important}
-          options={options}
-          textarea={textarea}
-          modal={modal}
-          up={up}
-          down={down}
-          left={left}
-          right={right}
-        />
-      )}
-    </div>
-  );
+    const handleOpenClose = useCallback(() => (isOpen ? handleClose() : handleOpen()), [isOpen]);
+
+    return (
+      <div className="relative">
+        <div onClick={handleOpenClose}>{children}</div>
+        {isOpen && (
+          <FormFillerDetails
+            copy={copy}
+            document={document}
+            instruction={instruction}
+            important={important}
+            options={options}
+            textarea={textarea}
+            modal={modal}
+            up={up}
+            down={down}
+            left={left}
+            right={right}
+          />
+        )}
+      </div>
+    );
+  },
+);
+
+FormFillerWrapper.propTypes = {
+  copy: PropTypes.object.isRequired,
+  document: PropTypes.object.isRequired,
+  instruction: PropTypes.string,
+  important: PropTypes.bool,
+  options: PropTypes.array,
+  textarea: PropTypes.string,
+  modal: PropTypes.bool,
+  up: PropTypes.bool,
+  down: PropTypes.bool,
+  left: PropTypes.bool,
+  right: PropTypes.bool,
+  children: PropTypes.node,
 };
