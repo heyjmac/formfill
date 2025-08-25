@@ -27,13 +27,19 @@ export const FormFillerWrapper = ({
     };
   }, []);
 
-  const handleOpenClose = () => {
-    events.emit('formFill', { isOpen: !isOpen });
+  const handleOpen = () => {
+    setIsOpen(true);
   };
 
+  const handleClose = () => {
+    events.emit('formFill', { isOpen: false });
+  };
+
+  const handleOpenClose = () => (isOpen ? handleClose() : handleOpen());
+
   return (
-    <div className="relative" onClick={handleOpenClose}>
-      {children}
+    <div className="relative">
+      <div onClick={handleOpenClose}>{children}</div>
       {isOpen && (
         <FormFillerDetails
           document={document}
