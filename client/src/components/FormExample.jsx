@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { FormFillerButton } from '../ai-components/FormFiller';
+import { FormFillerButton, FormFillerWrapper } from '../ai-components/FormFiller';
 
 export function FormExample() {
   const formRef = useRef(null);
@@ -239,12 +239,17 @@ export function FormExample() {
               instruction="Only fill the form with the plaintiff information. Never use the defendant's information."
               label="Fill with plaintiff info"
             />
-            <FormFillerButton
+            <FormFillerWrapper
               document="complaint"
               modal
               instruction="Only fill the form with the defendant information. Never use the plaintiff's information."
               label="Fill with defendant info"
-            />
+            >
+              <div className="m-2 flex gap-2 items-center justify-center cursor-pointer">
+                <span className="mr-1 text-lg material-symbols-outlined">auto_awesome</span>
+                Fill with defendant info
+              </div>
+            </FormFillerWrapper>
           </div>
           <div className="flex gap-2">
             <button
