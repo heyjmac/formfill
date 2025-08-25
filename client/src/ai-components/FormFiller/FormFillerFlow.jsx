@@ -13,6 +13,7 @@ import { defaultCopy } from './defaultCopy';
 import PropTypes from 'prop-types';
 import { FormFillerTopNav } from './FormFillerTopNav';
 import { FormFillerLabels } from './FormFillerLabels';
+import { FormFillerInstructionOptions } from './FormFillerInstructionOptions';
 
 export const FormFillerFlow = React.memo(
   ({ copy, document, instruction, important, options, textarea }) => {
@@ -87,6 +88,10 @@ export const FormFillerFlow = React.memo(
       setStatus('idle');
     }, []);
 
+    const handleClearFiles = useCallback(() => {
+      setFiles([]);
+    }, []);
+
     const handleApply = useCallback(() => {
       const selected = Object.fromEntries(
         Object.entries(fieldsFilled).filter(
@@ -128,6 +133,10 @@ export const FormFillerFlow = React.memo(
       setSelectedFields(noneSelected);
       setIsDirty(true);
     }, [fieldsFilled]);
+
+    const handleChangeText = useCallback((e) => {
+      setText(e.target.value);
+    }, []);
 
     if (status === 'loading') {
       return (
@@ -320,7 +329,7 @@ export const FormFillerFlow = React.memo(
             <button
               type="button"
               className="absolute right-[-8px] top-[-8px] flex size-[18px] cursor-pointer items-center justify-center rounded-full bg-gray-200 text-xs text-gray-700 hover:bg-red-400 hover:text-white"
-              onClick={() => setFiles([])}
+              onClick={handleClearFiles}
               aria-label="Clear files"
             >
               <span className="material-symbols-outlined">close</span>
@@ -340,7 +349,7 @@ export const FormFillerFlow = React.memo(
                 className="h-24 w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder={getCopy('text.paste_text', copy)}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={handleChangeText}
               ></textarea>
             </div>
           </>
@@ -351,20 +360,12 @@ export const FormFillerFlow = React.memo(
             <h3 className="mb-2 text-sm font-medium">{getCopy('text.options', copy)}</h3>
             <div className="space-y-2">
               {options.map((option, index) => (
-                <label
+                <FormFillerInstructionOptions
                   key={index}
-                  className="flex cursor-pointer items-center space-x-2 text-xs text-gray-700"
-                >
-                  <input
-                    type="radio"
-                    name="options"
-                    value={option.value || option.label || option.instruction}
-                    className="size-3 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    checked={selectedOption === option}
-                    onChange={() => setSelectedOption(option)}
-                  />
-                  <span>{option.label || option.instruction}</span>
-                </label>
+                  option={option}
+                  selectedOption={selectedOption}
+                  setSelectedOption={setSelectedOption}
+                />
               ))}
             </div>
           </div>
