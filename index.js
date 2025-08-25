@@ -149,10 +149,11 @@ You'll receive
 - optional list of uploaded files
 
 Your task:
+${instruction}
 1. Analyze the content provided (text or files).
-3. Use the tool args to determine what data to extract. ${instruction}
-4. Convert the extracted data to the format required in the args descriptions.
-5. Return the extracted data as the args to processFormFields.
+2. Use the tool args to determine what data to extract.
+3. Convert the extracted data to the format required in the args descriptions.
+4. Return the extracted data as the args to processFormFields.
 
 Do not explain or respond to the user. Just return the tool call with filled args.
 Do not ask questions. Only act.
