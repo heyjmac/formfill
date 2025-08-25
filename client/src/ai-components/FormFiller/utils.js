@@ -40,14 +40,15 @@ export const getCopy = (address, copy) => {
 export const getCleanData = (data) => {
   const cleanedData = Object.fromEntries(
     Object.entries(data).filter((entry) => {
+      const [_key, value] = entry;
       const normalized = (v) =>
         typeof v === 'string' && ['null', 'undefined', 'unknown'].includes(v.toLowerCase());
-      if (!entry.value) return false;
+      if (!value) return false;
       if (typeof value === 'string') {
-        return entry.value.trim() && !normalized(entry.value);
+        return value.trim() && !normalized(value);
       }
-      if (Array.isArray(entry.value)) {
-        return entry.value.some((v) => !normalized(v));
+      if (Array.isArray(value)) {
+        return value.some((v) => !normalized(v));
       }
       return true;
     }),
