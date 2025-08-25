@@ -129,13 +129,13 @@ export function getFormFields(important) {
   els.forEach((el) => {
     const name = el.getAttribute('data-form-filler-name') || el?.name || getLabelText(el);
     const description = el.getAttribute('data-form-filler-description');
-    const explicitFormat = el.getAttribute('data-form-filler-format'); // manual override
+    const explicitFormat = el.getAttribute('data-form-filler-format');
     const optionValues = [];
 
     const qualifiedDescription = important ? `${important}: ${description}` : description;
 
     const fullDescription = [qualifiedDescription];
-    if (explicitFormat) fullDescription.push(`Expected format: ${explicitFormat}`);
+    if (explicitFormat) fullDescription.push(`ADAPT TO THIS FORMAT: ${explicitFormat}`);
 
     if (el.tagName === 'SELECT') {
       const options = Array.from(el.options).map((opt) => ({ value: opt.value, text: opt.text }));
@@ -207,6 +207,7 @@ export function getFormFields(important) {
   return { properties, required };
 }
 
+// TO-DO: implement form data validation
 export function validateFormData(data) {
   const els = document.querySelectorAll('[data-form-filler-description]');
   const errors = [];

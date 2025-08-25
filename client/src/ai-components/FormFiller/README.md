@@ -166,6 +166,91 @@ See the full structure at `./defaultCopy.js`.
 
 Any nested value can be replaced. You don’t need to pass the full object — only the keys you want to override.
 
+### Changing Which Fields Are Filled
+
+Form Filler identifies fields using **data-attributes**. Add them to any `<input>`, `<select>`, or `<textarea>`.
+
+- **data-form-filler-name** (required): unique, machine-friendly key in snake_case.
+- **data-form-filler-description** (required): clear description that tells the AI what belongs in the field.
+- **data-form-filler-format** (optional): specify format or mask (e.g., `MM/DD/YYYY`, `(XXX) XXX-XXXX`).
+- For **radio/checkbox groups**, reuse the same `data-form-filler-name`; the `value` attribute decides what’s selected.
+- Remove all `data-form-filler-*` attributes if you want the field ignored by AI.
+
+```html
+<!-- Text -->
+<input
+  type="text"
+  data-form-filler-name="full_name"
+  data-form-filler-description="Complete name of the person or company formatted in lowercase and first capital letter"
+/>
+
+<!-- Email -->
+<input
+  type="email"
+  data-form-filler-name="email"
+  data-form-filler-description="Email address of the person or company"
+/>
+
+<!-- Select -->
+<select
+  data-form-filler-name="state"
+  data-form-filler-description="Brazilian state of the person or company"
+>
+  <option value="">Select...</option>
+  <option value="SP">São Paulo</option>
+  <option value="RJ">Rio de Janeiro</option>
+</select>
+
+<!-- Date with format -->
+<input
+  type="text"
+  data-form-filler-name="date_of_birth"
+  data-form-filler-description="Birth date in month/day/year format"
+  data-form-filler-format="MM/DD/YYYY"
+/>
+
+<!-- Phone with mask -->
+<input
+  type="tel"
+  data-form-filler-name="phone_primary"
+  data-form-filler-description="Primary contact phone number"
+  data-form-filler-format="(XXX) XXX-XXXX"
+/>
+
+<!-- Radio group -->
+<label>
+  <input
+    type="radio"
+    name="gender"
+    value="male"
+    data-form-filler-name="gender"
+    data-form-filler-description="Gender of the person"
+  />
+  Male
+</label>
+<label>
+  <input type="radio" name="gender" value="female" data-form-filler-name="gender" /> Female
+</label>
+
+<!-- Checkbox group (multi-select) -->
+<label>
+  <input
+    type="checkbox"
+    value="sports"
+    data-form-filler-name="hobbies"
+    data-form-filler-description="Multiple hobbies selection"
+  />
+  Sports
+</label>
+<label> <input type="checkbox" value="music" data-form-filler-name="hobbies" /> Music </label>
+
+<!-- Textarea -->
+<textarea
+  data-form-filler-name="notes"
+  data-form-filler-description="Additional information or special requests"
+></textarea>
+```
+
 ---
 
 You're ready to go! Drop in the component and give your users a seamless AI-powered form experience.
