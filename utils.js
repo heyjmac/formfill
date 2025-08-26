@@ -67,13 +67,13 @@ export const getProperties = (fields, important) => {
 
     properties[name] = { description: fullDescription.join('; ') };
 
-    if (pattern) properties[name].pattern = pattern;
-    if (maxLength && maxLength !== -1) properties[name].maxLength = maxLength;
-    if (minLength && minLength !== -1) properties[name].minLength = minLength;
-    if (tag === 'INPUT' && (type === 'number' || type === 'range')) {
-      if (min !== '') properties[name].minimum = Number(min);
-      if (max !== '') properties[name].maximum = Number(max);
-    }
+    // if (pattern) properties[name].pattern = pattern;
+    // if (maxLength && maxLength !== -1) properties[name].maxLength = maxLength;
+    // if (minLength && minLength !== -1) properties[name].minLength = minLength;
+    // if (tag === 'INPUT' && (type === 'number' || type === 'range')) {
+    //   if (min !== '') properties[name].minimum = Number(min);
+    //   if (max !== '') properties[name].maximum = Number(max);
+    // }
 
     if (isRequired) required.push(name);
     if (optionValues.length) properties[name].enum = optionValues;
