@@ -57,8 +57,11 @@ const deepEq = (a, b) => {
     if (ka.length !== kb.length) return false;
     return ka.every((k) => deepEq(a[k], b[k]));
   }
+  if (typeof a === 'string' && typeof b === 'string')
+    return a.trim().toLowerCase() === b.trim().toLowerCase();
   return String(a).trim() === String(b).trim();
 };
+
 const looseEq = (a, b) => {
   const sa = String(a).trim().toLowerCase(),
     sb = String(b).trim().toLowerCase();
