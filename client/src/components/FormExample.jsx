@@ -259,14 +259,14 @@ export const FormExample = React.memo(() => {
             <FormFillerButton
               document="complaint"
               modal
-              instruction="Your most important task is to find the PLAINTIFF and fill the form using ONLY their data."
+              instruction="Your most important task is to find the PLAINTIFF and fill the form using ONLY their data. The Plaintiff is the one who initiates the lawsuit."
               important="PLAINTIFF ONLY"
               label="Fill with plaintiff info"
             />
             <FormFillerWrapper
               document="complaint"
               modal
-              instruction="Your most important task is to find the DEFENDANT and fill the form using ONLY their data."
+              instruction="Your most important task is to find the DEFENDANT and fill the form using ONLY their data. The Defendant is the one being accused in the lawsuit."
               important="DEFENDANT ONLY"
               label="Fill with defendant info"
             >
