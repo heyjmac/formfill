@@ -162,6 +162,8 @@ app.post(
 You cannot reply or assist directly. 
 You must process the provided inputs using that tool and return only the correct arguments needed to call it.
 
+${instruction} ${important}
+
 You'll receive
 - an instruction you must absolutely follow
 - list of args accepted by the tool with descriptions
@@ -171,7 +173,6 @@ You'll receive
 The text and the list may have information to entities unrelated to your instruction. Don't mix up entities.
 
 Your task:
-${instruction}
 1. Analyze the content provided (text or files).
 2. Use the tool args to determine what data to extract.
 3. Convert the extracted data to the format required in the args descriptions.
@@ -183,7 +184,9 @@ Do not fill fields with "null", "undefined", "none", "N/A", "unknown" or similar
 Only fill in the fields with the extracted data. Don't use your own knowledge or assumptions.
 When in doubt, leave the field blank.
 
-Today is ${new Date().toLocaleDateString()}`;
+Today is ${new Date().toLocaleDateString()}
+
+${instruction} ${important}`;
 
     const { properties, _required } = getProperties(formFields, important);
     console.log(properties);
