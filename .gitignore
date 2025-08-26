@@ -28,5 +28,4 @@ dist-ssr
 # Temporary files
 uploads/
 downloads/
-input/
 results/
