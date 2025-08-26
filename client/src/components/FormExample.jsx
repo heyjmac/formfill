@@ -71,7 +71,18 @@ export const FormExample = React.memo(() => {
               pattern="\d{5,12}"
             />
           </div>
-          <div className="md:col-span-6">
+          <div className="md:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-gray-700">CNPJ</label>
+            <input
+              type="text"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
+              placeholder="00.000.000/0000-00"
+              data-form-filler-name="cnpj"
+              data-form-filler-description="Brazilian national registry (CNPJ) number"
+              pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}"
+            />
+          </div>
+          <div className="md:col-span-3">
             <label className="mb-1 block text-xs font-medium text-gray-700">Date of birth</label>
             <input
               type="text"
