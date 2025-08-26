@@ -239,6 +239,7 @@ Today is ${new Date().toLocaleDateString()}`;
       const tokens = response?.usageMetadata;
       res.json({ status: 'ok', data: args, duration, tokens });
     } catch (err) {
+      console.dir(err, { depth: null });
       res.status(500).json({
         status: 'error',
         message: 'Gemini API request failed',
