@@ -17,16 +17,12 @@ const typeToMcpFormat = {
   'datetime-local': 'date-time',
 };
 
-export const prependImportantToFormFields = (formFields, important) => {
-  if (!important) return formFields;
-  const updated = {};
-  for (const [name, field] of Object.entries(formFields)) {
-    updated[name] = {
-      ...field,
-      desc: `${important}. ${field.desc || field.description || ''}`.trim(),
-    };
-  }
-  return updated;
+export const prependImportantToDescriptions = (fields, important) => {
+  if (!important) return fields;
+  return fields.map((field) => ({
+    ...field,
+    description: `${important}. ${field.description}`.trim(),
+  }));
 };
 
 export const getProperties = (fields, important) => {

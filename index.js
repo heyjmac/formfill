@@ -7,6 +7,8 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { prependImportantToDescriptions } from './utils.js';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -110,20 +112,10 @@ app.post(
   async (req, res) => {
     const start = Date.now();
     const files = req.files || [];
-    const formFields = JSON.parse(req.body.formFields || '{}');
+    let formFields = JSON.parse(req.body.formFields || '{}');
     const instruction = req.body.instruction?.trim() || '';
     const important = req.body.important?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
-
-    // fs.writeFileSync(
-    //   path.join(__dirname, 'evals', 'input', 'formfields.json'),
-    //   JSON.stringify(formFields, null, 2),
-    // );
-    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
-    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
-    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
-
-    console.log(formFields);
 
     if (Object.keys(formFields).length === 0) {
       return res.status(400).json({
@@ -146,6 +138,17 @@ app.post(
         tip: 'Upload a file or paste some text before submitting.',
       });
     }
+
+    formFields = prependImportantToDescriptions(formFields, important);
+    console.log(formFields);
+
+    // fs.writeFileSync(
+    //   path.join(__dirname, 'evals', 'input', 'formfields.json'),
+    //   JSON.stringify(formFields, null, 2),
+    // );
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
 
     // TO-DO: ADD TO S3 AND SAVE REFERENCE IN A DB CONNECTED TO A CONTEXT TO BE PASSED BY THE FRONTEND
 
