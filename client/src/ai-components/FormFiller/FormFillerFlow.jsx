@@ -32,13 +32,13 @@ export const FormFillerFlow = React.memo(
 
     const handleSubmit = useCallback(async () => {
       setStatus('loading');
-      const formFields = getFormFields(important || selectedOption?.important);
+      const { properties } = getFormFields(important || selectedOption?.important);
       const formFieldLabels = getFormFieldLabels();
       const formFieldValues = getFormFieldValues();
       setFieldLabels(formFieldLabels);
       setFieldValues(formFieldValues);
       const formData = new FormData();
-      formData.append('formFields', JSON.stringify(formFields));
+      formData.append('formFields', JSON.stringify({ properties }));
       formData.append(
         'instruction',
         [instruction, selectedOption?.instruction].filter(Boolean).join(' '),

@@ -6,6 +6,8 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { sanitizeObject } from './utils.js';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -112,9 +114,20 @@ app.post(
   async (req, res) => {
     const start = Date.now();
     const files = req.files || [];
-    const formFields = JSON.parse(req.body.formFillerData || req.body.formFields || '{}');
+    const formFields = JSON.parse(req.body.formFields || '{}');
     const instruction = req.body.instruction?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
+
+    if (Object.keys(formFields?.properties).length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Parsing error',
+        errorCode: 'NO_FORM_FIELDS_PROVIDED',
+        error: 'No form fields were submitted.',
+        shortError: 'No form fields provided.',
+        tip: 'Please provide the necessary form fields before submitting.',
+      });
+    }
 
     if (files.length === 0 && !pastedText) {
       return res.status(400).json({
@@ -126,6 +139,8 @@ app.post(
         tip: 'Upload a file or paste some text before submitting.',
       });
     }
+
+    // TO-DO: ADD TO S3 AND SAVE REFERENCE IN A DB CONNECTED TO A CONTEXT TO BE PASSED BY THE FRONTEND
 
     const uploadedFiles = await Promise.all(
       files.map(async (file) => {
@@ -169,6 +184,8 @@ When in doubt, leave the field blank.
 
 Today is ${new Date().toLocaleDateString()}`;
 
+    const sanitizedProperties = sanitizeObject(formFields.properties);
+
     try {
       const response = await ai.models.generateContent({
         model: 'models/gemini-2.5-flash-lite',
@@ -194,7 +211,7 @@ Today is ${new Date().toLocaleDateString()}`;
                         description:
                           "Reason for selecting the tools's arguments, with explanation of why it complies with all the instructions",
                       },
-                      ...formFields.properties,
+                      ...sanitizedProperties,
                     },
                     required: ['ai_reason'],
                   },
