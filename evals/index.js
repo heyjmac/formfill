@@ -189,7 +189,7 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
       continue;
     }
 
-    console.log(`\nRunning ${blockName} → ${API_URL} (STRICT=${STRICT})\n`);
+    console.log(`\nRunning ${blockName}\n`);
     let sum = 0,
       counted = 0;
 
