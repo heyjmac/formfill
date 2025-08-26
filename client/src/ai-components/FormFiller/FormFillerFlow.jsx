@@ -105,7 +105,7 @@ export const FormFillerFlow = React.memo(
     }, [fieldValues, fieldsFilled, selectedFields]);
 
     const handleUndo = useCallback(() => {
-      fillFormFields(undoFields);
+      fillFormFields(undoFields, false);
       setUndoFields({});
     }, [undoFields]);
 

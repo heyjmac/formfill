@@ -274,7 +274,9 @@ export const validateFormData = (data) => {
   return { valid, errors, fields: fieldStatus };
 };
 
-export const fillFormFields = (data, { speed = 25, perFieldDelay = 80 } = {}) => {
+export const fillFormFields = (data, skipBlanks = true) => {
+  const speed = 25;
+  const perFieldDelay = 80;
   const validated = validateFormData(data);
   console.log('Validation result:', validated);
 
@@ -328,7 +330,9 @@ export const fillFormFields = (data, { speed = 25, perFieldDelay = 80 } = {}) =>
     if (!name) continue;
 
     const value = data?.[name];
-    if (isBlank(value)) continue; // <-- skip empty/blank incoming values entirely
+    previousValues[name] = el.value;
+
+    if (skipBlanks && isBlank(value)) continue;
 
     if (el.tagName === 'SELECT') {
       const selected = Array.from(el.selectedOptions).map((opt) => opt.value);
