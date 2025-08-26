@@ -1,3 +1,100 @@
+export const attempt =
+  (fn) =>
+  (...args) => {
+    try {
+      return fn(...args);
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
+const typeToMcpFormat = {
+  email: 'email',
+  url: 'uri',
+  date: 'date',
+  time: 'time',
+  'datetime-local': 'date-time',
+};
+
+export const getProperties = (fields, important) => {
+  const properties = {};
+  const required = [];
+
+  fields.forEach((field) => {
+    const {
+      name,
+      description,
+      explicitFormat,
+      type,
+      tag,
+      multiple,
+      required: isRequired,
+      pattern,
+      maxLength,
+      minLength,
+      min,
+      max,
+      options,
+    } = field;
+
+    const qualifiedDescription = important ? `${important}. ${description}` : description;
+    const fullDescription = [qualifiedDescription];
+    const optionValues = options.map((o) => o.value).filter((v) => v !== '');
+
+    if (explicitFormat) fullDescription.push(`ADAPT TO THIS FORMAT: ${explicitFormat}`);
+
+    if (tag === 'SELECT') {
+      fullDescription.push(
+        `Select options (${multiple ? 'multiple' : 'single'} choice): ${JSON.stringify(options)}`,
+      );
+    } else if (type === 'radio' || type === 'checkbox') {
+      fullDescription.push(
+        `${type[0].toUpperCase() + type.slice(1)} options: ${JSON.stringify(options)}`,
+      );
+    } else if (type) {
+      fullDescription.push(`Input type: ${type}`);
+    }
+
+    if (tag === 'INPUT') {
+      const constraints = [];
+      ['pattern', 'maxlength', 'minlength', 'min', 'max', 'step'].forEach((attr) => {
+        const val = field[attr];
+        if (val !== undefined && val !== '' && val !== -1) constraints.push(`${attr}: ${val}`);
+      });
+      if (constraints.length) fullDescription.push(`Constraints: ${constraints.join(', ')}`);
+    }
+
+    properties[name] = { description: fullDescription.join('; ') };
+
+    if (pattern) properties[name].pattern = pattern;
+    if (maxLength && maxLength !== -1) properties[name].maxLength = maxLength;
+    if (minLength && minLength !== -1) properties[name].minLength = minLength;
+    if (tag === 'INPUT' && (type === 'number' || type === 'range')) {
+      if (min !== '') properties[name].minimum = Number(min);
+      if (max !== '') properties[name].maximum = Number(max);
+    }
+
+    if (isRequired) required.push(name);
+    if (optionValues.length) properties[name].enum = optionValues;
+
+    if (tag === 'INPUT' && typeToMcpFormat[type]) {
+      properties[name].format = typeToMcpFormat[type];
+    }
+
+    if (tag === 'INPUT' && (type === 'number' || type === 'range')) {
+      properties[name].type = 'number';
+    } else if (multiple || type === 'checkbox') {
+      properties[name].type = 'array';
+      properties[name].items = { type: 'string' };
+    } else {
+      properties[name].type = 'string';
+    }
+  });
+
+  return { properties, required };
+};
+
 export const sanitizeObject = (input) => {
   const map = new Map([
     // quotes/apostrophes/backticks

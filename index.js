@@ -6,7 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { sanitizeObject } from './utils.js';
+import { attempt, getProperties, sanitizeObject } from './utils.js';
 
 dotenv.config();
 
@@ -116,9 +116,10 @@ app.post(
     const files = req.files || [];
     const formFields = JSON.parse(req.body.formFields || '{}');
     const instruction = req.body.instruction?.trim() || '';
+    const important = req.body.important?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
 
-    if (Object.keys(formFields?.properties).length === 0) {
+    if (Object.keys(formFields).length === 0) {
       return res.status(400).json({
         status: 'error',
         message: 'Parsing error',
@@ -184,7 +185,9 @@ When in doubt, leave the field blank.
 
 Today is ${new Date().toLocaleDateString()}`;
 
-    const sanitizedProperties = sanitizeObject(formFields.properties);
+    const { properties, _required } = getProperties(formFields, important);
+    console.log(properties);
+    const sanitizedProperties = sanitizeObject(properties);
 
     try {
       const response = await ai.models.generateContent({
@@ -235,9 +238,28 @@ Today is ${new Date().toLocaleDateString()}`;
       }
 
       const args = response?.candidates?.[0]?.content?.parts?.[0]?.functionCall?.args;
+      if (!args) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid function call arguments',
+          errorCode: 'INVALID_FUNCTION_CALL_ARGS',
+          error: 'No arguments provided',
+          shortError: 'No arguments provided',
+          tip: 'Check the API documentation for required parameters.',
+        });
+      }
+
+      const filteredArgs = Object.fromEntries(
+        Object.entries(args).filter(
+          ([_, v]) =>
+            typeof v !== 'string' ||
+            !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase()),
+        ),
+      );
+
       const duration = Date.now() - start;
       const tokens = response?.usageMetadata;
-      res.json({ status: 'ok', data: args, duration, tokens });
+      res.json({ status: 'ok', data: filteredArgs, duration, tokens });
     } catch (err) {
       console.dir(err, { depth: null });
       res.status(500).json({

@@ -1,13 +1,5 @@
 import { defaultCopy } from './defaultCopy';
 
-const typeToMcpFormat = {
-  email: 'email',
-  url: 'uri',
-  date: 'date',
-  time: 'time',
-  'datetime-local': 'date-time',
-};
-
 const unsnake = (str = '') => {
   return str.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 };
@@ -122,90 +114,54 @@ export const getFormFieldValues = () => {
   return values;
 };
 
-export const getFormFields = (important) => {
+export const getFormFields = () => {
   const els = document.querySelectorAll('[data-form-filler-description]');
-  const properties = {};
-  const required = [];
-
-  els.forEach((el) => {
+  return Array.from(els).map((el) => {
     const name = el.getAttribute('data-form-filler-name') || el?.name || getLabelText(el);
     const description = el.getAttribute('data-form-filler-description');
     const explicitFormat = el.getAttribute('data-form-filler-format');
-    const optionValues = [];
+    const type = el.type;
+    const tag = el.tagName;
+    const multiple = el.multiple;
+    const required = el.required;
+    const pattern = el.pattern;
+    const maxLength = el.maxLength;
+    const minLength = el.minLength;
+    const min = el.min;
+    const max = el.max;
+    const options = [];
 
-    const qualifiedDescription = important ? `${important}. ${description}` : description;
-
-    const fullDescription = [qualifiedDescription];
-    if (explicitFormat) fullDescription.push(`ADAPT TO THIS FORMAT: ${explicitFormat}`);
-
-    if (el.tagName === 'SELECT') {
-      const options = Array.from(el.options).map((opt) => ({ value: opt.value, text: opt.text }));
-      optionValues.push(...options.map((o) => o.value));
-      fullDescription.push(
-        `Select options (${el.multiple ? 'multiple' : 'single'} choice): ${JSON.stringify(
-          options,
-        )}`,
-      );
-    } else if (el?.type === 'radio' || el?.type === 'checkbox') {
-      const group = document.querySelectorAll(`input[type="${el.type}"][name="${el.name}"]`);
-      const options = Array.from(group).map((input) => ({
-        value: input.value,
-        label:
-          input.getAttribute('data-label') || input.nextSibling?.textContent?.trim() || input.value,
-      }));
-      optionValues.push(...options.map((o) => o.value));
-      fullDescription.push(
-        `${el.type[0].toUpperCase() + el.type.slice(1)} options: ${JSON.stringify(options)}`,
-      );
-    } else if (el?.type) {
-      fullDescription.push(`Input type: ${el.type}`);
-    }
-
-    if (el.tagName === 'INPUT') {
-      const constraints = [];
-      ['pattern', 'maxlength', 'minlength', 'min', 'max', 'step'].forEach((attr) => {
-        if (el.hasAttribute(attr)) constraints.push(`${attr}: ${el.getAttribute(attr)}`);
+    if (tag === 'SELECT') {
+      Array.from(el.options).forEach((opt) => options.push({ value: opt.value, text: opt.text }));
+    } else if (type === 'radio' || type === 'checkbox') {
+      const group = document.querySelectorAll(`input[type="${type}"][name="${el.name}"]`);
+      Array.from(group).forEach((input) => {
+        options.push({
+          value: input.value,
+          label:
+            input.getAttribute('data-label') ||
+            input.nextSibling?.textContent?.trim() ||
+            input.value,
+        });
       });
-      if (constraints.length) fullDescription.push(`Constraints: ${constraints.join(', ')}`);
     }
 
-    // if (el?.value) fullDescription.push(`Current calue: ${el.value}`);
-    // if (el?.placeholder) fullDescription.push(`Placeholder: ${el.placeholder}`);
-
-    properties[name] = { description: fullDescription.join('; ') };
-
-    if (el?.pattern) properties[name].pattern = el.pattern;
-    if (el?.maxLength && el.maxLength !== -1) properties[name].maxLength = el.maxLength;
-    if (el?.minLength && el.minLength !== -1) properties[name].minLength = el.minLength;
-
-    // CHANGED: only add numeric minimum/maximum for number/range inputs, and coerce to Number
-    if (el?.tagName === 'INPUT' && (el.type === 'number' || el.type === 'range')) {
-      if (el.min !== '') properties[name].minimum = Number(el.min);
-      if (el.max !== '') properties[name].maximum = Number(el.max);
-    }
-
-    if (el?.required) required.push(name);
-
-    // FIXED: only add enum if optionValues has non-empty strings
-    const cleanedValues = optionValues.filter((v) => v !== '');
-    if (cleanedValues.length) properties[name].enum = cleanedValues; // ← FIXED HERE
-
-    if (el.tagName === 'INPUT' && typeToMcpFormat[el.type]) {
-      properties[name].format = typeToMcpFormat[el.type];
-    }
-
-    // CHANGED: set type "number" only for number/range inputs; otherwise "string"
-    if (el.tagName === 'INPUT' && (el.type === 'number' || el.type === 'range')) {
-      properties[name].type = 'number';
-    } else if (el?.multiple || el?.type === 'checkbox') {
-      properties[name].type = 'array';
-      properties[name].items = { type: 'string' };
-    } else {
-      properties[name].type = 'string';
-    }
+    return {
+      name,
+      description,
+      explicitFormat,
+      type,
+      tag,
+      multiple,
+      required,
+      pattern,
+      maxLength,
+      minLength,
+      min,
+      max,
+      options,
+    };
   });
-
-  return { properties, required };
 };
 
 // TO-DO: implement form data validation
