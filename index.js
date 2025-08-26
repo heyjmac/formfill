@@ -116,6 +116,8 @@ app.post(
     const important = req.body.important?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
 
+    console.log(formFields);
+
     if (Object.keys(formFields).length === 0) {
       return res.status(400).json({
         status: 'error',

@@ -122,45 +122,48 @@ export const getFormFields = () => {
     const explicitFormat = el.getAttribute('data-form-filler-format');
     const type = el.type;
     const tag = el.tagName;
-    const multiple = el.multiple;
-    const required = el.required;
-    const pattern = el.pattern;
-    const maxLength = el.maxLength;
-    const minLength = el.minLength;
-    const min = el.min;
-    const max = el.max;
-    const options = [];
+    const multiple = el.multiple || undefined;
+    const required = el.required || undefined;
+    const pattern = el.pattern || undefined;
+    const maxLength = el.maxLength >= 0 ? el.maxLength : undefined;
+    const minLength = el.minLength >= 0 ? el.minLength : undefined;
+    const min = el.min || undefined;
+    const max = el.max || undefined;
 
+    let options;
     if (tag === 'SELECT') {
-      Array.from(el.options).forEach((opt) => options.push({ value: opt.value, text: opt.text }));
+      const selectOpts = Array.from(el.options).map((opt) => ({
+        value: opt.value,
+        text: opt.text,
+      }));
+      options = selectOpts.length ? selectOpts : undefined;
     } else if (type === 'radio' || type === 'checkbox') {
       const group = document.querySelectorAll(`input[type="${type}"][name="${el.name}"]`);
-      Array.from(group).forEach((input) => {
-        options.push({
-          value: input.value,
-          label:
-            input.getAttribute('data-label') ||
-            input.nextSibling?.textContent?.trim() ||
-            input.value,
-        });
-      });
+      const groupOpts = Array.from(group).map((input) => ({
+        value: input.value,
+        label:
+          input.getAttribute('data-label') || input.nextSibling?.textContent?.trim() || input.value,
+      }));
+      options = groupOpts.length ? groupOpts : undefined;
     }
 
-    return {
+    const field = {
       name,
       description,
       explicitFormat,
       type,
       tag,
-      multiple,
-      required,
-      pattern,
-      maxLength,
-      minLength,
-      min,
-      max,
-      options,
+      ...(multiple && { multiple }),
+      ...(required && { required }),
+      ...(pattern && { pattern }),
+      ...(maxLength !== undefined && { maxLength }),
+      ...(minLength !== undefined && { minLength }),
+      ...(min && { min }),
+      ...(max && { max }),
+      ...(options && { options }),
     };
+
+    return Object.fromEntries(Object.entries(field).filter(([_, v]) => v !== undefined));
   });
 };
 
