@@ -48,6 +48,29 @@ export const FormExample = React.memo(() => {
               <option value="company">Company</option>
             </select>
           </div>
+          <div className="md:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-gray-700">CPF</label>
+            <input
+              type="text"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
+              placeholder="000.000.000-00"
+              data-form-filler-name="cpf"
+              data-form-filler-description="Brazilian individual taxpayer registry (CPF) formatted with dots and dash"
+              data-form-filler-format="XXX.XXX.XXX-XX"
+              pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+            />
+          </div>
+          <div className="md:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-gray-700">RG</label>
+            <input
+              type="text"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
+              placeholder="0000000000"
+              data-form-filler-name="rg"
+              data-form-filler-description="Brazilian general registry (RG) number"
+              pattern="\d{5,12}"
+            />
+          </div>
           <div className="md:col-span-6">
             <label className="mb-1 block text-xs font-medium text-gray-700">Date of birth</label>
             <input

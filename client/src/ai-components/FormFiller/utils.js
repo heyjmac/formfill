@@ -133,7 +133,7 @@ export const getFormFields = (important) => {
     const explicitFormat = el.getAttribute('data-form-filler-format');
     const optionValues = [];
 
-    const qualifiedDescription = important ? `${important}: ${description}` : description;
+    const qualifiedDescription = important ? `${important}. ${description}` : description;
 
     const fullDescription = [qualifiedDescription];
     if (explicitFormat) fullDescription.push(`ADAPT TO THIS FORMAT: ${explicitFormat}`);
