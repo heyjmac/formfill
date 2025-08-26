@@ -2,11 +2,10 @@
 import { createPartFromUri, createUserContent, GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import express from 'express';
+import fs from 'fs';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import { attempt, getProperties, sanitizeObject } from './utils.js';
 
 dotenv.config();
 
@@ -115,6 +114,14 @@ app.post(
     const instruction = req.body.instruction?.trim() || '';
     const important = req.body.important?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
+
+    // fs.writeFileSync(
+    //   path.join(__dirname, 'evals', 'input', 'formfields.json'),
+    //   JSON.stringify(formFields, null, 2),
+    // );
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
+    // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
 
     console.log(formFields);
 
