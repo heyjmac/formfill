@@ -13,11 +13,7 @@ const API_URL = process.env.FORMFILL_URL || 'http://localhost:3000/api/formfill'
 const TIMEOUT = Number(process.env.EVAL_TIMEOUT_MS || 60000);
 const STRICT = (process.env.STRICT || 'true').toLowerCase() === 'true';
 
-const INPUT_DIR = path.join(__dirname, 'input');
-const UPLOADS_DIR = path.join(INPUT_DIR, 'uploads');
-const FORM_FIELDS_PATH = path.join(INPUT_DIR, 'formfields.json');
-const INSTRUCTION_PATH = path.join(INPUT_DIR, 'instruction.txt');
-const IMPORTANT_PATH = path.join(INPUT_DIR, 'important.txt');
+const INPUT_BASE_DIR = path.join(__dirname, 'input');
 const RESULTS_DIR = path.join(__dirname, 'results');
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
@@ -130,7 +126,7 @@ const mimeFromExt = (p) => {
   return map[ext] || 'application/octet-stream';
 };
 
-async function postFormFill({ instruction, important, formFields, filePath }) {
+const postFormFill = async ({ instruction, important, formFields, filePath }) => {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), TIMEOUT);
   try {
@@ -151,96 +147,112 @@ async function postFormFill({ instruction, important, formFields, filePath }) {
   } finally {
     clearTimeout(t);
   }
-}
+};
 
 (async () => {
-  if (!fs.existsSync(FORM_FIELDS_PATH)) {
-    console.error('Missing input/formfields.json');
-    process.exit(1);
-  }
   ensureDir(RESULTS_DIR);
+  const promptBlocks = fs
+    .readdirSync(INPUT_BASE_DIR)
+    .filter((d) => fs.statSync(path.join(INPUT_BASE_DIR, d)).isDirectory());
 
-  let formFields;
-  try {
-    formFields = JSON.parse(fs.readFileSync(FORM_FIELDS_PATH, 'utf8'));
-  } catch {
-    console.error('Invalid JSON in input/formfields.json');
-    process.exit(1);
-  }
-  const instruction = readIf(INSTRUCTION_PATH);
-  const important = readIf(IMPORTANT_PATH);
+  for (const blockName of promptBlocks) {
+    const INPUT_DIR = path.join(INPUT_BASE_DIR, blockName);
+    const UPLOADS_DIR = path.join(INPUT_DIR, 'uploads');
+    const FORM_FIELDS_PATH = path.join(INPUT_DIR, 'formfields.json');
+    const INSTRUCTION_PATH = path.join(INPUT_DIR, 'instruction.txt');
+    const IMPORTANT_PATH = path.join(INPUT_DIR, 'important.txt');
+    const blockResultDir = path.join(RESULTS_DIR, blockName);
+    ensureDir(blockResultDir);
 
-  const all = listFiles(UPLOADS_DIR);
-  const pdfs = all
-    .filter((f) => !f.toLowerCase().endsWith('.json'))
-    .map((f) => path.join(UPLOADS_DIR, f));
-  if (pdfs.length === 0) {
-    console.error('No files in input/uploads');
-    process.exit(1);
-  }
-
-  console.log(
-    `Running ${pdfs.length} eval${pdfs.length > 1 ? 's' : ''} → ${API_URL} (STRICT=${STRICT})\n`,
-  );
-  const results = [];
-  let sum = 0,
-    counted = 0;
-
-  for (const filePath of pdfs) {
-    const base = path.basename(filePath);
-    const expectedPath = path.join(UPLOADS_DIR, base.replace(/\.[^.]+$/, '') + '.json');
-    process.stdout.write(`• ${base} … `);
-
-    let expected = null;
-    if (fs.existsSync(expectedPath)) {
-      try {
-        expected = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
-      } catch {
-        expected = null;
-      }
+    if (!fs.existsSync(FORM_FIELDS_PATH)) {
+      console.error(`Missing formfields.json in ${blockName}`);
+      continue;
     }
 
+    let formFields;
     try {
-      const res = await postFormFill({ instruction, important, formFields, filePath });
-      const got = res.json?.data ?? {};
-      let cmp = null,
-        pct = null;
-      if (expected && Object.keys(expected).length) {
-        cmp = compare(expected, got);
-        pct = Math.round(cmp.score * 100);
-        if (!Number.isNaN(cmp.score)) {
-          sum += cmp.score;
-          counted++;
-        }
-      }
-      const out = {
-        file: base,
-        ok: res.ok,
-        status: res.status,
-        expected_present: Boolean(expected),
-        percent: pct,
-        compare: cmp,
-        response: res.json,
-      };
-      fs.writeFileSync(path.join(RESULTS_DIR, `${slug(base)}.json`), JSON.stringify(out, null, 2));
-      console.log(res.ok ? (pct !== null ? `${pct}%` : 'OK') : `HTTP ${res.status}`);
-      results.push(out);
-    } catch (e) {
-      const out = { file: base, ok: false, status: 'ERR', error: String(e) };
-      fs.writeFileSync(path.join(RESULTS_DIR, `${slug(base)}.json`), JSON.stringify(out, null, 2));
-      console.log('ERROR');
-      results.push(out);
+      formFields = JSON.parse(fs.readFileSync(FORM_FIELDS_PATH, 'utf8'));
+    } catch {
+      console.error(`Invalid JSON in ${blockName}/formfields.json`);
+      continue;
     }
-  }
 
-  const avg = counted ? Math.round((sum / counted) * 100) : null;
-  const summary = {
-    total_files: pdfs.length,
-    with_expected: counted,
-    average_percent: avg,
-    STRICT,
-    timestamp: new Date().toISOString(),
-  };
-  fs.writeFileSync(path.join(RESULTS_DIR, 'summary.json'), JSON.stringify(summary, null, 2));
-  console.log(`\nDone. Avg${avg === null ? ': n/a' : `: ${avg}%`} • Results in: ${RESULTS_DIR}`);
+    const instruction = readIf(INSTRUCTION_PATH);
+    const important = readIf(IMPORTANT_PATH);
+    const all = listFiles(UPLOADS_DIR);
+    const pdfs = all
+      .filter((f) => !f.toLowerCase().endsWith('.json'))
+      .map((f) => path.join(UPLOADS_DIR, f));
+
+    if (pdfs.length === 0) {
+      console.error(`No uploads in ${blockName}/uploads`);
+      continue;
+    }
+
+    console.log(`\nRunning ${blockName} → ${API_URL} (STRICT=${STRICT})\n`);
+    let sum = 0,
+      counted = 0;
+
+    for (const filePath of pdfs) {
+      const base = path.basename(filePath);
+      const expectedPath = path.join(UPLOADS_DIR, base.replace(/\.[^.]+$/, '') + '.json');
+      process.stdout.write(`• ${base} … `);
+
+      let expected = null;
+      if (fs.existsSync(expectedPath)) {
+        try {
+          expected = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
+        } catch {}
+      }
+
+      try {
+        const res = await postFormFill({ instruction, important, formFields, filePath });
+        const got = res.json?.data ?? {};
+        let cmp = null,
+          pct = null;
+        if (expected && Object.keys(expected).length) {
+          cmp = compare(expected, got);
+          pct = Math.round(cmp.score * 100);
+          if (!Number.isNaN(cmp.score)) {
+            sum += cmp.score;
+            counted++;
+          }
+        }
+        const out = {
+          file: base,
+          ok: res.ok,
+          status: res.status,
+          expected_present: Boolean(expected),
+          percent: pct,
+          compare: cmp,
+          response: res.json,
+        };
+        fs.writeFileSync(
+          path.join(blockResultDir, `${slug(base)}.json`),
+          JSON.stringify(out, null, 2),
+        );
+        console.log(res.ok ? (pct !== null ? `${pct}%` : 'OK') : `HTTP ${res.status}`);
+      } catch (e) {
+        const out = { file: base, ok: false, status: 'ERR', error: String(e) };
+        fs.writeFileSync(
+          path.join(blockResultDir, `${slug(base)}.json`),
+          JSON.stringify(out, null, 2),
+        );
+        console.log('ERROR');
+      }
+    }
+
+    const avg = counted ? Math.round((sum / counted) * 100) : null;
+    const summary = {
+      total_files: pdfs.length,
+      with_expected: counted,
+      average_percent: avg,
+      STRICT,
+      timestamp: new Date().toISOString(),
+    };
+    fs.writeFileSync(path.join(blockResultDir, 'summary.json'), JSON.stringify(summary, null, 2));
+    console.log(
+      `Done ${blockName}. Avg${avg === null ? ': n/a' : `: ${avg}%`} → ${blockResultDir}`,
+    );
+  }
 })();

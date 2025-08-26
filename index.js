@@ -187,9 +187,6 @@ app.post(
       });
     }
 
-    formFields = prependImportantToDescriptions(formFields, important);
-    console.log(formFields);
-
     // fs.writeFileSync(
     //   path.join(__dirname, 'evals', 'input', 'formfields.json'),
     //   JSON.stringify(formFields, null, 2),
@@ -197,6 +194,9 @@ app.post(
     // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
     // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
     // fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
+
+    formFields = prependImportantToDescriptions(formFields, important);
+    console.log(formFields);
 
     // TO-DO: ADD TO S3 AND SAVE REFERENCE IN A DB CONNECTED TO A CONTEXT TO BE PASSED BY THE FRONTEND
 
