@@ -7,6 +7,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "evals": "node evals",
     "build": "npm --prefix client run build",
     "serve": "node index.js",
     "start": "npm run build && node index.js",
