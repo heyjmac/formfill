@@ -104,9 +104,6 @@ app.use(express.static(clientDistPath));
 app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
 
 // 5. Endpoints
-
-// TO-DO:
-// be prepared for candidates: [ { finishReason: 'MALFORMED_FUNCTION_CALL', index: 0 } ],
 app.post(
   '/api/formfill',
   uploadMiddleware,
@@ -158,39 +155,40 @@ app.post(
       }),
     );
 
-    const systemInstructions = `You are an AI that must always call exactly one tool called "processFormFields". 
+    const systemInstructions = `You are an AI that fills form fields. 
 You cannot reply or assist directly. 
-You must process the provided inputs using that tool and return only the correct arguments needed to call it.
-
-${instruction} ${important}
+You must read the user inputs and return only the values needed to fill the form fields.
 
 You'll receive
-- an instruction you must absolutely follow
-- list of args accepted by the tool with descriptions
+- an instruction on how to fill the form fields
+- a list of fields accepted by the form with descriptions
 - optional text content pasted by the user
-- optional list of uploaded files
+- optional files uploaded by the user
 
-The text and the list may have information to entities unrelated to your instruction. Don't mix up entities.
+The content provided by the user may have information to entities unrelated to your instruction. 
+Be careful not to mix up entities.
+
+<INSTRUCTION>
+${instruction} ${important}
+</INSTRUCTION>
+
+<FORM_FIELDS>
+${JSON.stringify(formFields, null, 2)}
+</FORM_FIELDS>
 
 Your task:
 1. Analyze the content provided (text or files).
-2. Use the tool args to determine what data to extract.
-3. Convert the extracted data to the format required in the args descriptions.
-4. Return the extracted data as the args to processFormFields.
+2. Use the FORM_FIELDS to determine what data to extract.
+3. Convert the extracted data to the format required in the FORM_FIELDS.
+4. Return a json with the extracted data as values to each form field name.
 
-Do not explain or respond to the user. Just return the tool call with filled args.
+Do not explain or respond to the user. Just return the json with filled fields.
 Do not ask questions. Only act.
 Do not fill fields with "null", "undefined", "none", "N/A", "unknown" or similar.
 Only fill in the fields with the extracted data. Don't use your own knowledge or assumptions.
-When in doubt, leave the field blank.
+When in doubt, don't mention the field in your response.
 
-Today is ${new Date().toLocaleDateString()}
-
-${instruction} ${important}`;
-
-    const { properties, _required } = getProperties(formFields, important);
-    console.log(properties);
-    const sanitizedProperties = sanitizeObject(properties);
+Today is ${new Date().toLocaleDateString()}`;
 
     try {
       const response = await ai.models.generateContent({
@@ -198,58 +196,26 @@ ${instruction} ${important}`;
         contents: createUserContent([
           `Please extract the relevant information from the following:\n\nPasted text:\n${
             pastedText || '[none]'
-          }\n\nForm fields:\n${JSON.stringify(formFields, null, 2)}`,
+          }`,
           ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
         ]),
         config: {
-          tools: [
-            {
-              functionDeclarations: [
-                {
-                  name: 'processFormFields',
-                  description: 'Fills out form fields based on input content',
-                  parameters: {
-                    type: 'object',
-                    properties: {
-                      // eslint-disable-next-line camelcase
-                      ai_reason: {
-                        type: 'string',
-                        description:
-                          "Reason for selecting the tools's arguments, with explanation of why it complies with all the instructions",
-                      },
-                      ...sanitizedProperties,
-                    },
-                    required: ['ai_reason'],
-                  },
-                },
-              ],
-            },
-          ],
           systemInstruction: {
             role: 'system',
-            parts: [{ text: systemInstructions }, instruction && { text: instruction }].filter(
-              Boolean,
-            ),
+            parts: [{ text: systemInstructions }],
           },
         },
       });
 
-      if (response?.candidates?.[0]?.content?.parts?.[0]?.functionCall) {
-        console.log(response?.candidates?.[0]?.content?.parts?.[0]?.functionCall);
-      } else {
-        console.dir(response, { depth: null });
-      }
+      const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
 
-      const args = response?.candidates?.[0]?.content?.parts?.[0]?.functionCall?.args;
-      if (!args) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Invalid function call arguments',
-          errorCode: 'INVALID_FUNCTION_CALL_ARGS',
-          error: 'No arguments provided',
-          shortError: 'No arguments provided',
-          tip: 'Check the API documentation for required parameters.',
-        });
+      let args;
+      try {
+        const jsonMatch = rawText.match(/```json([\s\S]*?)```/i);
+        args = JSON.parse(jsonMatch ? jsonMatch[1] : rawText);
+      } catch (e) {
+        console.error('Failed to parse JSON from response:', rawText);
+        args = {};
       }
 
       const filteredArgs = Object.fromEntries(
