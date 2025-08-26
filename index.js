@@ -2,7 +2,7 @@
 import { createPartFromUri, createUserContent, GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import express from 'express';
-import fs from 'fs';
+// import fs from 'fs';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -228,11 +228,13 @@ Today is ${new Date().toLocaleDateString()}`;
       }
 
       const filteredArgs = Object.fromEntries(
-        Object.entries(args).filter(
-          ([_, v]) =>
-            typeof v !== 'string' ||
-            !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase()),
-        ),
+        Object.entries(args).filter(([_, v]) => {
+          if (v == null) return false;
+          if (typeof v === 'string') {
+            return !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase());
+          }
+          return true;
+        }),
       );
 
       const duration = Date.now() - start;
