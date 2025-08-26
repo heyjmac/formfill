@@ -228,20 +228,20 @@ export const FormExample = React.memo(() => {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Date</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Signature Date</label>
             <input
               type="date"
               className="w-full rounded border border-gray-200 p-2 text-sm"
-              data-form-filler-name="meeting_date"
+              data-form-filler-name="signature_date"
               data-form-filler-description="Date document was signed"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Time</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Signature Time</label>
             <input
               type="time"
               className="w-full rounded border border-gray-200 p-2 text-sm"
-              data-form-filler-name="meeting_time"
+              data-form-filler-name="signature_time"
               data-form-filler-description="Time document was signed, if available"
             />
           </div>

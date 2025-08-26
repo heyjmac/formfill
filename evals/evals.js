@@ -1,6 +1,5 @@
 // evals.js
 // Usage: node evals.js
-// Env: FORMFILL_URL=http://localhost:3000/api/formfill EVAL_TIMEOUT_MS=60000 STRICT=true
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -81,6 +80,7 @@ const compare = (expected, got) => {
     missing = 0,
     extra = 0;
   const details = [];
+
   for (const k of keys) {
     if (!(k in g)) {
       missing++;
@@ -91,12 +91,15 @@ const compare = (expected, got) => {
     ok ? correct++ : wrong++;
     details.push({ key: k, ok, expected: exp[k], got: g[k] });
   }
+
   for (const k of Object.keys(g))
     if (!(k in exp)) {
       extra++;
       details.push({ key: k, ok: !STRICT, reason: 'extra', expected: undefined, got: g[k] });
     }
+
   const score = keys.length ? correct / keys.length : 0;
+
   return { score, correct, wrong, missing, extra, total_expected: keys.length, details };
 };
 
