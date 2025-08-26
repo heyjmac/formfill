@@ -18,6 +18,8 @@ const app = express();
 
 // 2. Constants and Configs
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024); // 10MB default
+const RETRY_LIMIT = Number(process.env.RETRY_LIMIT ?? 1);
+const RETRY_DELAY_MS = Number(process.env.RETRY_DELAY_MS ?? 800);
 
 const allowedMimeTypes = new Set([
   'application/pdf',
@@ -103,6 +105,52 @@ const uploadMiddleware = (req, res, next) => {
 const clientDistPath = path.join(__dirname, 'client', 'dist');
 app.use(express.static(clientDistPath));
 app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const generateAndParse = async ({ ai, uploadedFiles, pastedText, systemInstructions }) => {
+  const response = await ai.models.generateContent({
+    model: 'models/gemini-2.5-flash-lite',
+    contents: createUserContent([
+      `Please extract the relevant information from the following:\n\nPasted text:\n${pastedText || '[none]'}`,
+      ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
+    ]),
+    config: { systemInstruction: { role: 'system', parts: [{ text: systemInstructions }] } },
+  });
+
+  const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
+  let args;
+  try {
+    const jsonMatch = rawText.match(/```json([\s\S]*?)```/i);
+    args = JSON.parse(jsonMatch ? jsonMatch[1] : rawText);
+  } catch {
+    args = {};
+  }
+
+  const filteredArgs = Object.fromEntries(
+    Object.entries(args).filter(([_, v]) => {
+      if (!v || v?.length === 0) return false;
+      if (typeof v === 'string')
+        return !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase());
+      return true;
+    }),
+  );
+
+  return { filteredArgs, tokens: response?.usageMetadata };
+};
+
+const withRetry = async (taskFn, { limit = RETRY_LIMIT, delayMs = RETRY_DELAY_MS } = {}) => {
+  let lastErr;
+  for (let attempt = 0; attempt <= limit; attempt++) {
+    try {
+      return await taskFn();
+    } catch (err) {
+      lastErr = err;
+      if (attempt < limit) await sleep(delayMs);
+    }
+  }
+  throw lastErr;
+};
 
 // 5. Endpoints
 app.post(
@@ -203,45 +251,11 @@ When in doubt, don't mention the field in your response.
 Today is ${new Date().toLocaleDateString()}`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: 'models/gemini-2.5-flash-lite',
-        contents: createUserContent([
-          `Please extract the relevant information from the following:\n\nPasted text:\n${
-            pastedText || '[none]'
-          }`,
-          ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
-        ]),
-        config: {
-          systemInstruction: {
-            role: 'system',
-            parts: [{ text: systemInstructions }],
-          },
-        },
-      });
-
-      const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
-
-      let args;
-      try {
-        const jsonMatch = rawText.match(/```json([\s\S]*?)```/i);
-        args = JSON.parse(jsonMatch ? jsonMatch[1] : rawText);
-      } catch (e) {
-        console.error('Failed to parse JSON from response:', rawText);
-        args = {};
-      }
-
-      const filteredArgs = Object.fromEntries(
-        Object.entries(args).filter(([_, v]) => {
-          if (!v || v?.length === 0) return false;
-          if (typeof v === 'string') {
-            return !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase());
-          }
-          return true;
-        }),
+      const { filteredArgs, tokens } = await withRetry(() =>
+        generateAndParse({ ai, uploadedFiles, pastedText, systemInstructions }),
       );
 
       const duration = Date.now() - start;
-      const tokens = response?.usageMetadata;
       res.json({ status: 'ok', data: filteredArgs, duration, tokens });
     } catch (err) {
       console.dir(err, { depth: null });
