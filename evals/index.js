@@ -79,7 +79,6 @@ const compare = (expected, got) => {
     missing = 0,
     extra = 0;
   const details = [];
-
   for (const k of keys) {
     if (!(k in g)) {
       missing++;
@@ -90,15 +89,12 @@ const compare = (expected, got) => {
     ok ? correct++ : wrong++;
     details.push({ key: k, ok, expected: exp[k], got: g[k] });
   }
-
   for (const k of Object.keys(g))
     if (!(k in exp)) {
       extra++;
       details.push({ key: k, ok: !STRICT, reason: 'extra', expected: undefined, got: g[k] });
     }
-
   const score = keys.length ? correct / keys.length : 0;
-
   return { score, correct, wrong, missing, extra, total_expected: keys.length, details };
 };
 
@@ -128,24 +124,33 @@ const mimeFromExt = (p) => {
 
 const postFormFill = async ({ instruction, important, formFields, filePath }) => {
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), TIMEOUT);
+  const to = setTimeout(() => controller.abort(), TIMEOUT);
+  const t0 = process.hrtime.bigint();
   try {
     const fd = new FormData();
     fd.append('instruction', instruction || '');
     fd.append('important', important || '');
     fd.append('formFields', JSON.stringify(formFields || {}));
-
     if (filePath) {
       const buf = await fs.promises.readFile(filePath);
       const blob = new Blob([buf], { type: mimeFromExt(filePath) });
       fd.append('files', blob, path.basename(filePath));
     }
-
     const res = await fetch(API_URL, { method: 'POST', body: fd, signal: controller.signal });
     const json = await res.json().catch(() => ({}));
-    return { ok: res.ok, status: res.status, json };
+    const t1 = process.hrtime.bigint();
+    const latency_ms = Number(t1 - t0) / 1e6;
+    const server_timing = res.headers.get('server-timing') || null;
+    const x_response_time = res.headers.get('x-response-time') || null;
+    return {
+      ok: res.ok,
+      status: res.status,
+      json,
+      latency_ms,
+      headers: { server_timing, x_response_time },
+    };
   } finally {
-    clearTimeout(t);
+    clearTimeout(to);
   }
 };
 
@@ -183,7 +188,6 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
     const pdfs = all
       .filter((f) => !f.toLowerCase().endsWith('.json'))
       .map((f) => path.join(UPLOADS_DIR, f));
-
     if (pdfs.length === 0) {
       console.error(`No uploads in ${blockName}/uploads`);
       continue;
@@ -191,7 +195,9 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
 
     console.log(`\nRunning ${blockName}\n`);
     let sum = 0,
-      counted = 0;
+      counted = 0,
+      latSum = 0,
+      latCount = 0;
 
     for (const filePath of pdfs) {
       const base = path.basename(filePath);
@@ -218,6 +224,10 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
             counted++;
           }
         }
+        if (Number.isFinite(res.latency_ms)) {
+          latSum += res.latency_ms;
+          latCount++;
+        }
         const out = {
           file: base,
           ok: res.ok,
@@ -225,13 +235,22 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
           expected_present: Boolean(expected),
           percent: pct,
           compare: cmp,
+          latency_ms: res.latency_ms,
+          headers: res.headers,
           response: res.json,
         };
         fs.writeFileSync(
           path.join(blockResultDir, `${slug(base)}.json`),
           JSON.stringify(out, null, 2),
         );
-        console.log(res.ok ? (pct !== null ? `${pct}%` : 'OK') : `HTTP ${res.status}`);
+        const lat = res.latency_ms != null ? `${Math.round(res.latency_ms)}ms` : 'n/a';
+        console.log(
+          res.ok
+            ? pct !== null
+              ? `${pct}% • ${lat}`
+              : `OK • ${lat}`
+            : `HTTP ${res.status} • ${lat}`,
+        );
       } catch (e) {
         const out = { file: base, ok: false, status: 'ERR', error: String(e) };
         fs.writeFileSync(
@@ -243,16 +262,18 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
     }
 
     const avg = counted ? Math.round((sum / counted) * 100) : null;
+    const avg_latency_ms = latCount ? Math.round(latSum / latCount) : null;
     const summary = {
       total_files: pdfs.length,
       with_expected: counted,
       average_percent: avg,
+      average_latency_ms: avg_latency_ms,
       STRICT,
       timestamp: new Date().toISOString(),
     };
     fs.writeFileSync(path.join(blockResultDir, 'summary.json'), JSON.stringify(summary, null, 2));
     console.log(
-      `Done ${blockName}. Avg${avg === null ? ': n/a' : `: ${avg}%`} → ${blockResultDir}`,
+      `\nDone ${blockName}. Avg${avg === null ? ': n/a' : `: ${avg}%`} • Avg latency${avg_latency_ms === null ? ': n/a' : `: ${avg_latency_ms}ms`}`,
     );
   }
 })();
