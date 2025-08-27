@@ -162,21 +162,6 @@ export const Input = () => {
             />
           </div>
         </div>
-
-        <div>
-          <label htmlFor="times" className="mb-1 block text-sm">
-            Run Times
-          </label>
-          <input
-            type="number"
-            id="times"
-            value={times}
-            min="1"
-            max="10"
-            onChange={(e) => setTimes(Number(e.target.value))}
-            className="w-24 rounded border  px-3 py-2"
-          />
-        </div>
         {/* File Upload */}
         <div>
           <label className="mb-2 block text-sm">Files</label>
@@ -362,7 +347,19 @@ export const Input = () => {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <label htmlFor="times" className="block text-sm">
+            Run Times
+          </label>
+          <input
+            type="number"
+            id="times"
+            value={times}
+            min="1"
+            max="10"
+            onChange={(e) => setTimes(Number(e.target.value))}
+            className="w-20 rounded border px-3 py-2 text-sm"
+          />
           <button
             className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500"
             onClick={handleSubmit}
