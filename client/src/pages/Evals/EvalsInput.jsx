@@ -20,10 +20,13 @@ const saveInputGroup = (data, callback) => {
   openDB((db) => {
     const tx = db.transaction(STORE_INPUTS, 'readwrite');
     const store = tx.objectStore(STORE_INPUTS);
-    store.add({ name: data.name || `Eval`, ...data });
-    tx.oncomplete = () => {
-      db.close();
-      if (callback) callback();
+    const req = store.add({ name: data.name || `Eval`, ...data });
+    req.onsuccess = () => {
+      const id = req.result;
+      tx.oncomplete = () => {
+        db.close();
+        if (callback) callback(id);
+      };
     };
   });
 };
@@ -350,7 +353,11 @@ export const EvalsInput = () => {
           expectedMap,
           files,
         },
-        () => loadInputGroups(setInputGroups),
+        (newId) => {
+          setSelectedGroupId(newId);
+          localStorage.setItem('evalsInput:lastGroupId', newId);
+          loadInputGroups(setInputGroups);
+        },
       ),
     [expectedMap, files, formFields, important, instruction, renameValue],
   );
