@@ -47,6 +47,30 @@ const renameInputGroup = (id, newName, callback) => {
   });
 };
 
+const updateInputGroup = (id, data, callback) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readwrite');
+    const store = tx.objectStore(STORE_INPUTS);
+    store.put({ id, ...data });
+    tx.oncomplete = () => {
+      db.close();
+      if (callback) callback();
+    };
+  });
+};
+
+const deleteInputGroup = (id, callback) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readwrite');
+    const store = tx.objectStore(STORE_INPUTS);
+    store.delete(id);
+    tx.oncomplete = () => {
+      db.close();
+      if (callback) callback();
+    };
+  });
+};
+
 const loadInputGroups = (callback) => {
   openDB((db) => {
     const tx = db.transaction(STORE_INPUTS, 'readonly');
@@ -504,15 +528,58 @@ export const EvalsInput = () => {
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <button
-            onClick={() =>
-              saveInputGroup({ instruction, important, formFields, expectedMap, files })
-            }
-            className="hidden cursor-pointer rounded px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500 md:block"
-          >
-            Save
-          </button>
-
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() =>
+                updateInputGroup(
+                  selectedGroupId,
+                  {
+                    id: selectedGroupId,
+                    name: renameValue || 'Eval',
+                    instruction,
+                    important,
+                    formFields,
+                    expectedMap,
+                    files,
+                  },
+                  () => loadInputGroups(setInputGroups),
+                )
+              }
+              className="cursor-pointer rounded border border-neutral-300 px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500"
+            >
+              Save
+            </button>
+            <button
+              onClick={() =>
+                saveInputGroup({ instruction, important, formFields, expectedMap, files }, () =>
+                  loadInputGroups(setInputGroups),
+                )
+              }
+              className="cursor-pointer rounded border border-neutral-300 px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500"
+            >
+              Save As
+            </button>
+            {selectedGroupId && (
+              <button
+                onClick={() =>
+                  deleteInputGroup(selectedGroupId, () => {
+                    setSelectedGroupId(null);
+                    setRenameValue('');
+                    setInstruction('');
+                    setImportant('');
+                    setFormFields([]);
+                    setExpectedMap({});
+                    setFiles([]);
+                    localStorage.removeItem('evalsInput:lastGroupId');
+                    loadInputGroups(setInputGroups);
+                  })
+                }
+                className="cursor-pointer rounded border border-red-300 px-6 py-2 text-red-600 transition-colors hover:bg-red-50"
+              >
+                Delete
+              </button>
+            )}
+          </div>
           <div className="flex items-center justify-center gap-2">
             <label htmlFor="times" className="block text-sm">
               Run Times
