@@ -291,6 +291,48 @@ export const EvalsInput = () => {
     [inputGroups],
   );
 
+  const handleSave = useCallback(
+    () =>
+      updateInputGroup(
+        selectedGroupId,
+        {
+          id: selectedGroupId,
+          name: renameValue || 'Eval',
+          instruction,
+          important,
+          formFields,
+          expectedMap,
+          files,
+        },
+        () => loadInputGroups(setInputGroups),
+      ),
+    [expectedMap, files, formFields, important, instruction, renameValue, selectedGroupId],
+  );
+
+  const handleSaveAs = useCallback(
+    () =>
+      saveInputGroup({ instruction, important, formFields, expectedMap, files }, () =>
+        loadInputGroups(setInputGroups),
+      ),
+    [expectedMap, files, formFields, important, instruction],
+  );
+
+  const handleDelete = useCallback(
+    () =>
+      deleteInputGroup(selectedGroupId, () => {
+        setSelectedGroupId(null);
+        setRenameValue('');
+        setInstruction('');
+        setImportant('');
+        setFormFields([]);
+        setExpectedMap({});
+        setFiles([]);
+        localStorage.removeItem('evalsInput:lastGroupId');
+        loadInputGroups(setInputGroups);
+      }),
+    [selectedGroupId],
+  );
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
@@ -308,7 +350,7 @@ export const EvalsInput = () => {
           />
         )}
         <select onChange={handleLoadPrevious}>
-          <option value="">Load Previous</option>
+          <option value="">History</option>
           {inputGroups.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name || `Eval #${g.id}`}
@@ -359,7 +401,7 @@ export const EvalsInput = () => {
               </div>
               <button
                 onClick={() => handleRemoveFile(file.name)}
-                className="text-gray-500 hover:text-gray-700"
+                className="cursor-pointer text-gray-500 hover:text-gray-700"
               >
                 <span className="material-symbols-outlined">delete</span>
               </button>
@@ -444,7 +486,7 @@ export const EvalsInput = () => {
                     <td className="p-3 text-right">
                       <button
                         onClick={() => removeField(i)}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="cursor-pointer text-gray-400 hover:text-gray-600"
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                           delete
@@ -459,7 +501,7 @@ export const EvalsInput = () => {
               <div />
               <button
                 onClick={addField}
-                className="flex items-center gap-1 rounded border border-neutral-300  bg-white px-3 py-1 text-sm hover:bg-gray-50"
+                className="flex cursor-pointer items-center gap-1 rounded border border-neutral-300  bg-white px-3 py-1 text-sm hover:bg-gray-50"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                   add
@@ -493,7 +535,7 @@ export const EvalsInput = () => {
                         className="focus:ring-primary-500 flex-1 rounded border border-neutral-300 px-3 py-1 text-sm transition-all focus:outline-none focus:ring-1"
                       />
                       <button
-                        className="text-gray-400 transition-colors hover:text-gray-600"
+                        className="cursor-pointer text-gray-400 transition-colors hover:text-gray-600"
                         onClick={() => handleRemoveExpectedField(fileName, field)}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
@@ -530,52 +572,33 @@ export const EvalsInput = () => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center justify-center gap-2">
             <button
-              onClick={() =>
-                updateInputGroup(
-                  selectedGroupId,
-                  {
-                    id: selectedGroupId,
-                    name: renameValue || 'Eval',
-                    instruction,
-                    important,
-                    formFields,
-                    expectedMap,
-                    files,
-                  },
-                  () => loadInputGroups(setInputGroups),
-                )
-              }
-              className="cursor-pointer rounded border border-neutral-300 px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500"
+              className="flex cursor-pointer items-center rounded border border-neutral-300 px-4 py-2 transition-colors hover:bg-gray-50"
+              onClick={handleSave}
             >
+              <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                save
+              </span>
               Save
-            </button>
-            <button
-              onClick={() =>
-                saveInputGroup({ instruction, important, formFields, expectedMap, files }, () =>
-                  loadInputGroups(setInputGroups),
-                )
-              }
-              className="cursor-pointer rounded border border-neutral-300 px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500"
-            >
-              Save As
             </button>
             {selectedGroupId && (
               <button
-                onClick={() =>
-                  deleteInputGroup(selectedGroupId, () => {
-                    setSelectedGroupId(null);
-                    setRenameValue('');
-                    setInstruction('');
-                    setImportant('');
-                    setFormFields([]);
-                    setExpectedMap({});
-                    setFiles([]);
-                    localStorage.removeItem('evalsInput:lastGroupId');
-                    loadInputGroups(setInputGroups);
-                  })
-                }
-                className="cursor-pointer rounded border border-red-300 px-6 py-2 text-red-600 transition-colors hover:bg-red-50"
+                className="flex cursor-pointer items-center rounded border border-neutral-300 px-4 py-2 transition-colors hover:bg-gray-50"
+                onClick={handleSaveAs}
               >
+                <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                  file_copy
+                </span>
+                Save as
+              </button>
+            )}
+            {selectedGroupId && (
+              <button
+                className="flex cursor-pointer items-center rounded border border-red-700 px-4 py-2 text-red-700 transition-colors hover:bg-gray-50"
+                onClick={handleDelete}
+              >
+                <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                  delete
+                </span>
                 Delete
               </button>
             )}
