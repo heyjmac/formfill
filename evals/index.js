@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const API_URL = process.env.FORMFILL_URL || 'http://localhost:3000/api/formfill';
-const TIMEOUT = Number(process.env.EVAL_TIMEOUT_MS || 60000);
-const STRICT = (process.env.STRICT || 'true').toLowerCase() === 'true';
+const API_URL = 'http://localhost:3000/api/formfill';
+const TIMEOUT = 60000;
+const STRICT = false;
 
 const INPUT_BASE_DIR = path.join(__dirname, 'input');
 const RESULTS_DIR = path.join(__dirname, 'results');
@@ -53,8 +53,7 @@ const deepEq = (a, b) => {
     if (ka.length !== kb.length) return false;
     return ka.every((k) => deepEq(a[k], b[k]));
   }
-  if (typeof a === 'string' && typeof b === 'string')
-    return a.trim().toLowerCase() === b.trim().toLowerCase();
+  if (typeof a === 'string' && typeof b === 'string') return a.trim() === b.trim();
   return String(a).trim() === String(b).trim();
 };
 
@@ -257,6 +256,8 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
           path.join(blockResultDir, `${slug(base)}.json`),
           JSON.stringify(out, null, 2),
         );
+        sum += 0;
+        counted++;
         console.log('ERROR');
       }
     }
