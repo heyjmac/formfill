@@ -2,24 +2,51 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 const DB_NAME = 'evalsDB';
-const STORE_NAME = 'files';
+const STORE_FILES = 'files';
+const STORE_INPUTS = 'inputGroups';
 
 const openDB = (callback) => {
-  const request = indexedDB.open(DB_NAME, 1);
+  const request = indexedDB.open(DB_NAME, 2);
   request.onupgradeneeded = (e) => {
     const db = e.target.result;
-    if (!db.objectStoreNames.contains(STORE_NAME)) {
-      db.createObjectStore(STORE_NAME);
+    if (!db.objectStoreNames.contains(STORE_FILES)) {
+      db.createObjectStore(STORE_FILES);
+    }
+    if (!db.objectStoreNames.contains(STORE_INPUTS)) {
+      db.createObjectStore(STORE_INPUTS, { keyPath: 'id', autoIncrement: true });
     }
   };
   request.onsuccess = () => callback(request.result);
   request.onerror = () => console.error('IndexedDB open error:', request.error);
 };
 
+const saveInputGroup = (data, callback) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readwrite');
+    const store = tx.objectStore(STORE_INPUTS);
+    store.add(data);
+    tx.oncomplete = () => {
+      db.close();
+      if (callback) callback();
+    };
+  });
+};
+
+const loadInputGroups = (callback) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readonly');
+    const store = tx.objectStore(STORE_INPUTS);
+    const request = store.getAll();
+    request.onsuccess = () => callback(request.result || []);
+    request.onerror = () => callback([]);
+    tx.oncomplete = () => db.close();
+  });
+};
+
 const saveFilesToIndexedDB = (files) => {
   openDB((db) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
+    const tx = db.transaction(STORE_FILES, 'readwrite');
+    const store = tx.objectStore(STORE_FILES);
     store.put(files, 'uploadedFiles');
     tx.oncomplete = () => db.close();
   });
@@ -27,8 +54,8 @@ const saveFilesToIndexedDB = (files) => {
 
 const loadFilesFromIndexedDB = (callback) => {
   openDB((db) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
+    const tx = db.transaction(STORE_FILES, 'readonly');
+    const store = tx.objectStore(STORE_FILES);
     const request = store.get('uploadedFiles');
     request.onsuccess = () => callback(request.result || []);
     request.onerror = () => callback([]);
@@ -44,6 +71,11 @@ export const EvalsInput = () => {
   const [formFields, setFormFields] = useState([]);
   const [expectedMap, setExpectedMap] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [inputGroups, setInputGroups] = useState([]);
+
+  useEffect(() => {
+    loadInputGroups(setInputGroups);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('evalsInput');
@@ -216,10 +248,32 @@ export const EvalsInput = () => {
     setIsLoading(false);
   }, [expectedMap, formFields, files, instruction, important, times]);
 
+  const handleLoadPrevious = useCallback(
+    (e) => {
+      const group = inputGroups.find((g) => g.id === Number(e.target.value));
+      if (group) {
+        setInstruction(group.instruction);
+        setImportant(group.important);
+        setFormFields(group.formFields || []);
+        setExpectedMap(group.expectedMap || {});
+        setFiles(group.files || []);
+      }
+    },
+    [inputGroups],
+  );
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
-      <div className="border-b border-neutral-300  bg-gray-50 p-4">
+      <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
         <h2 className="text-lg">Processing Input</h2>
+        <select onChange={handleLoadPrevious}>
+          <option value="">Load Previous</option>
+          {inputGroups.map((g) => (
+            <option key={g.id} value={g.id}>
+              Eval #{g.id}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="space-y-6 p-6">
         {/* Top Controls */}
@@ -432,32 +486,43 @@ export const EvalsInput = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
-          <label htmlFor="times" className="block text-sm">
-            Run Times
-          </label>
-          <input
-            type="number"
-            id="times"
-            value={times}
-            min="1"
-            max="10"
-            onChange={(e) => setTimes(Number(e.target.value))}
-            className="w-20 rounded border border-neutral-300 px-3 py-2 text-sm"
-          />
+        <div className="flex items-center justify-between gap-2">
           <button
-            className="hidden rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
-            onClick={handleSubmit}
-            disabled={
-              isLoading ||
-              !instruction.trim() ||
-              !files.length ||
-              !formFields.length ||
-              formFields.some((f) => !f.name)
+            onClick={() =>
+              saveInputGroup({ instruction, important, formFields, expectedMap, files })
             }
+            className="hidden cursor-pointer rounded px-6 py-2 transition-colors hover:bg-neutral-100 disabled:bg-gray-300 disabled:text-gray-500 md:block"
           >
-            {isLoading ? 'Processing...' : 'Process Documents'}
+            Save
           </button>
+
+          <div className="flex items-center justify-center gap-2">
+            <label htmlFor="times" className="block text-sm">
+              Run Times
+            </label>
+            <input
+              type="number"
+              id="times"
+              value={times}
+              min="1"
+              max="10"
+              onChange={(e) => setTimes(Number(e.target.value))}
+              className="w-20 rounded border border-neutral-300 px-3 py-2 text-sm"
+            />
+            <button
+              className="hidden cursor-pointer rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
+              onClick={handleSubmit}
+              disabled={
+                isLoading ||
+                !instruction.trim() ||
+                !files.length ||
+                !formFields.length ||
+                formFields.some((f) => !f.name)
+              }
+            >
+              {isLoading ? 'Processing...' : 'Process Documents'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
