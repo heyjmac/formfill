@@ -2,16 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 const DB_NAME = 'evalsDB';
-const STORE_FILES = 'files';
 const STORE_INPUTS = 'inputGroups';
 
 const openDB = (callback) => {
   const request = indexedDB.open(DB_NAME, 2);
   request.onupgradeneeded = (e) => {
     const db = e.target.result;
-    if (!db.objectStoreNames.contains(STORE_FILES)) {
-      db.createObjectStore(STORE_FILES);
-    }
     if (!db.objectStoreNames.contains(STORE_INPUTS)) {
       db.createObjectStore(STORE_INPUTS, { keyPath: 'id', autoIncrement: true });
     }
@@ -62,26 +58,6 @@ const loadInputGroups = (callback) => {
   });
 };
 
-const saveFilesToIndexedDB = (files) => {
-  openDB((db) => {
-    const tx = db.transaction(STORE_FILES, 'readwrite');
-    const store = tx.objectStore(STORE_FILES);
-    store.put(files, 'uploadedFiles');
-    tx.oncomplete = () => db.close();
-  });
-};
-
-const loadFilesFromIndexedDB = (callback) => {
-  openDB((db) => {
-    const tx = db.transaction(STORE_FILES, 'readonly');
-    const store = tx.objectStore(STORE_FILES);
-    const request = store.get('uploadedFiles');
-    request.onsuccess = () => callback(request.result || []);
-    request.onerror = () => callback([]);
-    tx.oncomplete = () => db.close();
-  });
-};
-
 export const EvalsInput = () => {
   const [instruction, setInstruction] = useState('');
   const [important, setImportant] = useState('');
@@ -99,27 +75,22 @@ export const EvalsInput = () => {
   }, []);
 
   useEffect(() => {
-    const saved = localStorage.getItem('evalsInput');
-    if (saved) {
-      const { instruction, important, times, formFields, expectedMap } = JSON.parse(saved);
-      setInstruction(instruction || '');
-      setImportant(important || '');
-      setTimes(times || 1);
-      setFormFields(formFields || []);
-      setExpectedMap(expectedMap || {});
+    const lastGroupId = Number(localStorage.getItem('evalsInput:lastGroupId'));
+    if (lastGroupId) {
+      const group = inputGroups.find((g) => g.id === lastGroupId);
+      if (group) {
+        setInstruction(group.instruction);
+        setImportant(group.important);
+        setFormFields(group.formFields || []);
+        setExpectedMap(group.expectedMap || {});
+        setFiles(group.files || []);
+        setSelectedGroupId(lastGroupId);
+        setRenameValue(group.name || '');
+      }
     }
-
-    loadFilesFromIndexedDB((loadedFiles) => {
-      if (loadedFiles?.length) setFiles(loadedFiles);
-    });
-  }, []);
+  }, [inputGroups]);
 
   useEffect(() => {
-    localStorage.setItem(
-      'evalsInput',
-      JSON.stringify({ instruction, important, times, formFields, expectedMap }),
-    );
-
     events.emit('evals:input', {
       instruction,
       important,
@@ -127,8 +98,6 @@ export const EvalsInput = () => {
       expected: expectedMap,
       files,
     });
-
-    if (files.length) saveFilesToIndexedDB(files);
   }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
   const handleFileUpload = useCallback(
@@ -273,6 +242,7 @@ export const EvalsInput = () => {
     (e) => {
       const id = Number(e.target.value);
       setSelectedGroupId(id);
+      localStorage.setItem('evalsInput:lastGroupId', id);
       const group = inputGroups.find((g) => g.id === id);
       if (group) {
         setInstruction(group.instruction);
