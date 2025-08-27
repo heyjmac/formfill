@@ -38,12 +38,12 @@ export const EvalsResults = () => {
   if (!summary || results?.length === 0) return null;
 
   return (
-    <div className="space-y-10">
+    <div className="break-inside-avoid space-y-10">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-normal">Processing Runs</h2>
         <button
           onClick={handlePrint}
-          className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+          className="hidden rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 md:block"
         >
           Print / Save as PDF
         </button>
@@ -59,7 +59,7 @@ export const EvalsResults = () => {
               <div className="flex items-center">
                 <span className="material-symbols-outlined mr-2 text-gray-600">analytics</span>
                 <span>{`Iteration ${run.run}`}</span>
-                {run.file && <span className="text-xs text-gray-500">({run.file})</span>}
+                {run.file && <span className="text-xs text-gray-500"> ({run.file})</span>}
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
                 <span>

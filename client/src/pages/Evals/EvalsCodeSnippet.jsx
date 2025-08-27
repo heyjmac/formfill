@@ -92,16 +92,18 @@ export const EvalsCodeSnippet = () => {
             expand_more
           </span>
         </summary>
-        <div className="relative mt-3 overflow-x-auto rounded bg-gray-900 p-3 font-mono text-sm text-gray-100">
+        <div className="relative mt-3 rounded bg-gray-900 p-3 font-mono text-sm text-gray-100">
           <button
             onClick={copyToClipboard}
             className="absolute right-3 top-3 rounded bg-gray-700 px-2 py-1 text-xs text-white hover:bg-gray-600"
           >
             {isCopying ? 'Copied!' : 'Copy'}
           </button>
-          <pre ref={preRef} className="whitespace-pre">
-            {code}
-          </pre>
+          <div className="overflow-x-auto">
+            <pre ref={preRef} className="whitespace-pre">
+              {code}
+            </pre>
+          </div>
         </div>
       </details>
     </div>
