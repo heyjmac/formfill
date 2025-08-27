@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const API_URL = 'http://localhost:3000/api/formfill';
 const TIMEOUT = 60000;
 const STRICT = false;
+const TIMES = 3;
 
 const INPUT_BASE_DIR = path.join(__dirname, 'input');
 const RESULTS_DIR = path.join(__dirname, 'results');
@@ -199,66 +200,68 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
       latCount = 0;
 
     for (const filePath of pdfs) {
-      const base = path.basename(filePath);
-      const expectedPath = path.join(UPLOADS_DIR, base.replace(/\.[^.]+$/, '') + '.json');
-      process.stdout.write(`• ${base} … `);
+      for (let i = 0; i < TIMES; i++) {
+        const base = path.basename(filePath);
+        const expectedPath = path.join(UPLOADS_DIR, base.replace(/\.[^.]+$/, '') + '.json');
+        process.stdout.write(`• ${base} … `);
 
-      let expected = null;
-      if (fs.existsSync(expectedPath)) {
+        let expected = null;
+        if (fs.existsSync(expectedPath)) {
+          try {
+            expected = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
+          } catch {}
+        }
+
         try {
-          expected = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
-        } catch {}
-      }
-
-      try {
-        const res = await postFormFill({ instruction, important, formFields, filePath });
-        const got = res.json?.data ?? {};
-        let cmp = null,
-          pct = null;
-        if (expected && Object.keys(expected).length) {
-          cmp = compare(expected, got);
-          pct = Math.round(cmp.score * 100);
-          if (!Number.isNaN(cmp.score)) {
-            sum += cmp.score;
-            counted++;
+          const res = await postFormFill({ instruction, important, formFields, filePath });
+          const got = res.json?.data ?? {};
+          let cmp = null,
+            pct = null;
+          if (expected && Object.keys(expected).length) {
+            cmp = compare(expected, got);
+            pct = Math.round(cmp.score * 100);
+            if (!Number.isNaN(cmp.score)) {
+              sum += cmp.score;
+              counted++;
+            }
           }
+          if (Number.isFinite(res.latency_ms)) {
+            latSum += res.latency_ms;
+            latCount++;
+          }
+          const out = {
+            file: base,
+            ok: res.ok,
+            status: res.status,
+            expected_present: Boolean(expected),
+            percent: pct,
+            compare: cmp,
+            latency_ms: res.latency_ms,
+            headers: res.headers,
+            response: res.json,
+          };
+          fs.writeFileSync(
+            path.join(blockResultDir, `${slug(base)}_${i + 1}.json`),
+            JSON.stringify(out, null, 2),
+          );
+          const lat = res.latency_ms != null ? `${Math.round(res.latency_ms)}ms` : 'n/a';
+          console.log(
+            res.ok
+              ? pct !== null
+                ? `${pct}% • ${lat}`
+                : `OK • ${lat}`
+              : `HTTP ${res.status} • ${lat}`,
+          );
+        } catch (e) {
+          const out = { file: base, ok: false, status: 'ERR', error: String(e) };
+          fs.writeFileSync(
+            path.join(blockResultDir, `${slug(base)}_${i + 1}.json`),
+            JSON.stringify(out, null, 2),
+          );
+          sum += 0;
+          counted++;
+          console.log('ERROR');
         }
-        if (Number.isFinite(res.latency_ms)) {
-          latSum += res.latency_ms;
-          latCount++;
-        }
-        const out = {
-          file: base,
-          ok: res.ok,
-          status: res.status,
-          expected_present: Boolean(expected),
-          percent: pct,
-          compare: cmp,
-          latency_ms: res.latency_ms,
-          headers: res.headers,
-          response: res.json,
-        };
-        fs.writeFileSync(
-          path.join(blockResultDir, `${slug(base)}.json`),
-          JSON.stringify(out, null, 2),
-        );
-        const lat = res.latency_ms != null ? `${Math.round(res.latency_ms)}ms` : 'n/a';
-        console.log(
-          res.ok
-            ? pct !== null
-              ? `${pct}% • ${lat}`
-              : `OK • ${lat}`
-            : `HTTP ${res.status} • ${lat}`,
-        );
-      } catch (e) {
-        const out = { file: base, ok: false, status: 'ERR', error: String(e) };
-        fs.writeFileSync(
-          path.join(blockResultDir, `${slug(base)}.json`),
-          JSON.stringify(out, null, 2),
-        );
-        sum += 0;
-        counted++;
-        console.log('ERROR');
       }
     }
 
