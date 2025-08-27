@@ -67,6 +67,14 @@ export const EvalsInput = () => {
       JSON.stringify({ instruction, important, times, formFields, expectedMap }),
     );
 
+    events.emit('evals:input', {
+      instruction,
+      important,
+      formFields,
+      expected: expectedMap,
+      files,
+    });
+
     if (files.length) saveFilesToIndexedDB(files);
   }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
@@ -203,13 +211,6 @@ export const EvalsInput = () => {
     });
 
     const json = await res.json();
-    events.emit('evals:input', {
-      instruction,
-      important,
-      formFields,
-      expected: expectedMap,
-      files,
-    });
     events.emit('evals:summary', json.summary);
     events.emit('evals:results', json.results);
     setIsLoading(false);

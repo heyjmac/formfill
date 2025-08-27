@@ -55,6 +55,10 @@ export const EvalsSummary = () => {
               <p className="text-xl">{avg_latency_ms}</p>
             </div>
             <div>
+              <p className="text-xs text-gray-500">Total Cost</p>
+              <p className="text-xl">${total_cost_usd}</p>
+            </div>
+            <div>
               <p className="text-xs text-gray-500">Avg Precision</p>
               <p className="text-xl">{(avg_precision * 100).toFixed(2)}%</p>
             </div>
@@ -65,10 +69,6 @@ export const EvalsSummary = () => {
             <div>
               <p className="text-xs text-gray-500">Avg F1 Score</p>
               <p className="text-xl">{(avg_f1 * 100).toFixed(2)}%</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Total Cost</p>
-              <p className="text-xl">{total_cost_usd}</p>
             </div>
           </div>
         </div>
