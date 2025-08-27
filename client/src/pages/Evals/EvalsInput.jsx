@@ -121,7 +121,6 @@ export const EvalsInput = () => {
     (name) => {
       setFiles((prev) => {
         const updated = prev.filter((f) => f.name !== name);
-        saveFilesToIndexedDB(updated);
         return updated;
       });
       const updatedMap = { ...expectedMap };
