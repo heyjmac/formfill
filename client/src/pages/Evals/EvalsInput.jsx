@@ -292,7 +292,7 @@ export const EvalsInput = () => {
                   <th className="w-16 p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-neutral-300">
                 {formFields.map((field, i) => (
                   <tr key={i}>
                     <td className="p-3">

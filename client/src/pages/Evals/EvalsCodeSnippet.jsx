@@ -43,7 +43,7 @@ ${formFields?.map(generateInput).join('\n\n')}
 </form>`;
 
   return (
-    <div className="border-b bg-gray-50 p-4">
+    <div className="border-b border-neutral-300 bg-gray-50 p-4">
       <details className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between">
           <span className="text-sm font-medium">Generated Form Code</span>
