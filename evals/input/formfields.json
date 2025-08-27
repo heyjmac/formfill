@@ -36,7 +36,7 @@
   },
   {
     "name": "cpf",
-    "description": "Brazilian individual taxpayer registry (CPF) formatted with dots and dash",
+    "description": "Only fill if natural person. Brazilian individual taxpayer registry (CPF) formatted with dots and dash",
     "explicitFormat": "XXX.XXX.XXX-XX",
     "type": "text",
     "tag": "INPUT",
@@ -44,7 +44,7 @@
   },
   {
     "name": "rg",
-    "description": "Brazilian general registry (RG) number",
+    "description": "Only fill if natural person. Brazilian general registry (RG) number",
     "explicitFormat": null,
     "type": "text",
     "tag": "INPUT",
@@ -52,14 +52,14 @@
   },
   {
     "name": "cnpj",
-    "description": "Brazilian national registry (CNPJ) number",
+    "description": "Only fill if company. Brazilian national registry (CNPJ) number",
     "explicitFormat": null,
     "type": "text",
     "tag": "INPUT",
     "pattern": "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}"
   },
   {
-    "name": "date_of_birth",
+    "name": "date_of_birth_or_establishment",
     "description": "Birth date or establishment date in month/day/year format of the person or company",
     "explicitFormat": "MM/DD/YYYY",
     "type": "text",
@@ -74,7 +74,7 @@
   },
   {
     "name": "marital_status",
-    "description": "Current marital status of the person, if a natural person",
+    "description": "Only fill if natural person. Current marital status.",
     "explicitFormat": null,
     "type": "text",
     "tag": "INPUT"
@@ -139,7 +139,7 @@
   },
   {
     "name": "gender",
-    "description": "Gender selection of the person, if a natural person",
+    "description": "Only fill if natural person. Gender selection of the person",
     "explicitFormat": null,
     "type": "radio",
     "tag": "INPUT",
@@ -164,20 +164,20 @@
     "max": "120"
   },
   {
-    "name": "hobbies",
-    "description": "Multiple hobbies selection of the person, if a natural person",
+    "name": "requests",
+    "description": "Final requests",
     "explicitFormat": null,
     "type": "checkbox",
     "tag": "INPUT"
   },
   {
-    "name": "satisfaction",
-    "description": "Satisfaction level from 1 to 10 of the person or company",
+    "name": "lawsuit_amount",
+    "description": "Lawsuit amount in USD",
     "explicitFormat": null,
     "type": "range",
     "tag": "INPUT",
     "min": "1",
-    "max": "10"
+    "max": "10000000"
   },
   {
     "name": "signature_date",
