@@ -33,19 +33,19 @@ export const MainDataSection = () => {
     y += 6;
     doc.text(`Important Note: ${input?.important || ''}`, 10, y);
     y += 6;
-    doc.text(`Total Files: ${summary.total_files}`, 10, y);
+    doc.text(`Total Files: ${summary?.total_files}`, 10, y);
     y += 6;
-    doc.text(`Total Runs: ${summary.total_runs}`, 10, y);
+    doc.text(`Total Runs: ${summary?.total_runs}`, 10, y);
     y += 6;
-    doc.text(`Avg Latency: ${(summary.avg_latency_ms / 1000).toFixed(2)}s`, 10, y);
+    doc.text(`Avg Latency: ${(summary?.avg_latency_ms / 1000).toFixed(2)}s`, 10, y);
     y += 6;
-    doc.text(`Avg Precision: ${(summary.avg_precision * 100).toFixed(2)}%`, 10, y);
+    doc.text(`Avg Precision: ${(summary?.avg_precision * 100).toFixed(2)}%`, 10, y);
     y += 6;
-    doc.text(`Avg Recall: ${(summary.avg_recall * 100).toFixed(2)}%`, 10, y);
+    doc.text(`Avg Recall: ${(summary?.avg_recall * 100).toFixed(2)}%`, 10, y);
     y += 6;
-    doc.text(`Avg F1 Score: ${(summary.avg_f1 * 100).toFixed(2)}%`, 10, y);
+    doc.text(`Avg F1 Score: ${(summary?.avg_f1 * 100).toFixed(2)}%`, 10, y);
     y += 6;
-    doc.text(`Total Cost: $${summary.total_cost_usd}`, 10, y);
+    doc.text(`Total Cost: $${summary?.total_cost_usd}`, 10, y);
     y += 10;
 
     // Form Fields
@@ -54,7 +54,7 @@ export const MainDataSection = () => {
       doc.text('Form Fields:', 10, y);
       y += 8;
       doc.setFontSize(11);
-      input.formFields.forEach((f) => {
+      input?.formFields.forEach((f) => {
         doc.text(`- ${f.name} (${f.type}) — ${f.description || ''}`, 12, y);
         y += 6;
       });
@@ -67,7 +67,7 @@ export const MainDataSection = () => {
       doc.text('Expected Values:', 10, y);
       y += 8;
       doc.setFontSize(11);
-      Object.entries(input.expected).forEach(([file, values]) => {
+      Object.entries(input?.expected).forEach(([file, values]) => {
         doc.text(`File: ${file}`, 12, y);
         y += 6;
         Object.entries(values).forEach(([key, val]) => {
@@ -79,7 +79,7 @@ export const MainDataSection = () => {
     }
 
     // Results Section
-    results.forEach((run, i) => {
+    results?.forEach((run, i) => {
       if (y > 270) {
         doc.addPage();
         y = 10;
@@ -134,21 +134,21 @@ export const MainDataSection = () => {
 
     doc.save('evals_results.pdf');
   }, [
-    input.expected,
-    input.formFields,
+    input?.expected,
+    input?.formFields,
     input?.important,
     input?.instruction,
     results,
-    summary.avg_f1,
-    summary.avg_latency_ms,
-    summary.avg_precision,
-    summary.avg_recall,
-    summary.total_cost_usd,
-    summary.total_files,
-    summary.total_runs,
+    summary?.avg_f1,
+    summary?.avg_latency_ms,
+    summary?.avg_precision,
+    summary?.avg_recall,
+    summary?.total_cost_usd,
+    summary?.total_files,
+    summary?.total_runs,
   ]);
 
-  if (!summary || results.length === 0) return null;
+  if (!summary || results?.length === 0) return null;
 
   return (
     <div className="space-y-10">
@@ -162,7 +162,7 @@ export const MainDataSection = () => {
         </button>
       </div>
       <div className="space-y-4">
-        {results.map((run, i) => (
+        {results?.map((run, i) => (
           <details key={i} className="group rounded border border-neutral-300">
             <summary className="flex cursor-pointer items-center justify-between p-4">
               <div className="flex items-center">
