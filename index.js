@@ -338,6 +338,14 @@ app.post(
       return res.status(400).json({ error: 'Missing formFields or files' });
     }
 
+    const input = {
+      instruction,
+      important,
+      times,
+      files,
+      formFields,
+      expected: expectedMap,
+    };
     const results = [];
 
     for (const file of files) {
@@ -402,7 +410,7 @@ app.post(
     summary.avg_f1 = metricCount ? +(f1Sum / metricCount).toFixed(4) : null;
     summary.total_cost_usd = +summary.total_cost_usd.toFixed(6);
 
-    res.json({ total_runs: results.length, times, summary, results });
+    res.json({ input, total_runs: results.length, summary, results });
   },
 );
 
