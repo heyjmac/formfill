@@ -280,7 +280,7 @@ export const EvalsInput = () => {
         </div>
 
         {/* Form Fields Table */}
-        <div>
+        <div className="break-inside-avoid">
           <label className="mb-2 block text-sm">Form Fields</label>
           <div className="overflow-hidden rounded border border-neutral-300">
             <table className="w-full text-sm">
@@ -375,7 +375,7 @@ export const EvalsInput = () => {
           </div>
         </div>
 
-        <div>
+        <div className="break-inside-avoid">
           <div className="rounded border border-neutral-300 p-4">
             <label className="mb-2 block text-sm">Expected Results</label>
             {Object.entries(expectedMap).length === 0 && (

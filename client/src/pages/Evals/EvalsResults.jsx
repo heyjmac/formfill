@@ -50,7 +50,11 @@ export const EvalsResults = () => {
       </div>
       <div className="space-y-4">
         {results?.map((run, i) => (
-          <details key={i} className="group rounded border border-neutral-300" open>
+          <details
+            key={i}
+            className="group break-inside-avoid rounded border border-neutral-300"
+            open
+          >
             <summary className="flex cursor-pointer items-center justify-between p-4">
               <div className="flex items-center">
                 <span className="material-symbols-outlined mr-2 text-gray-600">analytics</span>

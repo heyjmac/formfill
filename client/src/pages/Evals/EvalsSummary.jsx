@@ -38,7 +38,7 @@ export const EvalsSummary = () => {
   }, []);
 
   return (
-    <div ref={summaryRef}>
+    <div ref={summaryRef} className="break-inside-avoid">
       {total_files ? (
         <div className="rounded border border-neutral-300 bg-gray-50 p-6">
           <div className="grid grid-cols-4 gap-4">
