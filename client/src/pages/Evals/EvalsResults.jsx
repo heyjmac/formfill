@@ -1,164 +1,51 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
-import jsPDF from 'jspdf';
 
 export const EvalsResults = () => {
-  const [input, setInput] = useState(null);
   const [summary, setSummary] = useState(null);
   const [results, setResults] = useState([]);
 
   useEffect(() => {
-    const unsubscribe1 = events.on('evals:input', setInput, true);
-    const unsubscribe2 = events.on('evals:summary', setSummary, true);
-    const unsubscribe3 = events.on('evals:results', setResults, true);
+    const unsubscribe1 = events.on('evals:summary', setSummary, true);
+    const unsubscribe2 = events.on('evals:results', setResults, true);
     return () => {
       unsubscribe1();
       unsubscribe2();
-      unsubscribe3();
     };
   }, []);
 
-  const handleDownloadPDF = useCallback(() => {
-    const doc = new jsPDF();
-    let y = 10;
+  const handlePrint = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const details = Array.from(document.querySelectorAll('details'));
+    const prevOpen = details.map((d) => d.open);
+    details.forEach((d) => (d.open = true));
 
-    // Title
-    doc.setFontSize(18);
-    doc.text('Evals Results Summary', 10, y);
-    y += 10;
+    const restore = () => {
+      details.forEach((d, i) => (d.open = prevOpen[i]));
+      window.removeEventListener('afterprint', restore);
+      if (mql?.removeEventListener) mql.removeEventListener('change', onChange);
+    };
+    const onChange = (e) => {
+      if (!e.matches) restore();
+    };
+    const mql = window.matchMedia('print');
+    if (mql?.addEventListener) mql.addEventListener('change', onChange);
+    window.addEventListener('afterprint', restore);
 
-    // Summary Section
-    doc.setFontSize(12);
-    doc.text(`Instruction: ${input?.instruction || ''}`, 10, y);
-    y += 6;
-    doc.text(`Important Note: ${input?.important || ''}`, 10, y);
-    y += 6;
-    doc.text(`Total Files: ${summary?.total_files}`, 10, y);
-    y += 6;
-    doc.text(`Total Runs: ${summary?.total_runs}`, 10, y);
-    y += 6;
-    doc.text(`Avg Latency: ${(summary?.avg_latency_ms / 1000).toFixed(2)}s`, 10, y);
-    y += 6;
-    doc.text(`Avg Precision: ${(summary?.avg_precision * 100).toFixed(2)}%`, 10, y);
-    y += 6;
-    doc.text(`Avg Recall: ${(summary?.avg_recall * 100).toFixed(2)}%`, 10, y);
-    y += 6;
-    doc.text(`Avg F1 Score: ${(summary?.avg_f1 * 100).toFixed(2)}%`, 10, y);
-    y += 6;
-    doc.text(`Total Cost: $${summary?.total_cost_usd}`, 10, y);
-    y += 10;
-
-    // Form Fields
-    if (input?.formFields?.length) {
-      doc.setFontSize(14);
-      doc.text('Form Fields:', 10, y);
-      y += 8;
-      doc.setFontSize(11);
-      input?.formFields.forEach((f) => {
-        doc.text(`- ${f.name} (${f.type}) — ${f.description || ''}`, 12, y);
-        y += 6;
-      });
-      y += 4;
-    }
-
-    // Expected Values
-    if (input?.expected) {
-      doc.setFontSize(14);
-      doc.text('Expected Values:', 10, y);
-      y += 8;
-      doc.setFontSize(11);
-      Object.entries(input?.expected).forEach(([file, values]) => {
-        doc.text(`File: ${file}`, 12, y);
-        y += 6;
-        Object.entries(values).forEach(([key, val]) => {
-          doc.text(`  ${key}: ${val}`, 14, y);
-          y += 6;
-        });
-      });
-      y += 4;
-    }
-
-    // Results Section
-    results?.forEach((run, i) => {
-      if (y > 270) {
-        doc.addPage();
-        y = 10;
-      }
-
-      doc.setFontSize(14);
-      doc.text(`Iteration ${run.run}`, 10, y);
-      y += 8;
-      doc.setFontSize(11);
-
-      if (run.ok && run.compare?.details) {
-        doc.text(`Precision: ${(run.precision * 100).toFixed(2)}%`, 12, y);
-        y += 6;
-        doc.text(`Recall: ${(run.recall * 100).toFixed(2)}%`, 12, y);
-        y += 6;
-        doc.text(`F1 Score: ${(run.f1 * 100).toFixed(2)}%`, 12, y);
-        y += 6;
-        doc.text(`Latency: ${(run.latency_ms / 1000).toFixed(2)}s`, 12, y);
-        y += 6;
-        doc.text(`Cost: $${run.total_cost}`, 12, y);
-        y += 6;
-
-        doc.text(`Correct: ${run.compare.correct}`, 12, y);
-        y += 6;
-        doc.text(`Wrong: ${run.compare.wrong}`, 12, y);
-        y += 6;
-        doc.text(`Missing: ${run.compare.missing}`, 12, y);
-        y += 6;
-        doc.text(`Extra: ${run.compare.extra}`, 12, y);
-        y += 6;
-
-        run.compare.details.forEach((d, idx) => {
-          if (y > 270) {
-            doc.addPage();
-            y = 10;
-          }
-          doc.setFontSize(10);
-          doc.text(`${d.key}: ${d.ok ? '✔' : '✘'}`, 14, y);
-          y += 5;
-          doc.text(`Expected: ${d.expected}`, 16, y);
-          y += 5;
-          doc.text(`Got: ${d.got}`, 16, y);
-          y += 6;
-        });
-      } else {
-        doc.text(`Error: ${run.error || 'Unknown error'}`, 12, y);
-        y += 8;
-      }
-
-      y += 4;
-    });
-
-    doc.save('evals_results.pdf');
-  }, [
-    input?.expected,
-    input?.formFields,
-    input?.important,
-    input?.instruction,
-    results,
-    summary?.avg_f1,
-    summary?.avg_latency_ms,
-    summary?.avg_precision,
-    summary?.avg_recall,
-    summary?.total_cost_usd,
-    summary?.total_files,
-    summary?.total_runs,
-  ]);
+    requestAnimationFrame(() => window.print());
+  }, []);
 
   if (!summary || results?.length === 0) return null;
 
   return (
     <div className="space-y-10">
-      <h2 className="mb-4 text-lg font-normal">Processing Runs</h2>
-      <div className="flex justify-end">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-normal">Processing Runs</h2>
         <button
-          onClick={handleDownloadPDF}
-          className="mb-4 rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+          onClick={handlePrint}
+          className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
         >
-          Download PDF
+          Print / Save as PDF
         </button>
       </div>
       <div className="space-y-4">
@@ -182,7 +69,7 @@ export const EvalsResults = () => {
             <div className="border-t border-neutral-300 p-4">
               {run.ok && run.compare?.details ? (
                 <>
-                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
+                  <div className="mb-4 grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-xs text-gray-500">Precision</p>
                       <p>{(run.precision * 100).toFixed(2)}%</p>

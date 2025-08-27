@@ -446,7 +446,7 @@ export const EvalsInput = () => {
             className="w-20 rounded border border-neutral-300 px-3 py-2 text-sm"
           />
           <button
-            className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500"
+            className="hidden rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
             onClick={handleSubmit}
             disabled={
               isLoading ||
