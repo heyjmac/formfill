@@ -43,15 +43,15 @@ export const MainDataSection = () => {
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
                     <div>
                       <p className="text-xs text-gray-500">Precision</p>
-                      <p>{run.precision}</p>
+                      <p>{(run.precision * 100).toFixed(2)}%}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Recall</p>
-                      <p>{run.recall}</p>
+                      <p>{(run.recall * 100).toFixed(2)}%}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">F1 Score</p>
-                      <p>{run.f1}</p>
+                      <p>{(run.f1 * 100).toFixed(2)}%}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Tokens</p>

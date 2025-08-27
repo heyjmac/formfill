@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 export const SummaryCard = () => {
@@ -9,6 +9,7 @@ export const SummaryCard = () => {
   const [total_cost_usd, setTotalCostUsd] = useState(0);
   const [total_files, setTotalFiles] = useState(0);
   const [total_runs, setTotalRuns] = useState(0);
+  const summaryRef = useRef(null);
 
   useEffect(() => {
     const handler = ({
@@ -27,13 +28,17 @@ export const SummaryCard = () => {
       setTotalCostUsd(total_cost_usd);
       setTotalFiles(total_files);
       setTotalRuns(total_runs);
+
+      setTimeout(() => {
+        summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 600);
     };
     events.on('evals:summary', handler);
     return () => events.off('evals:summary', handler);
   }, []);
 
   return (
-    <>
+    <div ref={summaryRef}>
       {total_files ? (
         <div className="rounded border border-neutral-300 bg-gray-50 p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -70,6 +75,6 @@ export const SummaryCard = () => {
       ) : (
         <></>
       )}
-    </>
+    </div>
   );
 };
