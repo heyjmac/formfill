@@ -1,24 +1,166 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
+import jsPDF from 'jspdf';
 
 export const MainDataSection = () => {
   const [input, setInput] = useState(null);
+  const [summary, setSummary] = useState(null);
   const [results, setResults] = useState([]);
 
   useEffect(() => {
-    events.on('evals:summary', setInput);
-    events.on('evals:results', setResults);
+    const unsubscribe1 = events.on('evals:input', setInput, true);
+    const unsubscribe2 = events.on('evals:summary', setSummary, true);
+    const unsubscribe3 = events.on('evals:results', setResults, true);
     return () => {
-      events.off('evals:summary', setInput);
-      events.off('evals:results', setResults);
+      unsubscribe1();
+      unsubscribe2();
+      unsubscribe3();
     };
   }, []);
 
-  if (!input || results.length === 0) return null;
+  const handleDownloadPDF = useCallback(() => {
+    const doc = new jsPDF();
+    let y = 10;
+
+    // Title
+    doc.setFontSize(18);
+    doc.text('Evals Results Summary', 10, y);
+    y += 10;
+
+    // Summary Section
+    doc.setFontSize(12);
+    doc.text(`Instruction: ${input?.instruction || ''}`, 10, y);
+    y += 6;
+    doc.text(`Important Note: ${input?.important || ''}`, 10, y);
+    y += 6;
+    doc.text(`Total Files: ${summary.total_files}`, 10, y);
+    y += 6;
+    doc.text(`Total Runs: ${summary.total_runs}`, 10, y);
+    y += 6;
+    doc.text(`Avg Latency: ${(summary.avg_latency_ms / 1000).toFixed(2)}s`, 10, y);
+    y += 6;
+    doc.text(`Avg Precision: ${(summary.avg_precision * 100).toFixed(2)}%`, 10, y);
+    y += 6;
+    doc.text(`Avg Recall: ${(summary.avg_recall * 100).toFixed(2)}%`, 10, y);
+    y += 6;
+    doc.text(`Avg F1 Score: ${(summary.avg_f1 * 100).toFixed(2)}%`, 10, y);
+    y += 6;
+    doc.text(`Total Cost: $${summary.total_cost_usd}`, 10, y);
+    y += 10;
+
+    // Form Fields
+    if (input?.formFields?.length) {
+      doc.setFontSize(14);
+      doc.text('Form Fields:', 10, y);
+      y += 8;
+      doc.setFontSize(11);
+      input.formFields.forEach((f) => {
+        doc.text(`- ${f.name} (${f.type}) — ${f.description || ''}`, 12, y);
+        y += 6;
+      });
+      y += 4;
+    }
+
+    // Expected Values
+    if (input?.expected) {
+      doc.setFontSize(14);
+      doc.text('Expected Values:', 10, y);
+      y += 8;
+      doc.setFontSize(11);
+      Object.entries(input.expected).forEach(([file, values]) => {
+        doc.text(`File: ${file}`, 12, y);
+        y += 6;
+        Object.entries(values).forEach(([key, val]) => {
+          doc.text(`  ${key}: ${val}`, 14, y);
+          y += 6;
+        });
+      });
+      y += 4;
+    }
+
+    // Results Section
+    results.forEach((run, i) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 10;
+      }
+
+      doc.setFontSize(14);
+      doc.text(`Iteration ${run.run}`, 10, y);
+      y += 8;
+      doc.setFontSize(11);
+
+      if (run.ok && run.compare?.details) {
+        doc.text(`Precision: ${(run.precision * 100).toFixed(2)}%`, 12, y);
+        y += 6;
+        doc.text(`Recall: ${(run.recall * 100).toFixed(2)}%`, 12, y);
+        y += 6;
+        doc.text(`F1 Score: ${(run.f1 * 100).toFixed(2)}%`, 12, y);
+        y += 6;
+        doc.text(`Latency: ${(run.latency_ms / 1000).toFixed(2)}s`, 12, y);
+        y += 6;
+        doc.text(`Cost: $${run.total_cost}`, 12, y);
+        y += 6;
+
+        doc.text(`Correct: ${run.compare.correct}`, 12, y);
+        y += 6;
+        doc.text(`Wrong: ${run.compare.wrong}`, 12, y);
+        y += 6;
+        doc.text(`Missing: ${run.compare.missing}`, 12, y);
+        y += 6;
+        doc.text(`Extra: ${run.compare.extra}`, 12, y);
+        y += 6;
+
+        run.compare.details.forEach((d, idx) => {
+          if (y > 270) {
+            doc.addPage();
+            y = 10;
+          }
+          doc.setFontSize(10);
+          doc.text(`${d.key}: ${d.ok ? '✔' : '✘'}`, 14, y);
+          y += 5;
+          doc.text(`Expected: ${d.expected}`, 16, y);
+          y += 5;
+          doc.text(`Got: ${d.got}`, 16, y);
+          y += 6;
+        });
+      } else {
+        doc.text(`Error: ${run.error || 'Unknown error'}`, 12, y);
+        y += 8;
+      }
+
+      y += 4;
+    });
+
+    doc.save('evals_results.pdf');
+  }, [
+    input.expected,
+    input.formFields,
+    input?.important,
+    input?.instruction,
+    results,
+    summary.avg_f1,
+    summary.avg_latency_ms,
+    summary.avg_precision,
+    summary.avg_recall,
+    summary.total_cost_usd,
+    summary.total_files,
+    summary.total_runs,
+  ]);
+
+  if (!summary || results.length === 0) return null;
 
   return (
     <div className="space-y-10">
       <h2 className="mb-4 text-lg font-normal">Processing Runs</h2>
+      <div className="flex justify-end">
+        <button
+          onClick={handleDownloadPDF}
+          className="mb-4 rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+        >
+          Download PDF
+        </button>
+      </div>
       <div className="space-y-4">
         {results.map((run, i) => (
           <details key={i} className="group rounded border border-neutral-300">
@@ -43,15 +185,15 @@ export const MainDataSection = () => {
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
                     <div>
                       <p className="text-xs text-gray-500">Precision</p>
-                      <p>{(run.precision * 100).toFixed(2)}%}</p>
+                      <p>{(run.precision * 100).toFixed(2)}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Recall</p>
-                      <p>{(run.recall * 100).toFixed(2)}%}</p>
+                      <p>{(run.recall * 100).toFixed(2)}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">F1 Score</p>
-                      <p>{(run.f1 * 100).toFixed(2)}%}</p>
+                      <p>{(run.f1 * 100).toFixed(2)}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Tokens</p>

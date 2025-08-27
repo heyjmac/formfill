@@ -203,6 +203,13 @@ export const Input = () => {
     });
 
     const json = await res.json();
+    events.emit('evals:input', {
+      instruction,
+      important,
+      formFields,
+      expected: expectedMap,
+      files,
+    });
     events.emit('evals:summary', json.summary);
     events.emit('evals:results', json.results);
     setIsLoading(false);
