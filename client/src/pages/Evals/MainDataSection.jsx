@@ -28,7 +28,9 @@ export const MainDataSection = () => {
                 <span>{`Iteration ${run.run}`}</span>
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
-                <span>Response Time: {(run.latency_ms / 1000).toFixed(2)}s</span>
+                <span>
+                  Response Time: {run.latency_ms ? (run.latency_ms / 1000).toFixed(2) + 's' : '—'}
+                </span>
                 <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">
                   expand_more
                 </span>
@@ -36,44 +38,55 @@ export const MainDataSection = () => {
             </summary>
 
             <div className="border-t p-4">
-              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
-                <div>
-                  <p className="text-xs text-gray-500">Precision</p>
-                  <p>{run.precision}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Recall</p>
-                  <p>{run.recall}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">F1 Score</p>
-                  <p>{run.f1}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Tokens</p>
-                  <p>{run.tokens?.totalTokenCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Cost</p>
-                  <p>${run.total_cost}</p>
-                </div>
-              </div>
-
-              <div className="rounded border">
-                <div className="border-b bg-gray-50 p-3 font-medium">Extracted Fields</div>
-                {run.compare?.details?.map((field, idx) => (
-                  <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
-                    <div className="flex justify-between">
-                      <p className="text-sm font-medium">{field.key}</p>
-                      <span className="material-symbols-outlined text-sm">
-                        {field.ok ? 'check_circle' : 'cancel'}
-                      </span>
+              {run.ok && run.compare?.details ? (
+                <>
+                  <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Precision</p>
+                      <p>{run.precision}</p>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
-                    <p className="mt-1">Got: {field.got}</p>
+                    <div>
+                      <p className="text-xs text-gray-500">Recall</p>
+                      <p>{run.recall}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">F1 Score</p>
+                      <p>{run.f1}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Tokens</p>
+                      <p>{run.tokens?.totalTokenCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Cost</p>
+                      <p>${run.total_cost}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="rounded border">
+                    <div className="border-b bg-gray-50 p-3 font-medium">Extracted Fields</div>
+                    {run.compare.details.map((field, idx) => (
+                      <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
+                        <div className="flex justify-between">
+                          <p className="text-sm font-medium">{field.key}</p>
+                          <span className="material-symbols-outlined text-sm">
+                            {field.ok ? 'check_circle' : 'cancel'}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
+                        <p className="mt-1">Got: {field.got}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="rounded border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm font-medium text-red-800">Error</p>
+                  <p className="mt-1 text-sm text-red-700">
+                    {run.error || 'Unknown error occurred.'}
+                  </p>
+                </div>
+              )}
             </div>
           </details>
         ))}
