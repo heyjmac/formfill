@@ -329,7 +329,7 @@ app.post(
     let formFields, expectedMap;
     try {
       formFields = JSON.parse(req.body.formFields || '{}');
-      expectedMap = JSON.parse(req.body.expectedMap || '{}');
+      expectedMap = JSON.parse(req.body.expected || '{}');
     } catch {
       return res.status(400).json({ error: 'Invalid JSON in formFields or expectedMap' });
     }
@@ -368,8 +368,41 @@ app.post(
 
       fs.unlinkSync(file.path);
     }
+    const summary = {
+      total_files: files.length,
+      total_runs: results.length,
+      avg_latency_ms: null,
+      avg_precision: null,
+      avg_recall: null,
+      avg_f1: null,
+      total_cost_usd: 0,
+    };
 
-    res.json({ total_runs: results.length, times, results });
+    let latencySum = 0;
+    let precisionSum = 0;
+    let recallSum = 0;
+    let f1Sum = 0;
+    let metricCount = 0;
+
+    for (const r of results) {
+      if (r.latency_ms != null) latencySum += r.latency_ms;
+      if (r.total_cost) summary.total_cost_usd += parseFloat(r.total_cost);
+
+      if (r.precision != null && r.recall != null && r.f1 != null) {
+        precisionSum += r.precision;
+        recallSum += r.recall;
+        f1Sum += r.f1;
+        metricCount++;
+      }
+    }
+
+    summary.avg_latency_ms = results.length ? Math.round(latencySum / results.length) : null;
+    summary.avg_precision = metricCount ? +(precisionSum / metricCount).toFixed(4) : null;
+    summary.avg_recall = metricCount ? +(recallSum / metricCount).toFixed(4) : null;
+    summary.avg_f1 = metricCount ? +(f1Sum / metricCount).toFixed(4) : null;
+    summary.total_cost_usd = +summary.total_cost_usd.toFixed(6);
+
+    res.json({ total_runs: results.length, times, summary, results });
   },
 );
 
