@@ -33,37 +33,43 @@ export const SummaryCard = () => {
   }, []);
 
   return (
-    <div className="rounded border bg-gray-50 p-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        <div>
-          <p className="text-xs text-gray-500">Files Processed</p>
-          <p className="text-xl">{total_files}</p>
+    <>
+      {total_files ? (
+        <div className="rounded border bg-gray-50 p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div>
+              <p className="text-xs text-gray-500">Files Processed</p>
+              <p className="text-xl">{total_files}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Total Runs</p>
+              <p className="text-xl">{total_runs}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Avg Latency</p>
+              <p className="text-xl">{avg_latency_ms}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Total Cost</p>
+              <p className="text-xl">{total_cost_usd}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Avg Precision</p>
+              <p className="text-xl">{avg_precision}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Avg Recall</p>
+              <p className="text-xl">{avg_recall}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Avg F1 Score</p>
+              <p className="text-xl">{avg_f1}</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-gray-500">Total Runs</p>
-          <p className="text-xl">{total_runs}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Avg Latency</p>
-          <p className="text-xl">{avg_latency_ms}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Total Cost</p>
-          <p className="text-xl">{total_cost_usd}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Avg Precision</p>
-          <p className="text-xl">{avg_precision}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Avg Recall</p>
-          <p className="text-xl">{avg_recall}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Avg F1 Score</p>
-          <p className="text-xl">{avg_f1}</p>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
