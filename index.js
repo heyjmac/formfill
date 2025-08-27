@@ -316,18 +316,31 @@ app.post(
       const got = data?.data ?? {};
 
       let compareResult = null;
-      let score = null;
+      let precision = null;
+      let recall = null;
+      let f1 = null;
 
       if (expected && Object.keys(expected).length) {
         compareResult = compare(expected, got);
-        score = compareResult.score;
+
+        const { correct, wrong, missing, extra } = compareResult;
+
+        const tp = correct;
+        const fp = wrong + extra;
+        const fn = missing;
+
+        precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+        recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+        f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
       }
 
       res.json({
         file: file.originalname,
         ok: response.ok,
         status: response.status,
-        percent: score !== null ? Math.round(score * 100) : null,
+        precision,
+        recall,
+        f1,
         compare: compareResult,
         latency_ms: latency,
         response: data,
