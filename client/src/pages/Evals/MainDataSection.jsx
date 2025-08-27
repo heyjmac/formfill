@@ -21,7 +21,7 @@ export const MainDataSection = () => {
       <h2 className="mb-4 text-lg font-normal">Processing Runs</h2>
       <div className="space-y-4">
         {results.map((run, i) => (
-          <details key={i} className="group rounded border">
+          <details key={i} className="group rounded border border-neutral-300">
             <summary className="flex cursor-pointer items-center justify-between p-4">
               <div className="flex items-center">
                 <span className="material-symbols-outlined mr-2 text-gray-600">analytics</span>
@@ -37,7 +37,7 @@ export const MainDataSection = () => {
               </div>
             </summary>
 
-            <div className="border-t p-4">
+            <div className="border-t border-neutral-300 p-4">
               {run.ok && run.compare?.details ? (
                 <>
                   <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
@@ -63,8 +63,10 @@ export const MainDataSection = () => {
                     </div>
                   </div>
 
-                  <div className="rounded border">
-                    <div className="border-b bg-gray-50 p-3 font-medium">Extracted Fields</div>
+                  <div className="rounded border border-neutral-300">
+                    <div className="border-b border-neutral-300 bg-gray-50 p-3 font-medium">
+                      Extracted Fields
+                    </div>
                     {run.compare.details.map((field, idx) => (
                       <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
                         <div className="flex justify-between">
@@ -80,7 +82,7 @@ export const MainDataSection = () => {
                   </div>
                 </>
               ) : (
-                <div className="rounded border border-red-200 bg-red-50 p-4">
+                <div className="rounded border border-neutral-300 border-red-200 bg-red-50 p-4">
                   <p className="text-sm font-medium text-red-800">Error</p>
                   <p className="mt-1 text-sm text-red-700">
                     {run.error || 'Unknown error occurred.'}

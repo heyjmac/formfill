@@ -163,8 +163,8 @@ export const Input = () => {
   }, [expectedMap, formFields, files, instruction, important, times]);
 
   return (
-    <div className="overflow-hidden rounded-md border">
-      <div className="border-b  bg-gray-50 p-4">
+    <div className="overflow-hidden rounded-md border border-neutral-300">
+      <div className="border-b border-neutral-300  bg-gray-50 p-4">
         <h2 className="text-lg">Processing Input</h2>
       </div>
       <div className="space-y-6 p-6">
@@ -178,7 +178,7 @@ export const Input = () => {
               id="instruction"
               value={instruction}
               onChange={(e) => setInstruction(e.target.value)}
-              className="w-full rounded border  px-3 py-2"
+              className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
           <div className="col-span-4">
@@ -189,7 +189,7 @@ export const Input = () => {
               id="important"
               value={important}
               onChange={(e) => setImportant(e.target.value)}
-              className="w-full rounded border  px-3 py-2"
+              className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
         </div>
@@ -199,7 +199,7 @@ export const Input = () => {
           {files.map((file) => (
             <div
               key={file.name}
-              className="mb-2 flex items-center justify-between rounded border  bg-gray-50 p-4"
+              className="mb-2 flex items-center justify-between rounded border border-neutral-300  bg-gray-50 p-4"
             >
               <div className="flex items-center">
                 <span className="material-symbols-outlined mr-3 text-gray-600">description</span>
@@ -217,7 +217,7 @@ export const Input = () => {
             </div>
           ))}
           <div className="mt-2 flex space-x-2">
-            <label className="inline-flex cursor-pointer items-center rounded border  px-4 py-2 hover:bg-gray-50">
+            <label className="inline-flex cursor-pointer items-center rounded border border-neutral-300  px-4 py-2 hover:bg-gray-50">
               <span className="material-symbols-outlined mr-2">upload_file</span>
               <span>Upload Files</span>
               <input type="file" className="hidden" multiple onChange={handleFileUpload} />
@@ -228,9 +228,9 @@ export const Input = () => {
         {/* Form Fields Table */}
         <div>
           <label className="mb-2 block text-sm">Form Fields</label>
-          <div className="overflow-hidden rounded border">
+          <div className="overflow-hidden rounded border border-neutral-300">
             <table className="w-full text-sm">
-              <thead className="border-b  bg-gray-50">
+              <thead className="border-b border-neutral-300  bg-gray-50">
                 <tr>
                   <th className="p-3 text-left">Field Name</th>
                   <th className="p-3 text-left">Type</th>
@@ -247,14 +247,14 @@ export const Input = () => {
                         type="text"
                         value={field.name}
                         onChange={(e) => updateField(i, 'name', e.target.value)}
-                        className="w-full border-0  bg-transparent px-2 py-1"
+                        className="w-full border-0 border-neutral-300  bg-transparent px-2 py-1"
                       />
                     </td>
                     <td className="p-3">
                       <select
                         value={field.type}
                         onChange={(e) => updateField(i, 'type', e.target.value)}
-                        className="w-full border-0  bg-transparent px-2 py-1"
+                        className="w-full border-0 border-neutral-300  bg-transparent px-2 py-1"
                       >
                         {[
                           'text',
@@ -280,7 +280,7 @@ export const Input = () => {
                         type="text"
                         value={field.description}
                         onChange={(e) => updateField(i, 'description', e.target.value)}
-                        className="w-full border-0  bg-transparent px-2 py-1 text-gray-500"
+                        className="w-full border-0 border-neutral-300  bg-transparent px-2 py-1 text-gray-500"
                       />
                     </td>
                     <td className="p-3 text-gray-500">
@@ -289,7 +289,7 @@ export const Input = () => {
                         value={field.format}
                         onChange={(e) => updateField(i, 'format', e.target.value)}
                         placeholder="Format (optional)"
-                        className="w-full border-0  bg-transparent px-2 py-1 text-gray-500"
+                        className="w-full border-0 border-neutral-300  bg-transparent px-2 py-1 text-gray-500"
                       />
                     </td>
                     <td className="p-3 text-right">
@@ -306,11 +306,11 @@ export const Input = () => {
                 ))}
               </tbody>
             </table>
-            <div className="flex items-center justify-between border-t  bg-gray-50 p-4">
+            <div className="flex items-center justify-between border-t border-neutral-300  bg-gray-50 p-4">
               <div />
               <button
                 onClick={addField}
-                className="flex items-center gap-1 rounded border  bg-white px-3 py-1 text-sm hover:bg-gray-50"
+                className="flex items-center gap-1 rounded border border-neutral-300  bg-white px-3 py-1 text-sm hover:bg-gray-50"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                   add
@@ -322,7 +322,7 @@ export const Input = () => {
         </div>
 
         <div>
-          <div className="rounded border p-4">
+          <div className="rounded border border-neutral-300 p-4">
             <label className="mb-2 block text-sm">Expected Results</label>
             {Object.entries(expectedMap).length === 0 && (
               <div className="text-gray-500">Add a file first</div>
@@ -341,7 +341,7 @@ export const Input = () => {
                         type="text"
                         value={value}
                         onChange={(e) => handleExpectedFieldChange(fileName, field, e.target.value)}
-                        className="focus:ring-primary-500 flex-1 rounded border px-3 py-1 text-sm transition-all focus:outline-none focus:ring-1"
+                        className="focus:ring-primary-500 flex-1 rounded border border-neutral-300 px-3 py-1 text-sm transition-all focus:outline-none focus:ring-1"
                       />
                       <button
                         className="text-gray-400 transition-colors hover:text-gray-600"
@@ -359,7 +359,7 @@ export const Input = () => {
                         handleAddExpectedField(fileName, e.target.value);
                         e.target.selectedIndex = 0;
                       }}
-                      className="mt-2 rounded border px-2 py-1 text-sm"
+                      className="mt-2 rounded border border-neutral-300 px-2 py-1 text-sm"
                     >
                       <option value="">Add field</option>
                       {formFields
@@ -389,7 +389,7 @@ export const Input = () => {
             min="1"
             max="10"
             onChange={(e) => setTimes(Number(e.target.value))}
-            className="w-20 rounded border px-3 py-2 text-sm"
+            className="w-20 rounded border border-neutral-300 px-3 py-2 text-sm"
           />
           <button
             className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500"

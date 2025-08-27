@@ -35,7 +35,7 @@ export const SummaryCard = () => {
   return (
     <>
       {total_files ? (
-        <div className="rounded border bg-gray-50 p-6">
+        <div className="rounded border border-neutral-300 bg-gray-50 p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <div>
               <p className="text-xs text-gray-500">Files Processed</p>
