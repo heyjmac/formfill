@@ -36,7 +36,7 @@ const loadFilesFromIndexedDB = (callback) => {
   });
 };
 
-export const Input = () => {
+export const EvalsInput = () => {
   const [instruction, setInstruction] = useState('');
   const [important, setImportant] = useState('');
   const [times, setTimes] = useState(3);

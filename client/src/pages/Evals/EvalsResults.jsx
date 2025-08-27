@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 import jsPDF from 'jspdf';
 
-export const MainDataSection = () => {
+export const EvalsResults = () => {
   const [input, setInput] = useState(null);
   const [summary, setSummary] = useState(null);
   const [results, setResults] = useState([]);

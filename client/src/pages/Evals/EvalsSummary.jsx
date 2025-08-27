@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
-export const SummaryCard = () => {
+export const EvalsSummary = () => {
   const [avg_f1, setAvgF1] = useState(0);
   const [avg_latency_ms, setAvgLatencyMs] = useState(0);
   const [avg_precision, setAvgPrecision] = useState(0);
