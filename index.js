@@ -7,7 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { calculateGeminiCosts, compare } from './evals.utils.js';
+import { calculateGeminiCosts, compare, runEval } from './evals.utils.js';
 import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
@@ -277,12 +277,12 @@ Today is ${new Date().toLocaleDateString()}`;
 );
 
 app.post(
-  '/api/evals',
+  '/api/eval',
   uploadMiddleware,
   express.urlencoded({ extended: true }),
   async (req, res) => {
-    const { instruction = '', important = '' } = req.body;
     const file = req.files?.[0];
+    const { instruction = '', important = '' } = req.body;
 
     let formFields, expected;
     try {
@@ -296,71 +296,80 @@ app.post(
       return res.status(400).json({ error: 'Missing formFields or file' });
     }
 
-    const fd = new FormData();
-    fd.append('formFields', JSON.stringify(formFields));
-    fd.append('instruction', instruction);
-    fd.append('important', important);
-
-    const fileBuffer = fs.readFileSync(file.path);
-    fd.append('files', new Blob([fileBuffer], { type: file.mimetype }), file.originalname);
-
-    const t0 = Date.now();
     try {
-      const response = await fetch('http://localhost:3000/api/formfill', {
-        method: 'POST',
-        body: fd,
+      const fileBuffer = fs.readFileSync(file.path);
+      const result = await runEval({
+        file,
+        fileBuffer,
+        formFields,
+        instruction,
+        important,
+        expected,
       });
-
-      const data = await response.json();
-      const latency = Date.now() - t0;
-      const got = data?.data ?? {};
-      const tokens = data?.tokens ?? {};
-      const cost = tokens ? calculateGeminiCosts(tokens) : null;
-
-      let compareResult = null;
-      let precision = null;
-      let recall = null;
-      let f1 = null;
-
-      if (expected && Object.keys(expected).length) {
-        compareResult = compare(expected, got);
-
-        const { correct, wrong, missing, extra } = compareResult;
-
-        const tp = correct;
-        const fp = wrong + extra;
-        const fn = missing;
-
-        precision = tp + fp > 0 ? tp / (tp + fp) : 0;
-        recall = tp + fn > 0 ? tp / (tp + fn) : 0;
-        f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
-      }
-
-      res.json({
-        file: file.originalname,
-        ok: response.ok,
-        status: response.status,
-        precision,
-        recall,
-        f1,
-        latency_ms: latency,
-        total_cost: cost?.totalCost,
-        compare: compareResult,
-        cost,
-        tokens,
-        response: data,
-        timestamp: new Date().toISOString(),
-      });
+      res.json(result);
     } catch (err) {
-      res.status(500).json({
-        file: file.originalname,
-        ok: false,
-        status: 'ERR',
-        error: String(err),
-      });
+      res
+        .status(500)
+        .json({ file: file.originalname, ok: false, status: 'ERR', error: String(err) });
     } finally {
       fs.unlinkSync(file.path);
     }
+  },
+);
+
+app.post(
+  '/api/evals',
+  uploadMiddleware,
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const { instruction = '', important = '' } = req.body;
+    const times = Number(req.query.times || 3);
+    const files = req.files || [];
+
+    let formFields, expectedMap;
+    try {
+      formFields = JSON.parse(req.body.formFields || '{}');
+      expectedMap = JSON.parse(req.body.expectedMap || '{}');
+    } catch {
+      return res.status(400).json({ error: 'Invalid JSON in formFields or expectedMap' });
+    }
+
+    if (!formFields || !files.length) {
+      return res.status(400).json({ error: 'Missing formFields or files' });
+    }
+
+    const results = [];
+
+    for (const file of files) {
+      const fileBuffer = fs.readFileSync(file.path);
+      const expected = expectedMap[file.originalname];
+
+      for (let i = 0; i < times; i++) {
+        try {
+          const result = await runEval({
+            file,
+            fileBuffer,
+            formFields,
+            instruction,
+            important,
+            expected,
+          });
+          results.push({ ...result, run: i + 1 });
+        } catch (err) {
+          results.push({
+            file: file.originalname,
+            run: i + 1,
+            ok: false,
+            status: 'ERR',
+            error: String(err),
+          });
+        }
+      }
+
+      fs.unlinkSync(file.path);
+    }
+
+    res.json({ total_runs: results.length, times, results });
   },
 );
 

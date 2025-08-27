@@ -163,3 +163,79 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
     clearTimeout(to);
   }
 };
+
+const computeMetrics = (expected, actual) => {
+  const result = compare(expected, actual);
+  const { correct, wrong, missing, extra } = result;
+
+  const tp = correct;
+  const fp = wrong + extra;
+  const fn = missing;
+
+  const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+  const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+  const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+
+  return {
+    compare: result,
+    precision,
+    recall,
+    f1,
+  };
+};
+
+export const runEval = async ({
+  file,
+  fileBuffer,
+  formFields,
+  instruction,
+  important,
+  expected,
+}) => {
+  const fd = new FormData();
+  fd.append('formFields', JSON.stringify(formFields));
+  fd.append('instruction', instruction);
+  fd.append('important', important);
+  fd.append('files', new Blob([fileBuffer], { type: file.mimetype }), file.originalname);
+
+  const t0 = Date.now();
+  const response = await fetch('http://localhost:3000/api/formfill', {
+    method: 'POST',
+    body: fd,
+  });
+  const latency = Date.now() - t0;
+
+  const data = await response.json();
+  const got = data?.data ?? {};
+  const tokens = data?.tokens ?? {};
+  const cost = calculateGeminiCosts(tokens);
+
+  let compareResult = null;
+  let precision = null;
+  let recall = null;
+  let f1 = null;
+
+  if (expected && Object.keys(expected).length) {
+    const metrics = computeMetrics(expected, got);
+    compareResult = metrics.compare;
+    precision = metrics.precision;
+    recall = metrics.recall;
+    f1 = metrics.f1;
+  }
+
+  return {
+    file: file.originalname,
+    ok: response.ok,
+    status: response.status,
+    precision,
+    recall,
+    f1,
+    latency_ms: latency,
+    total_cost: cost.totalCost,
+    compare: compareResult,
+    cost,
+    tokens,
+    response: data,
+    timestamp: new Date().toISOString(),
+  };
+};
