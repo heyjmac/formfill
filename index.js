@@ -7,6 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { compare } from './evals.utils.js';
 import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
@@ -271,6 +272,76 @@ Today is ${new Date().toLocaleDateString()}`;
         shortError: 'Processing failed.',
         tip: 'Try again or check your API key.',
       });
+    }
+  },
+);
+
+app.post(
+  '/api/evals',
+  uploadMiddleware,
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const { instruction = '', important = '' } = req.body;
+    const file = req.files?.[0];
+
+    let formFields, expected;
+    try {
+      formFields = JSON.parse(req.body.formFields || '{}');
+      expected = JSON.parse(req.body.expected || '{}');
+    } catch {
+      return res.status(400).json({ error: 'Invalid JSON in formFields or expected' });
+    }
+
+    if (!formFields || !file) {
+      return res.status(400).json({ error: 'Missing formFields or file' });
+    }
+
+    const fd = new FormData();
+    fd.append('formFields', JSON.stringify(formFields));
+    fd.append('instruction', instruction);
+    fd.append('important', important);
+
+    const fileBuffer = fs.readFileSync(file.path);
+    fd.append('files', new Blob([fileBuffer], { type: file.mimetype }), file.originalname);
+
+    const t0 = Date.now();
+    try {
+      const response = await fetch('http://localhost:3000/api/formfill', {
+        method: 'POST',
+        body: fd,
+      });
+
+      const data = await response.json();
+      const latency = Date.now() - t0;
+      const got = data?.data ?? {};
+
+      let compareResult = null;
+      let score = null;
+
+      if (expected && Object.keys(expected).length) {
+        compareResult = compare(expected, got);
+        score = compareResult.score;
+      }
+
+      res.json({
+        file: file.originalname,
+        ok: response.ok,
+        status: response.status,
+        percent: score !== null ? Math.round(score * 100) : null,
+        compare: compareResult,
+        latency_ms: latency,
+        response: data,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      res.status(500).json({
+        file: file.originalname,
+        ok: false,
+        status: 'ERR',
+        error: String(err),
+      });
+    } finally {
+      fs.unlinkSync(file.path);
     }
   },
 );
