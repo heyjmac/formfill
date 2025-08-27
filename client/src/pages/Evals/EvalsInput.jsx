@@ -223,7 +223,7 @@ export const EvalsInput = () => {
       </div>
       <div className="space-y-6 p-6">
         {/* Top Controls */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <div className="grid grid-cols-12 gap-6">
           <div className="col-span-8">
             <label htmlFor="instruction" className="mb-1 block text-sm">
               Instruction

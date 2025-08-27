@@ -69,7 +69,7 @@ export const EvalsResults = () => {
             <div className="border-t border-neutral-300 p-4">
               {run.ok && run.compare?.details ? (
                 <>
-                  <div className="mb-4 grid grid-cols-3 gap-4">
+                  <div className="mb-4 grid grid-cols-4 gap-4">
                     <div>
                       <p className="text-xs text-gray-500">Precision</p>
                       <p>{(run.precision * 100).toFixed(2)}%</p>
@@ -85,6 +85,10 @@ export const EvalsResults = () => {
                     <div>
                       <p className="text-xs text-gray-500">Tokens</p>
                       <p>{run.tokens?.totalTokenCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Latency ms</p>
+                      <p>{run.latency_ms ? run.latency_ms : '—'}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Cost</p>
