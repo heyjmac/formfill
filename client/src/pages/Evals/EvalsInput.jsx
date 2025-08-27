@@ -136,6 +136,28 @@ export const EvalsInput = () => {
     });
   }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
+  useEffect(() => {
+    if (!selectedGroupId) return;
+
+    const timeout = setTimeout(() => {
+      updateInputGroup(
+        selectedGroupId,
+        {
+          id: selectedGroupId,
+          name: renameValue || 'Eval',
+          instruction,
+          important,
+          formFields,
+          expectedMap,
+          files,
+        },
+        () => loadInputGroups(setInputGroups),
+      );
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [instruction, important, formFields, expectedMap, files, selectedGroupId, renameValue]);
+
   const handleFileUpload = useCallback(
     (e) => {
       const uploaded = Array.from(e.target.files);
@@ -309,12 +331,28 @@ export const EvalsInput = () => {
     [expectedMap, files, formFields, important, instruction, renameValue, selectedGroupId],
   );
 
+  const getCopyName = (name) => {
+    if (!name) return 'New Eval';
+    const match = name.match(/^(.*?)( Copy)?(?: (\d+))?$/);
+    const base = match[1] || name;
+    const copyNumber = match[3] ? parseInt(match[3], 10) + 1 : match[2] ? 2 : '';
+    return `${base} Copy${copyNumber ? ' ' + copyNumber : ''}`;
+  };
+
   const handleSaveAs = useCallback(
     () =>
-      saveInputGroup({ instruction, important, formFields, expectedMap, files }, () =>
-        loadInputGroups(setInputGroups),
+      saveInputGroup(
+        {
+          name: getCopyName(renameValue),
+          instruction,
+          important,
+          formFields,
+          expectedMap,
+          files,
+        },
+        () => loadInputGroups(setInputGroups),
       ),
-    [expectedMap, files, formFields, important, instruction],
+    [expectedMap, files, formFields, important, instruction, renameValue],
   );
 
   const handleDelete = useCallback(
@@ -582,43 +620,56 @@ export const EvalsInput = () => {
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center justify-center gap-2">
-            <button
-              className="flex cursor-pointer items-center rounded border border-neutral-300 px-4 py-2 transition-colors hover:bg-gray-50"
-              onClick={handleSave}
-            >
-              <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
-                save
-              </span>
-              Save
-            </button>
             {selectedGroupId && (
               <button
-                className="flex cursor-pointer items-center rounded border border-neutral-300 px-4 py-2 transition-colors hover:bg-gray-50"
+                onClick={handleNew}
+                className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
+              >
+                <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                  add
+                </span>
+                New
+              </button>
+            )}
+
+            {selectedGroupId ? (
+              <>
+                <button
+                  className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
+                  onClick={handleSave}
+                >
+                  <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                    save
+                  </span>
+                </button>
+                <button
+                  className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
+                  onClick={handleSaveAs}
+                >
+                  <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
+                    file_copy
+                  </span>
+                </button>
+              </>
+            ) : (
+              <button
+                className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
                 onClick={handleSaveAs}
               >
                 <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
-                  file_copy
+                  save
                 </span>
-                Save as
+                Save
               </button>
             )}
             {selectedGroupId && (
               <button
-                className="flex cursor-pointer items-center rounded border border-red-700 px-4 py-2 text-red-700 transition-colors hover:bg-gray-50"
+                className="flex h-[40px] cursor-pointer items-center rounded border border-red-700 px-4 text-red-700 transition-colors hover:bg-gray-50"
                 onClick={handleDelete}
               >
                 <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                   delete
                 </span>
-                Delete
-              </button>
-            )}
-            {selectedGroupId && (
-              <button
-                onClick={handleNew}
-                className="ml-2 rounded border border-neutral-300 px-2 py-1 text-sm hover:bg-gray-50"
-              >
-                New
               </button>
             )}
           </div>
@@ -633,10 +684,10 @@ export const EvalsInput = () => {
               min="1"
               max="10"
               onChange={(e) => setTimes(Number(e.target.value))}
-              className="w-20 rounded border border-neutral-300 px-3 py-2 text-sm"
+              className="h-[40px] w-20 rounded border border-neutral-300 px-3  text-sm"
             />
             <button
-              className="hidden cursor-pointer rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
+              className="hidden h-[40px] cursor-pointer rounded bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
               onClick={handleSubmit}
               disabled={
                 isLoading ||
