@@ -531,13 +531,73 @@ export const EvalsInput = () => {
                       />
                     </td>
                     <td className="p-3 text-gray-500">
-                      <input
-                        type="text"
-                        value={field.format}
-                        onChange={(e) => updateField(i, 'format', e.target.value)}
-                        placeholder="Format (optional)"
-                        className="w-full border-0 border-neutral-300  bg-transparent px-2 py-1 text-gray-500"
-                      />
+                      {field.type === 'select-one' ? (
+                        <div className="flex flex-wrap items-center gap-2 border-0 border-neutral-300 bg-transparent px-2 py-1 text-sm">
+                          {(field.options || []).map((opt, idx) => (
+                            <span
+                              key={idx}
+                              className="flex items-center gap-1 rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700"
+                            >
+                              {opt.text}
+                              <button
+                                onClick={() => {
+                                  const options = [...(field.options || [])];
+                                  options.splice(idx, 1);
+                                  updateField(i, 'options', options);
+                                  updateField(
+                                    i,
+                                    'format',
+                                    options.map((o) => `"${o.value}"`).join(', '),
+                                  );
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                          <input
+                            type="text"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ',') {
+                                e.preventDefault();
+                                const val = e.target.value.trim().replace(/^"|"$/g, '');
+                                if (val) {
+                                  const options = [
+                                    ...(field.options || []),
+                                    { value: val, text: val },
+                                  ];
+                                  updateField(i, 'options', options);
+                                  updateField(
+                                    i,
+                                    'format',
+                                    options.map((o) => `"${o.value}"`).join(', '),
+                                  );
+                                  e.target.value = '';
+                                }
+                              }
+                            }}
+                            placeholder="Add option"
+                            className="flex-1 bg-transparent text-sm outline-none"
+                          />
+                        </div>
+                      ) : field.type === 'number' || field.type === 'range' ? (
+                        <input
+                          type="text"
+                          value={field.format}
+                          onChange={(e) => updateField(i, 'format', e.target.value)}
+                          placeholder="min-max"
+                          className="w-full border-0 border-neutral-300 bg-transparent px-2 py-1 text-gray-500"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={field.format}
+                          onChange={(e) => updateField(i, 'format', e.target.value)}
+                          placeholder="Format (optional)"
+                          className="w-full border-0 border-neutral-300 bg-transparent px-2 py-1 text-gray-500"
+                        />
+                      )}
                     </td>
                     <td className="p-3 text-right">
                       <button

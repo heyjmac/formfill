@@ -71,11 +71,9 @@ const deepEq = (a, b) => {
 const looseEq = (a, b) => {
   if (a === b) return true;
   if (a == null || b == null) return false;
-
-  const sa = a?.trim().toLowerCase();
-  const sb = b?.trim().toLowerCase();
-
-  return sa === sb;
+  if (typeof a === 'string' && typeof b === 'string') return a?.trim() === b?.trim();
+  if (typeof a === 'number' && typeof b === 'number') return a === b;
+  return String(a)?.trim() === String(b)?.trim();
 };
 
 export const compare = (expected, got) => {
