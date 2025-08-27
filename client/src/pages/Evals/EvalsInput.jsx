@@ -24,7 +24,26 @@ const saveInputGroup = (data, callback) => {
   openDB((db) => {
     const tx = db.transaction(STORE_INPUTS, 'readwrite');
     const store = tx.objectStore(STORE_INPUTS);
-    store.add(data);
+    store.add({ name: data.name || `Eval`, ...data });
+    tx.oncomplete = () => {
+      db.close();
+      if (callback) callback();
+    };
+  });
+};
+
+const renameInputGroup = (id, newName, callback) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readwrite');
+    const store = tx.objectStore(STORE_INPUTS);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const group = getReq.result;
+      if (group) {
+        group.name = newName;
+        store.put(group);
+      }
+    };
     tx.oncomplete = () => {
       db.close();
       if (callback) callback();
@@ -72,6 +91,8 @@ export const EvalsInput = () => {
   const [expectedMap, setExpectedMap] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [inputGroups, setInputGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
 
   useEffect(() => {
     loadInputGroups(setInputGroups);
@@ -250,13 +271,16 @@ export const EvalsInput = () => {
 
   const handleLoadPrevious = useCallback(
     (e) => {
-      const group = inputGroups.find((g) => g.id === Number(e.target.value));
+      const id = Number(e.target.value);
+      setSelectedGroupId(id);
+      const group = inputGroups.find((g) => g.id === id);
       if (group) {
         setInstruction(group.instruction);
         setImportant(group.important);
         setFormFields(group.formFields || []);
         setExpectedMap(group.expectedMap || {});
         setFiles(group.files || []);
+        setRenameValue(group.name || '');
       }
     },
     [inputGroups],
@@ -266,11 +290,23 @@ export const EvalsInput = () => {
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
         <h2 className="text-lg">Processing Input</h2>
+        {selectedGroupId && (
+          <input
+            type="text"
+            placeholder="Rename group"
+            className="ml-2 rounded border border-neutral-300 px-2 py-1 text-sm"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onBlur={() => {
+              renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
+            }}
+          />
+        )}
         <select onChange={handleLoadPrevious}>
           <option value="">Load Previous</option>
           {inputGroups.map((g) => (
             <option key={g.id} value={g.id}>
-              Eval #{g.id}
+              {g.name || `Eval #${g.id}`}
             </option>
           ))}
         </select>
