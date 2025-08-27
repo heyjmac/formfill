@@ -333,6 +333,17 @@ export const EvalsInput = () => {
     [selectedGroupId],
   );
 
+  const handleNew = useCallback(() => {
+    setSelectedGroupId(null);
+    setRenameValue('');
+    setInstruction('');
+    setImportant('');
+    setFormFields([]);
+    setExpectedMap({});
+    setFiles([]);
+    localStorage.removeItem('evalsInput:lastGroupId');
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
@@ -600,6 +611,14 @@ export const EvalsInput = () => {
                   delete
                 </span>
                 Delete
+              </button>
+            )}
+            {selectedGroupId && (
+              <button
+                onClick={handleNew}
+                className="ml-2 rounded border border-neutral-300 px-2 py-1 text-sm hover:bg-gray-50"
+              >
+                New
               </button>
             )}
           </div>
