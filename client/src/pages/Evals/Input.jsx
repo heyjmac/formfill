@@ -4,33 +4,36 @@ import { events } from '../../ai-components/utils/events';
 const DB_NAME = 'evalsDB';
 const STORE_NAME = 'files';
 
-const saveFilesToIndexedDB = (files) => {
+const openDB = (callback) => {
   const request = indexedDB.open(DB_NAME, 1);
-  request.onupgradeneeded = () => {
-    const db = request.result;
+  request.onupgradeneeded = (e) => {
+    const db = e.target.result;
     if (!db.objectStoreNames.contains(STORE_NAME)) {
-      db.createObjectStore(STORE_NAME, { keyPath: 'name' });
+      db.createObjectStore(STORE_NAME);
     }
   };
-  request.onsuccess = () => {
-    const db = request.result;
+  request.onsuccess = () => callback(request.result);
+  request.onerror = () => console.error('IndexedDB open error:', request.error);
+};
+
+const saveFilesToIndexedDB = (files) => {
+  openDB((db) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    files.forEach((file) => store.put(file));
-  };
+    store.put(files, 'uploadedFiles');
+    tx.oncomplete = () => db.close();
+  });
 };
 
 const loadFilesFromIndexedDB = (callback) => {
-  const request = indexedDB.open(DB_NAME, 1);
-  request.onsuccess = () => {
-    const db = request.result;
+  openDB((db) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
-    const getAll = store.getAll();
-    getAll.onsuccess = () => {
-      callback(getAll.result);
-    };
-  };
+    const request = store.get('uploadedFiles');
+    request.onsuccess = () => callback(request.result || []);
+    request.onerror = () => callback([]);
+    tx.oncomplete = () => db.close();
+  });
 };
 
 export const Input = () => {
@@ -45,11 +48,12 @@ export const Input = () => {
   useEffect(() => {
     const saved = localStorage.getItem('evalsInput');
     if (saved) {
-      const { instruction, important, times, formFields } = JSON.parse(saved);
+      const { instruction, important, times, formFields, expectedMap } = JSON.parse(saved);
       setInstruction(instruction || '');
       setImportant(important || '');
       setTimes(times || 1);
       setFormFields(formFields || []);
+      setExpectedMap(expectedMap || {});
     }
 
     loadFilesFromIndexedDB((loadedFiles) => {
@@ -60,13 +64,11 @@ export const Input = () => {
   useEffect(() => {
     localStorage.setItem(
       'evalsInput',
-      JSON.stringify({ instruction, important, times, formFields }),
+      JSON.stringify({ instruction, important, times, formFields, expectedMap }),
     );
-  }, [instruction, important, times, formFields]);
 
-  useEffect(() => {
     if (files.length) saveFilesToIndexedDB(files);
-  }, [files]);
+  }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
   const handleFileUpload = useCallback(
     (e) => {
@@ -87,7 +89,11 @@ export const Input = () => {
 
   const handleRemoveFile = useCallback(
     (name) => {
-      setFiles((prev) => prev.filter((f) => f.name !== name));
+      setFiles((prev) => {
+        const updated = prev.filter((f) => f.name !== name);
+        saveFilesToIndexedDB(updated);
+        return updated;
+      });
       const updatedMap = { ...expectedMap };
       delete updatedMap[name];
       setExpectedMap(updatedMap);
