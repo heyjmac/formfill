@@ -209,10 +209,6 @@ export const Input = () => {
               <span>Upload Files</span>
               <input type="file" className="hidden" multiple onChange={handleFileUpload} />
             </label>
-            <button className="inline-flex cursor-pointer items-center rounded border  px-4 py-2 hover:bg-gray-50">
-              <span className="material-symbols-outlined mr-2">format_list_bulleted</span>
-              <span>Import JSON Schema</span>
-            </button>
           </div>
         </div>
 
@@ -365,9 +361,15 @@ export const Input = () => {
 
         <div className="flex justify-end">
           <button
-            className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600"
+            className="rounded bg-blue-500 px-6 py-2 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500"
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={
+              isLoading ||
+              !instruction.trim() ||
+              !files.length ||
+              !formFields.length ||
+              formFields.some((f) => !f.name)
+            }
           >
             {isLoading ? 'Processing...' : 'Process Documents'}
           </button>
