@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input } from './Input';
 import { SummaryCard } from './SummaryCard';
+import { MainDataSection } from './MainDataSection';
 
 export const Evals = () => {
   return (
@@ -15,6 +16,8 @@ export const Evals = () => {
         <Input />
         {/* Summary Card */}
         <SummaryCard />
+        {/* Main Data Section */}
+        <MainDataSection />
       </div>
     </div>
   );

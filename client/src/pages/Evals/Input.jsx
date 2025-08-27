@@ -311,10 +311,16 @@ export const Input = () => {
         <div>
           <div className="rounded border p-4">
             <label className="mb-2 block text-sm">Expected Results</label>
+            {Object.entries(expectedMap).length === 0 && (
+              <div className="text-gray-500">Add a file first</div>
+            )}
             {Object.entries(expectedMap).map(([fileName, fields]) => (
               <div key={fileName} className="mb-4">
                 <p className="mb-2 text-sm font-medium">{fileName}</p>
                 <div className="space-y-2">
+                  {Object.entries(fields).length === 0 && (
+                    <div className="text-gray-500">Add at least one form field</div>
+                  )}
                   {Object.entries(fields).map(([field, value], index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <span className="text-sm">{field}:</span>
@@ -334,7 +340,7 @@ export const Input = () => {
                       </button>
                     </div>
                   ))}
-                  {formFields.length > 0 && (
+                  {formFields.map((f) => f.name).filter((name) => !(name in fields)).length > 0 && (
                     <select
                       onChange={(e) => {
                         handleAddExpectedField(fileName, e.target.value);
