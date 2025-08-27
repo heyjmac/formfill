@@ -138,25 +138,23 @@ export const Input = () => {
       </div>
       <div className="space-y-6 p-6">
         {/* Top Controls */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+          <div className="col-span-8">
             <label htmlFor="instruction" className="mb-1 block text-sm">
               Instruction
             </label>
-            <input
-              type="text"
+            <textarea
               id="instruction"
               value={instruction}
               onChange={(e) => setInstruction(e.target.value)}
               className="w-full rounded border  px-3 py-2"
             />
           </div>
-          <div>
+          <div className="col-span-4">
             <label htmlFor="important" className="mb-1 block text-sm">
               Important Note
             </label>
-            <input
-              type="text"
+            <textarea
               id="important"
               value={important}
               onChange={(e) => setImportant(e.target.value)}
@@ -179,7 +177,6 @@ export const Input = () => {
             className="w-24 rounded border  px-3 py-2"
           />
         </div>
-
         {/* File Upload */}
         <div>
           <label className="mb-2 block text-sm">Files</label>
