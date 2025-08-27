@@ -1,0 +1,210 @@
+[
+  {
+    "name": "plaintiff_vs_defendant",
+    "description": "Complete name of the plaintiff followed by the complete name of the defendant in the format {{plaintiff}} vs {{defendant}}",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "full_name",
+    "description": "Complete name of the person or company formatted in lowercase and first capital letter",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "email",
+    "description": "Email address of the person or company",
+    "explicitFormat": null,
+    "type": "email",
+    "tag": "INPUT"
+  },
+  {
+    "name": "type",
+    "description": "Type of the person or company",
+    "explicitFormat": null,
+    "type": "select-one",
+    "tag": "SELECT",
+    "options": [
+      {
+        "value": "",
+        "text": "Select..."
+      },
+      {
+        "value": "natural",
+        "text": "Natural Person"
+      },
+      {
+        "value": "company",
+        "text": "Company"
+      }
+    ]
+  },
+  {
+    "name": "cpf",
+    "description": "Brazilian individual taxpayer registry (CPF) formatted with dots and dash",
+    "explicitFormat": "XXX.XXX.XXX-XX",
+    "type": "text",
+    "tag": "INPUT",
+    "pattern": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}"
+  },
+  {
+    "name": "rg",
+    "description": "Brazilian general registry (RG) number",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT",
+    "pattern": "\\d{5,12}"
+  },
+  {
+    "name": "cnpj",
+    "description": "Brazilian national registry (CNPJ) number",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT",
+    "pattern": "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}"
+  },
+  {
+    "name": "date_of_birth",
+    "description": "Birth date or establishment date in month/day/year format of the person or company",
+    "explicitFormat": "MM/DD/YYYY",
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "profession",
+    "description": "Current job title, profession or purpose of the person or company",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "marital_status",
+    "description": "Current marital status of the person, if a natural person",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "postal_code",
+    "description": "Postal or ZIP code of the person or company",
+    "explicitFormat": "XXXXX-XXX",
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "state",
+    "description": "Brazilian state of the person or company",
+    "explicitFormat": null,
+    "type": "select-one",
+    "tag": "SELECT",
+    "options": [
+      {
+        "value": "",
+        "text": "Select..."
+      },
+      {
+        "value": "SP",
+        "text": "São Paulo"
+      },
+      {
+        "value": "RJ",
+        "text": "Rio de Janeiro"
+      }
+    ]
+  },
+  {
+    "name": "city",
+    "description": "Brazilian city name of the person or company",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "address",
+    "description": "Street address with house/apartment/room number of the person or company",
+    "explicitFormat": null,
+    "type": "text",
+    "tag": "INPUT"
+  },
+  {
+    "name": "phone_primary",
+    "description": "Primary contact phone number of the person or company",
+    "explicitFormat": "(XXX) XXX-XXXX",
+    "type": "tel",
+    "tag": "INPUT",
+    "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+  },
+  {
+    "name": "phone_secondary",
+    "description": "Alternative phone number (optional) of the person or company",
+    "explicitFormat": null,
+    "type": "tel",
+    "tag": "INPUT",
+    "pattern": "\\(\\d{3}\\) \\d{3}-\\d{4}"
+  },
+  {
+    "name": "gender",
+    "description": "Gender selection of the person, if a natural person",
+    "explicitFormat": null,
+    "type": "radio",
+    "tag": "INPUT",
+    "options": [
+      {
+        "value": "male",
+        "label": "Male"
+      },
+      {
+        "value": "female",
+        "label": "Female"
+      }
+    ]
+  },
+  {
+    "name": "age",
+    "description": "User age or time since establishment of the person or company",
+    "explicitFormat": null,
+    "type": "number",
+    "tag": "INPUT",
+    "min": "0",
+    "max": "120"
+  },
+  {
+    "name": "hobbies",
+    "description": "Multiple hobbies selection of the person, if a natural person",
+    "explicitFormat": null,
+    "type": "checkbox",
+    "tag": "INPUT"
+  },
+  {
+    "name": "satisfaction",
+    "description": "Satisfaction level from 1 to 10 of the person or company",
+    "explicitFormat": null,
+    "type": "range",
+    "tag": "INPUT",
+    "min": "1",
+    "max": "10"
+  },
+  {
+    "name": "signature_date",
+    "description": "Date document was signed",
+    "explicitFormat": null,
+    "type": "date",
+    "tag": "INPUT"
+  },
+  {
+    "name": "signature_time",
+    "description": "Time document was signed, if available",
+    "explicitFormat": null,
+    "type": "time",
+    "tag": "INPUT"
+  },
+  {
+    "name": "notes",
+    "description": "Additional information or special requests of the person or company",
+    "explicitFormat": null,
+    "type": "textarea",
+    "tag": "TEXTAREA"
+  }
+]

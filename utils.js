@@ -17,6 +17,14 @@ const typeToMcpFormat = {
   'datetime-local': 'date-time',
 };
 
+export const prependImportantToDescriptions = (fields, important) => {
+  if (!important) return fields;
+  return fields.map((field) => ({
+    ...field,
+    description: `${important}. ${field.description}`.trim(),
+  }));
+};
+
 export const getProperties = (fields, important) => {
   const properties = {};
   const required = [];

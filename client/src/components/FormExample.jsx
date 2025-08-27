@@ -55,7 +55,7 @@ export const FormExample = React.memo(() => {
               className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="000.000.000-00"
               data-form-filler-name="cpf"
-              data-form-filler-description="Brazilian individual taxpayer registry (CPF) formatted with dots and dash"
+              data-form-filler-description="Only fill if natural person. Brazilian individual taxpayer registry (CPF) formatted with dots and dash"
               data-form-filler-format="XXX.XXX.XXX-XX"
               pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
             />
@@ -67,17 +67,28 @@ export const FormExample = React.memo(() => {
               className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="0000000000"
               data-form-filler-name="rg"
-              data-form-filler-description="Brazilian general registry (RG) number"
+              data-form-filler-description="Only fill if natural person. Brazilian general registry (RG) number"
               pattern="\d{5,12}"
             />
           </div>
-          <div className="md:col-span-6">
+          <div className="md:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-gray-700">CNPJ</label>
+            <input
+              type="text"
+              className="w-full rounded border border-gray-200 p-2 text-sm"
+              placeholder="00.000.000/0000-00"
+              data-form-filler-name="cnpj"
+              data-form-filler-description="Only fill if company. Brazilian national registry (CNPJ) number"
+              pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}"
+            />
+          </div>
+          <div className="md:col-span-3">
             <label className="mb-1 block text-xs font-medium text-gray-700">Date of birth</label>
             <input
               type="text"
               className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="MM/DD/YYYY"
-              data-form-filler-name="date_of_birth"
+              data-form-filler-name="date_of_birth_or_establishment"
               data-form-filler-description="Birth date or establishment date in month/day/year format of the person or company"
               data-form-filler-format="MM/DD/YYYY"
             />
@@ -99,7 +110,7 @@ export const FormExample = React.memo(() => {
               className="w-full rounded border border-gray-200 p-2 text-sm"
               placeholder="Single"
               data-form-filler-name="marital_status"
-              data-form-filler-description="Current marital status of the person, if a natural person"
+              data-form-filler-description="Only fill if natural person. Current marital status."
             />
           </div>
           <div className="md:col-span-3">
@@ -177,7 +188,7 @@ export const FormExample = React.memo(() => {
                   name="gender"
                   value="male"
                   data-form-filler-name="gender"
-                  data-form-filler-description="Gender selection of the person, if a natural person"
+                  data-form-filler-description="Only fill if natural person. Gender selection of the person"
                 />
                 Male
               </label>
@@ -199,49 +210,49 @@ export const FormExample = React.memo(() => {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Hobbies</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Requests</label>
             <div className="flex gap-4 text-sm">
               <label className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  value="sports"
-                  data-form-filler-name="hobbies"
-                  data-form-filler-description="Multiple hobbies selection of the person, if a natural person"
+                  value="immediate_relief"
+                  data-form-filler-name="requests"
+                  data-form-filler-description="Final requests"
                 />
-                Sports
+                Immediate relief
               </label>
               <label className="flex items-center gap-1">
-                <input type="checkbox" value="music" data-form-filler-name="hobbies" />
-                Music
+                <input type="checkbox" value="indemnities" data-form-filler-name="requests" />
+                Indemnities
               </label>
             </div>
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Satisfaction</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Lawsuit Amount</label>
             <input
               type="range"
               min="1"
-              max="10"
+              max="10000000"
               className="w-full"
-              data-form-filler-name="satisfaction"
-              data-form-filler-description="Satisfaction level from 1 to 10 of the person or company"
+              data-form-filler-name="lawsuit_amount"
+              data-form-filler-description="Lawsuit amount in USD"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Date</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Signature Date</label>
             <input
               type="date"
               className="w-full rounded border border-gray-200 p-2 text-sm"
-              data-form-filler-name="meeting_date"
+              data-form-filler-name="signature_date"
               data-form-filler-description="Date document was signed"
             />
           </div>
           <div className="md:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-gray-700">Meeting Time</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Signature Time</label>
             <input
               type="time"
               className="w-full rounded border border-gray-200 p-2 text-sm"
-              data-form-filler-name="meeting_time"
+              data-form-filler-name="signature_time"
               data-form-filler-description="Time document was signed, if available"
             />
           </div>
@@ -259,14 +270,14 @@ export const FormExample = React.memo(() => {
             <FormFillerButton
               document="complaint"
               modal
-              instruction="Your most important task is to find the PLAINTIFF and fill the form using ONLY their data. The Plaintiff is the one who initiates the lawsuit."
+              instruction="Find the PLAINTIFF and fill the form using ONLY their data. The Plaintiff is the one who initiates the lawsuit. It usually comes first in the petition."
               important="PLAINTIFF ONLY"
               label="Fill with plaintiff info"
             />
             <FormFillerWrapper
               document="complaint"
               modal
-              instruction="Your most important task is to find the DEFENDANT and fill the form using ONLY their data. The Defendant is the one being accused in the lawsuit."
+              instruction="Find the DEFENDANT and fill the form using ONLY their data. The Defendant is the one being accused in the lawsuit. It usually comes second in the petition."
               important="DEFENDANT ONLY"
               label="Fill with defendant info"
             >

@@ -2,13 +2,17 @@
 import { createPartFromUri, createUserContent, GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import express from 'express';
+import fs from 'fs';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { attempt, getProperties, sanitizeObject } from './utils.js';
+import { calculateGeminiCosts, compare, runEval } from './evals.utils.js';
+import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
+
+const SAVE_PROMPT = false;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +21,8 @@ const app = express();
 
 // 2. Constants and Configs
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024); // 10MB default
+const RETRY_LIMIT = Number(process.env.RETRY_LIMIT ?? 1);
+const RETRY_DELAY_MS = Number(process.env.RETRY_DELAY_MS ?? 800);
 
 const allowedMimeTypes = new Set([
   'application/pdf',
@@ -103,10 +109,53 @@ const clientDistPath = path.join(__dirname, 'client', 'dist');
 app.use(express.static(clientDistPath));
 app.use('/downloads', express.static(path.join(process.cwd(), 'downloads')));
 
-// 5. Endpoints
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// TO-DO:
-// be prepared for candidates: [ { finishReason: 'MALFORMED_FUNCTION_CALL', index: 0 } ],
+const generateAndParse = async ({ ai, uploadedFiles, pastedText, systemInstructions }) => {
+  const response = await ai.models.generateContent({
+    model: 'models/gemini-2.5-flash-lite',
+    contents: createUserContent([
+      `Please extract the relevant information from the following:\n\nPasted text:\n${pastedText || '[none]'}`,
+      ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
+    ]),
+    config: { systemInstruction: { role: 'system', parts: [{ text: systemInstructions }] } },
+  });
+
+  const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '{}';
+  let args;
+  try {
+    const jsonMatch = rawText.match(/```json([\s\S]*?)```/i);
+    args = JSON.parse(jsonMatch ? jsonMatch[1] : rawText);
+  } catch {
+    args = {};
+  }
+
+  const filteredArgs = Object.fromEntries(
+    Object.entries(args).filter(([_, v]) => {
+      if (!v || v?.length === 0) return false;
+      if (typeof v === 'string')
+        return !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase());
+      return true;
+    }),
+  );
+
+  return { filteredArgs, tokens: response?.usageMetadata };
+};
+
+const withRetry = async (taskFn, { limit = RETRY_LIMIT, delayMs = RETRY_DELAY_MS } = {}) => {
+  let lastErr;
+  for (let attempt = 0; attempt <= limit; attempt++) {
+    try {
+      return await taskFn();
+    } catch (err) {
+      lastErr = err;
+      if (attempt < limit) await sleep(delayMs);
+    }
+  }
+  throw lastErr;
+};
+
+// 5. Endpoints
 app.post(
   '/api/formfill',
   uploadMiddleware,
@@ -114,7 +163,7 @@ app.post(
   async (req, res) => {
     const start = Date.now();
     const files = req.files || [];
-    const formFields = JSON.parse(req.body.formFields || '{}');
+    let formFields = JSON.parse(req.body.formFields || '{}');
     const instruction = req.body.instruction?.trim() || '';
     const important = req.body.important?.trim() || '';
     const pastedText = req.body.pastedText?.trim() || '';
@@ -141,6 +190,19 @@ app.post(
       });
     }
 
+    if (SAVE_PROMPT) {
+      fs.writeFileSync(
+        path.join(__dirname, 'evals', 'input', 'formfields.json'),
+        JSON.stringify(formFields, null, 2),
+      );
+      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
+      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
+      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
+    }
+
+    formFields = prependImportantToDescriptions(formFields, important);
+    console.log(formFields);
+
     // TO-DO: ADD TO S3 AND SAVE REFERENCE IN A DB CONNECTED TO A CONTEXT TO BE PASSED BY THE FRONTEND
 
     const uploadedFiles = await Promise.all(
@@ -158,110 +220,47 @@ app.post(
       }),
     );
 
-    const systemInstructions = `You are an AI that must always call exactly one tool called "processFormFields". 
+    const systemInstructions = `You are an AI that fills form fields. 
 You cannot reply or assist directly. 
-You must process the provided inputs using that tool and return only the correct arguments needed to call it.
-
-${instruction} ${important}
+You must read the user inputs and return only the values needed to fill the form fields.
 
 You'll receive
-- an instruction you must absolutely follow
-- list of args accepted by the tool with descriptions
+- an instruction on how to fill the form fields
+- a list of fields accepted by the form with descriptions
 - optional text content pasted by the user
-- optional list of uploaded files
+- optional files uploaded by the user
 
-The text and the list may have information to entities unrelated to your instruction. Don't mix up entities.
+The content provided by the user may have information to entities unrelated to your instruction. 
+Be careful not to mix up entities.
+
+<INSTRUCTION>
+${instruction} ${important}
+</INSTRUCTION>
+
+<FORM_FIELDS>
+${JSON.stringify(formFields, null, 2)}
+</FORM_FIELDS>
 
 Your task:
 1. Analyze the content provided (text or files).
-2. Use the tool args to determine what data to extract.
-3. Convert the extracted data to the format required in the args descriptions.
-4. Return the extracted data as the args to processFormFields.
+2. Use the FORM_FIELDS to determine what data to extract.
+3. Convert the extracted data to the format required in the FORM_FIELDS.
+4. Return a json with the extracted data as values to each form field name.
 
-Do not explain or respond to the user. Just return the tool call with filled args.
+Do not explain or respond to the user. Just return the json with filled fields.
 Do not ask questions. Only act.
 Do not fill fields with "null", "undefined", "none", "N/A", "unknown" or similar.
 Only fill in the fields with the extracted data. Don't use your own knowledge or assumptions.
-When in doubt, leave the field blank.
+When in doubt, don't mention the field in your response.
 
-Today is ${new Date().toLocaleDateString()}
-
-${instruction} ${important}`;
-
-    const { properties, _required } = getProperties(formFields, important);
-    console.log(properties);
-    const sanitizedProperties = sanitizeObject(properties);
+Today is ${new Date().toLocaleDateString()}`;
 
     try {
-      const response = await ai.models.generateContent({
-        model: 'models/gemini-2.5-flash-lite',
-        contents: createUserContent([
-          `Please extract the relevant information from the following:\n\nPasted text:\n${
-            pastedText || '[none]'
-          }\n\nForm fields:\n${JSON.stringify(formFields, null, 2)}`,
-          ...uploadedFiles.map((f) => createPartFromUri(f.uri, f.mimeType)),
-        ]),
-        config: {
-          tools: [
-            {
-              functionDeclarations: [
-                {
-                  name: 'processFormFields',
-                  description: 'Fills out form fields based on input content',
-                  parameters: {
-                    type: 'object',
-                    properties: {
-                      // eslint-disable-next-line camelcase
-                      ai_reason: {
-                        type: 'string',
-                        description:
-                          "Reason for selecting the tools's arguments, with explanation of why it complies with all the instructions",
-                      },
-                      ...sanitizedProperties,
-                    },
-                    required: ['ai_reason'],
-                  },
-                },
-              ],
-            },
-          ],
-          systemInstruction: {
-            role: 'system',
-            parts: [{ text: systemInstructions }, instruction && { text: instruction }].filter(
-              Boolean,
-            ),
-          },
-        },
-      });
-
-      if (response?.candidates?.[0]?.content?.parts?.[0]?.functionCall) {
-        console.log(response?.candidates?.[0]?.content?.parts?.[0]?.functionCall);
-      } else {
-        console.dir(response, { depth: null });
-      }
-
-      const args = response?.candidates?.[0]?.content?.parts?.[0]?.functionCall?.args;
-      if (!args) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Invalid function call arguments',
-          errorCode: 'INVALID_FUNCTION_CALL_ARGS',
-          error: 'No arguments provided',
-          shortError: 'No arguments provided',
-          tip: 'Check the API documentation for required parameters.',
-        });
-      }
-
-      const filteredArgs = Object.fromEntries(
-        Object.entries(args).filter(
-          ([_, v]) =>
-            typeof v !== 'string' ||
-            !['null', 'undefined', 'none', 'n/a', 'unknown'].includes(v.toLowerCase()),
-        ),
+      const { filteredArgs, tokens } = await withRetry(() =>
+        generateAndParse({ ai, uploadedFiles, pastedText, systemInstructions }),
       );
 
       const duration = Date.now() - start;
-      const tokens = response?.usageMetadata;
       res.json({ status: 'ok', data: filteredArgs, duration, tokens });
     } catch (err) {
       console.dir(err, { depth: null });
@@ -277,8 +276,149 @@ ${instruction} ${important}`;
   },
 );
 
+app.post(
+  '/api/eval',
+  uploadMiddleware,
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const file = req.files?.[0];
+    const { instruction = '', important = '' } = req.body;
+
+    let formFields, expected;
+    try {
+      formFields = JSON.parse(req.body.formFields || '{}');
+      expected = JSON.parse(req.body.expected || '{}');
+    } catch {
+      return res.status(400).json({ error: 'Invalid JSON in formFields or expected' });
+    }
+
+    if (!formFields || !file) {
+      return res.status(400).json({ error: 'Missing formFields or file' });
+    }
+
+    try {
+      const fileBuffer = fs.readFileSync(file.path);
+      const result = await runEval({
+        file,
+        fileBuffer,
+        formFields,
+        instruction,
+        important,
+        expected,
+      });
+      res.json(result);
+    } catch (err) {
+      res
+        .status(500)
+        .json({ file: file.originalname, ok: false, status: 'ERR', error: String(err) });
+    } finally {
+      fs.unlinkSync(file.path);
+    }
+  },
+);
+
+app.post(
+  '/api/evals',
+  uploadMiddleware,
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const { instruction = '', important = '' } = req.body;
+    const times = Number(req.query.times || 3);
+    const files = req.files || [];
+
+    let formFields, expectedMap;
+    try {
+      formFields = JSON.parse(req.body.formFields || '{}');
+      expectedMap = JSON.parse(req.body.expected || '{}');
+    } catch {
+      return res.status(400).json({ error: 'Invalid JSON in formFields or expectedMap' });
+    }
+
+    if (!formFields || !files.length) {
+      return res.status(400).json({ error: 'Missing formFields or files' });
+    }
+
+    const input = {
+      instruction,
+      important,
+      times,
+      files,
+      formFields,
+      expected: expectedMap,
+    };
+    const results = [];
+
+    for (const file of files) {
+      const fileBuffer = fs.readFileSync(file.path);
+      const expected = expectedMap[file.originalname];
+
+      for (let i = 0; i < times; i++) {
+        try {
+          const result = await runEval({
+            file,
+            fileBuffer,
+            formFields,
+            instruction,
+            important,
+            expected,
+          });
+          results.push({ ...result, run: i + 1 });
+        } catch (err) {
+          results.push({
+            file: file.originalname,
+            run: i + 1,
+            ok: false,
+            status: 'ERR',
+            error: String(err),
+          });
+        }
+      }
+
+      fs.unlinkSync(file.path);
+    }
+    const summary = {
+      total_files: files.length,
+      total_runs: results.length,
+      avg_latency_ms: null,
+      avg_precision: null,
+      avg_recall: null,
+      avg_f1: null,
+      total_cost_usd: 0,
+    };
+
+    let latencySum = 0;
+    let precisionSum = 0;
+    let recallSum = 0;
+    let f1Sum = 0;
+    let metricCount = 0;
+
+    for (const r of results) {
+      if (r.latency_ms != null) latencySum += r.latency_ms;
+      if (r.total_cost) summary.total_cost_usd += parseFloat(r.total_cost);
+
+      if (r.precision != null && r.recall != null && r.f1 != null) {
+        precisionSum += r.precision;
+        recallSum += r.recall;
+        f1Sum += r.f1;
+        metricCount++;
+      }
+    }
+
+    summary.avg_latency_ms = results.length ? Math.round(latencySum / results.length) : null;
+    summary.avg_precision = metricCount ? +(precisionSum / metricCount).toFixed(4) : null;
+    summary.avg_recall = metricCount ? +(recallSum / metricCount).toFixed(4) : null;
+    summary.avg_f1 = metricCount ? +(f1Sum / metricCount).toFixed(4) : null;
+    summary.total_cost_usd = +summary.total_cost_usd.toFixed(6);
+
+    res.json({ input, total_runs: results.length, summary, results });
+  },
+);
+
 // 6. Frontend Fallback
 app.get('/', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
+app.get('/evals', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
