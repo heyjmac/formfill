@@ -69,15 +69,13 @@ const deepEq = (a, b) => {
 };
 
 const looseEq = (a, b) => {
-  const sa = String(a).trim().toLowerCase(),
-    sb = String(b).trim().toLowerCase();
-  if (sa === sb) return true;
-  const na = Number(sa.replace(/[^\d.-]/g, '')),
-    nb = Number(sb.replace(/[^\d.-]/g, ''));
-  if (!Number.isNaN(na) && !Number.isNaN(nb)) return Math.abs(na - nb) < 1e-6;
-  const nu = (s) => s.replace(/\/+$/, '');
-  if (sa.startsWith('http') && sb.startsWith('http')) return nu(sa) === nu(sb);
-  return false;
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+
+  const sa = a.trim().toLowerCase();
+  const sb = b.trim().toLowerCase();
+
+  return sa === sb;
 };
 
 export const compare = (expected, got) => {

@@ -13,21 +13,20 @@ export const Input = () => {
   useEffect(() => {
     const saved = localStorage.getItem('evalsInput');
     if (saved) {
-      const { instruction, important, times, formFields, expectedMap } = JSON.parse(saved);
+      const { instruction, important, times, formFields } = JSON.parse(saved);
       setInstruction(instruction || '');
       setImportant(important || '');
       setTimes(times || 1);
       setFormFields(formFields || []);
-      setExpectedMap(expectedMap || {});
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem(
       'evalsInput',
-      JSON.stringify({ instruction, important, times, formFields, expectedMap }),
+      JSON.stringify({ instruction, important, times, formFields }),
     );
-  }, [instruction, important, times, formFields, expectedMap]);
+  }, [instruction, important, times, formFields]);
 
   const handleFileUpload = useCallback(
     (e) => {
