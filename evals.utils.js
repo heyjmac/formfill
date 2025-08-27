@@ -1,6 +1,3 @@
-// evals.js
-// Usage: node evals.js
-
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -8,6 +5,44 @@ import process from 'node:process';
 const API_URL = 'http://localhost:3000/api/formfill';
 const TIMEOUT = 60000;
 const STRICT = false;
+
+const GEMINI_PRICING = {
+  input: {
+    TEXT: 0.1 / 1_000_000,
+    IMAGE: 0.1 / 1_000_000,
+    VIDEO: 0.1 / 1_000_000,
+    AUDIO: 0.3 / 1_000_000,
+  },
+  output: 0.4 / 1_000_000,
+  cache: {
+    TEXT: 0.025 / 1_000_000,
+    IMAGE: 0.025 / 1_000_000,
+    VIDEO: 0.025 / 1_000_000,
+    AUDIO: 0.125 / 1_000_000,
+  },
+};
+
+export const calculateGeminiCosts = (tokens) => {
+  const promptCost = tokens.promptTokensDetails.reduce((acc, { modality, tokenCount }) => {
+    const rate = GEMINI_PRICING.input[modality] || 0;
+    return acc + tokenCount * rate;
+  }, 0);
+
+  const outputCost = tokens.candidatesTokenCount * GEMINI_PRICING.output;
+
+  const cacheCost =
+    tokens.cacheTokensDetails?.reduce((acc, { modality, tokenCount }) => {
+      const rate = GEMINI_PRICING.cache[modality] || 0;
+      return acc + tokenCount * rate;
+    }, 0) || 0;
+
+  return {
+    promptCost: promptCost.toFixed(6),
+    outputCost: outputCost.toFixed(6),
+    cacheCost: cacheCost.toFixed(6),
+    totalCost: (promptCost + outputCost + cacheCost).toFixed(6),
+  };
+};
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const flat = (o, pfx = '') =>

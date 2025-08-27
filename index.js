@@ -7,7 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { compare } from './evals.utils.js';
+import { calculateGeminiCosts, compare } from './evals.utils.js';
 import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
@@ -314,6 +314,8 @@ app.post(
       const data = await response.json();
       const latency = Date.now() - t0;
       const got = data?.data ?? {};
+      const tokens = data?.tokens ?? {};
+      const cost = tokens ? calculateGeminiCosts(tokens) : null;
 
       let compareResult = null;
       let precision = null;
@@ -341,8 +343,11 @@ app.post(
         precision,
         recall,
         f1,
-        compare: compareResult,
         latency_ms: latency,
+        total_cost: cost?.totalCost,
+        compare: compareResult,
+        cost,
+        tokens,
         response: data,
         timestamp: new Date().toISOString(),
       });
