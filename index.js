@@ -410,6 +410,9 @@ app.post(
 app.get('/', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
+app.get('/evals', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
 
 // 7. Start Server
 app.listen(3000, () => console.log('http://localhost:3000'));
