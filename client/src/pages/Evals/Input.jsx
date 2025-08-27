@@ -16,7 +16,7 @@ export const Input = () => {
       const { instruction, important, times, formFields, expectedMap } = JSON.parse(saved);
       setInstruction(instruction || '');
       setImportant(important || '');
-      setTimes(times || 3);
+      setTimes(times || 1);
       setFormFields(formFields || []);
       setExpectedMap(expectedMap || {});
     }

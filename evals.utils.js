@@ -23,15 +23,15 @@ const GEMINI_PRICING = {
 };
 
 export const calculateGeminiCosts = (tokens) => {
-  const promptCost = tokens.promptTokensDetails.reduce((acc, { modality, tokenCount }) => {
+  const promptCost = tokens?.promptTokensDetails?.reduce((acc, { modality, tokenCount }) => {
     const rate = GEMINI_PRICING.input[modality] || 0;
     return acc + tokenCount * rate;
   }, 0);
 
-  const outputCost = tokens.candidatesTokenCount * GEMINI_PRICING.output;
+  const outputCost = tokens?.candidatesTokenCount * GEMINI_PRICING.output;
 
   const cacheCost =
-    tokens.cacheTokensDetails?.reduce((acc, { modality, tokenCount }) => {
+    tokens?.cacheTokensDetails?.reduce((acc, { modality, tokenCount }) => {
       const rate = GEMINI_PRICING.cache[modality] || 0;
       return acc + tokenCount * rate;
     }, 0) || 0;
