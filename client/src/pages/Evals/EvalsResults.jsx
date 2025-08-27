@@ -62,6 +62,21 @@ export const EvalsResults = () => {
                 {run.file && <span className="text-xs text-gray-500">(Iteration {run.run})</span>}
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
+                <button
+                  className="rounded px-3 py-1 text-sm text-blue-700 hover:bg-neutral-100"
+                  onClick={() => {
+                    const expected = {
+                      [run.file]: run.compare.details.reduce((acc, curr) => {
+                        acc[curr.key] = curr.got;
+                        return acc;
+                      }, {}),
+                    };
+                    events.emit('evals:overwriteExpected', expected);
+                  }}
+                >
+                  Use this as Expected
+                </button>
+
                 <span>
                   Response Time: {run.latency_ms ? (run.latency_ms / 1000).toFixed(2) + 's' : '—'}
                 </span>

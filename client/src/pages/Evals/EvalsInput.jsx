@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 const DB_NAME = 'evalsDB';
@@ -69,6 +69,18 @@ export const EvalsInput = () => {
   const [inputGroups, setInputGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const expectedRef = useRef();
+
+  useEffect(() => {
+    const unsubscribe = events.on('evals:overwriteExpected', (newExpected) => {
+      setExpectedMap((prev) => ({ ...prev, ...newExpected }));
+
+      setTimeout(() => {
+        expectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 600);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     loadInputGroups(setInputGroups);
@@ -435,7 +447,7 @@ export const EvalsInput = () => {
         </div>
 
         <div className="break-inside-avoid">
-          <div className="rounded border border-neutral-300 p-4">
+          <div className="rounded border border-neutral-300 p-4" ref={expectedRef}>
             <label className="mb-2 block text-sm">Expected Results</label>
             {Object.entries(expectedMap).length === 0 && (
               <div className="text-gray-500">Add a file first</div>
