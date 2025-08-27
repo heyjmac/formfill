@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 export const Input = () => {
@@ -10,43 +10,72 @@ export const Input = () => {
   const [expectedMap, setExpectedMap] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileUpload = (e) => {
-    const uploaded = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...uploaded]);
+  useEffect(() => {
+    const saved = localStorage.getItem('evalsInput');
+    if (saved) {
+      const { instruction, important, times, formFields, expectedMap } = JSON.parse(saved);
+      setInstruction(instruction || '');
+      setImportant(important || '');
+      setTimes(times || 3);
+      setFormFields(formFields || []);
+      setExpectedMap(expectedMap || {});
+    }
+  }, []);
 
-    const updatedMap = { ...expectedMap };
-    uploaded.forEach((file) => {
-      updatedMap[file.name] = updatedMap[file.name] || {};
-      formFields.forEach(({ name }) => {
-        updatedMap[file.name][name] = '';
-      });
-    });
-    setExpectedMap(updatedMap);
-  };
+  useEffect(() => {
+    localStorage.setItem(
+      'evalsInput',
+      JSON.stringify({ instruction, important, times, formFields, expectedMap }),
+    );
+  }, [instruction, important, times, formFields, expectedMap]);
 
-  const handleRemoveFile = (name) => {
-    setFiles((prev) => prev.filter((f) => f.name !== name));
-    const updatedMap = { ...expectedMap };
-    delete updatedMap[name];
-    setExpectedMap(updatedMap);
-  };
-  const updateField = (index, key, value) => {
-    const updated = [...formFields];
-    const oldName = updated[index].name;
-    updated[index][key] = value;
-    setFormFields(updated);
+  const handleFileUpload = useCallback(
+    (e) => {
+      const uploaded = Array.from(e.target.files);
+      setFiles((prev) => [...prev, ...uploaded]);
 
-    if (key === 'name' && oldName !== value) {
       const updatedMap = { ...expectedMap };
-      Object.keys(updatedMap).forEach((file) => {
-        updatedMap[file][value] = updatedMap[file][oldName] || '';
-        delete updatedMap[file][oldName];
+      uploaded.forEach((file) => {
+        updatedMap[file.name] = updatedMap[file.name] || {};
+        formFields.forEach(({ name }) => {
+          updatedMap[file.name][name] = '';
+        });
       });
       setExpectedMap(updatedMap);
-    }
-  };
+    },
+    [formFields, expectedMap],
+  );
 
-  const addField = () => {
+  const handleRemoveFile = useCallback(
+    (name) => {
+      setFiles((prev) => prev.filter((f) => f.name !== name));
+      const updatedMap = { ...expectedMap };
+      delete updatedMap[name];
+      setExpectedMap(updatedMap);
+    },
+    [expectedMap],
+  );
+
+  const updateField = useCallback(
+    (index, key, value) => {
+      const updated = [...formFields];
+      const oldName = updated[index].name;
+      updated[index][key] = value;
+      setFormFields(updated);
+
+      if (key === 'name' && oldName !== value) {
+        const updatedMap = { ...expectedMap };
+        Object.keys(updatedMap).forEach((file) => {
+          updatedMap[file][value] = updatedMap[file][oldName] || '';
+          delete updatedMap[file][oldName];
+        });
+        setExpectedMap(updatedMap);
+      }
+    },
+    [expectedMap, formFields],
+  );
+
+  const addField = useCallback(() => {
     const newField = { name: '', type: 'text', description: '', format: '' };
     setFormFields((prev) => {
       const updated = [...prev, newField];
@@ -57,22 +86,25 @@ export const Input = () => {
       setExpectedMap(updatedMap);
       return updated;
     });
-  };
+  }, [expectedMap]);
 
-  const removeField = (index) => {
-    const fieldName = formFields[index].name;
-    const updated = [...formFields];
-    updated.splice(index, 1);
-    setFormFields(updated);
+  const removeField = useCallback(
+    (index) => {
+      const fieldName = formFields[index].name;
+      const updated = [...formFields];
+      updated.splice(index, 1);
+      setFormFields(updated);
 
-    const updatedMap = { ...expectedMap };
-    Object.keys(updatedMap).forEach((file) => {
-      delete updatedMap[file][fieldName];
-    });
-    setExpectedMap(updatedMap);
-  };
+      const updatedMap = { ...expectedMap };
+      Object.keys(updatedMap).forEach((file) => {
+        delete updatedMap[file][fieldName];
+      });
+      setExpectedMap(updatedMap);
+    },
+    [expectedMap, formFields],
+  );
 
-  const handleAddExpectedField = (fileName, newField) => {
+  const handleAddExpectedField = useCallback((fileName, newField) => {
     if (!newField) return;
     setExpectedMap((prev) => ({
       ...prev,
@@ -81,9 +113,9 @@ export const Input = () => {
         [newField]: '',
       },
     }));
-  };
+  }, []);
 
-  const handleExpectedFieldChange = (fileName, key, value, isKey = false) => {
+  const handleExpectedFieldChange = useCallback((fileName, key, value, isKey = false) => {
     setExpectedMap((prev) => {
       const updatedFields = { ...prev[fileName] };
       if (isKey) {
@@ -98,9 +130,9 @@ export const Input = () => {
         [fileName]: updatedFields,
       };
     });
-  };
+  }, []);
 
-  const handleRemoveExpectedField = (fileName, key) => {
+  const handleRemoveExpectedField = useCallback((fileName, key) => {
     setExpectedMap((prev) => {
       const updatedFields = { ...prev[fileName] };
       delete updatedFields[key];
@@ -109,9 +141,9 @@ export const Input = () => {
         [fileName]: updatedFields,
       };
     });
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsLoading(true);
     const body = new FormData();
     body.append('instruction', instruction);
@@ -129,7 +161,7 @@ export const Input = () => {
     events.emit('evals:summary', json.summary);
     events.emit('evals:results', json.results);
     setIsLoading(false);
-  };
+  }, [expectedMap, formFields, files, instruction, important, times]);
 
   return (
     <div className="overflow-hidden rounded-md border">
