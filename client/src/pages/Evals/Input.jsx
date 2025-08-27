@@ -1,6 +1,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { events } from '../../ai-components/utils/events';
 
+const DB_NAME = 'evalsDB';
+const STORE_NAME = 'files';
+
+const saveFilesToIndexedDB = (files) => {
+  const request = indexedDB.open(DB_NAME, 1);
+  request.onupgradeneeded = () => {
+    const db = request.result;
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+      db.createObjectStore(STORE_NAME, { keyPath: 'name' });
+    }
+  };
+  request.onsuccess = () => {
+    const db = request.result;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    files.forEach((file) => store.put(file));
+  };
+};
+
+const loadFilesFromIndexedDB = (callback) => {
+  const request = indexedDB.open(DB_NAME, 1);
+  request.onsuccess = () => {
+    const db = request.result;
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const getAll = store.getAll();
+    getAll.onsuccess = () => {
+      callback(getAll.result);
+    };
+  };
+};
+
 export const Input = () => {
   const [instruction, setInstruction] = useState('');
   const [important, setImportant] = useState('');
@@ -19,6 +51,10 @@ export const Input = () => {
       setTimes(times || 1);
       setFormFields(formFields || []);
     }
+
+    loadFilesFromIndexedDB((loadedFiles) => {
+      if (loadedFiles?.length) setFiles(loadedFiles);
+    });
   }, []);
 
   useEffect(() => {
@@ -27,6 +63,10 @@ export const Input = () => {
       JSON.stringify({ instruction, important, times, formFields }),
     );
   }, [instruction, important, times, formFields]);
+
+  useEffect(() => {
+    if (files.length) saveFilesToIndexedDB(files);
+  }, [files]);
 
   const handleFileUpload = useCallback(
     (e) => {

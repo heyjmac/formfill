@@ -75,7 +75,7 @@ const looseEq = (a, b) => {
   const sa = a.trim().toLowerCase();
   const sb = b.trim().toLowerCase();
 
-  return sa === sb;
+  return;
 };
 
 export const compare = (expected, got) => {
