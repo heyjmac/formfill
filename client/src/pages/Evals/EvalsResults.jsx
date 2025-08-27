@@ -56,10 +56,10 @@ export const EvalsResults = () => {
             open
           >
             <summary className="flex cursor-pointer items-center justify-between p-4">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <span className="material-symbols-outlined mr-2 text-gray-600">analytics</span>
-                <span>{`Iteration ${run.run}`}</span>
-                {run.file && <span className="text-xs text-gray-500"> ({run.file})</span>}
+                <span>{run.file}</span>
+                {run.file && <span className="text-xs text-gray-500">(Iteration {run.run})</span>}
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
                 <span>
