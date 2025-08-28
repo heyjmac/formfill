@@ -100,17 +100,20 @@ ${formCode}`;
   return (
     <>
       {instruction && (
-        <div className="break-inside-avoid rounded border border-neutral-950 bg-neutral-200 p-4">
+        <div
+          id="codeSnippet"
+          className="break-inside-avoid rounded border border-neutral-300 bg-neutral-50 p-4"
+        >
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center justify-between">
               <span className="text-sm font-medium">Generated Form</span>
               <div className="flex items-center gap-2">
                 <button
-                  className="flex h-[40px] cursor-pointer items-center gap-1 rounded border px-3 transition-colors print:hidden"
+                  className="flex h-[40px] cursor-pointer items-center gap-1 rounded border border-neutral-300 bg-white px-3 transition-colors print:hidden"
                   onClick={handleDemo}
                 >
                   <span className="material-symbols-outlined">visibility</span>
-                  <span>See the demo</span>
+                  <span>Play with demo</span>
                 </button>
                 <span className="material-symbols-outlined transition-transform group-open:rotate-180">
                   expand_more
