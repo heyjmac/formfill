@@ -1,6 +1,34 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
+const toTitleCase = (str) => {
+  const ignore = [
+    'da',
+    'do',
+    'de',
+    'das',
+    'dos',
+    'e',
+    'em',
+    'no',
+    'na',
+    'nos',
+    'nas',
+    'a',
+    'o',
+    'as',
+    'os',
+  ];
+  return str
+    .split('_')
+    .map((word, i) => {
+      word = word.toLowerCase();
+      if (i > 0 && ignore.includes(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+};
+
 export const EvalsCodeSnippet = React.memo(() => {
   const [formFields, setFormFields] = useState([]);
   const [instruction, setInstruction] = useState('');
@@ -33,18 +61,18 @@ export const EvalsCodeSnippet = React.memo(() => {
     }`;
 
     if (type === 'textarea') {
-      return `<label>${name}<textarea ${baseAttrs}></textarea></label>`;
+      return `<label>${toTitleCase(name)}<textarea ${baseAttrs}></textarea></label>`;
     }
 
     if (type === 'select-one') {
-      return `<label>${name}<select ${baseAttrs}>
+      return `<label>${toTitleCase(name)}<select ${baseAttrs}>
   <option value="">Select...</option>
   <option value="option1">Option 1</option>
   <option value="option2">Option 2</option>
 </select></label>`;
     }
 
-    return `<label>${name}<input type="${type}" ${baseAttrs} /></label>`;
+    return `<label>${toTitleCase(name)}<input type="${type}" ${baseAttrs} /></label>`;
   }, []);
 
   useEffect(() => {
