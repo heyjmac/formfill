@@ -19,7 +19,6 @@ export const EvalsIframe = React.memo(() => {
       setCode(code);
       setInstruction(instruction);
       setImportant(important);
-      setIsOpen(true);
     });
     return () => {
       unsubscribe1();
