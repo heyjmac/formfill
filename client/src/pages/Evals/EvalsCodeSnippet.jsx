@@ -93,21 +93,34 @@ ${formCode}`;
     }
   }, [clearSelection, code, visuallySelectPre]);
 
+  const handleDemo = useCallback(() => {
+    events.emit('evals:iframe', { url: null });
+  }, []);
+
   return (
     <>
       {instruction && (
-        <div className="break-inside-avoid border-b border-neutral-300 bg-gray-50 p-4">
+        <div className="break-inside-avoid rounded border border-neutral-950 bg-neutral-200 p-4">
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center justify-between">
-              <span className="text-sm font-medium">Generated Form Code</span>
-              <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">
-                expand_more
-              </span>
+              <span className="text-sm font-medium">Generated Form</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex h-[40px] cursor-pointer items-center gap-1 rounded border px-3 transition-colors print:hidden"
+                  onClick={handleDemo}
+                >
+                  <span className="material-symbols-outlined">visibility</span>
+                  <span>See the demo</span>
+                </button>
+                <span className="material-symbols-outlined transition-transform group-open:rotate-180">
+                  expand_more
+                </span>
+              </div>
             </summary>
-            <div className="relative mt-3 rounded bg-gray-900 p-3 font-mono text-sm text-gray-100">
+            <div className="relative mt-3 rounded bg-neutral-900 p-3 font-mono text-sm text-neutral-100">
               <button
                 onClick={copyToClipboard}
-                className="absolute right-3 top-3 rounded bg-gray-700 px-2 py-1 text-xs text-white hover:bg-gray-600"
+                className="absolute right-3 top-3 rounded bg-neutral-700 px-2 py-1 text-xs text-white hover:bg-neutral-600"
               >
                 {isCopying ? 'Copied!' : 'Copy'}
               </button>

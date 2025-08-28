@@ -57,7 +57,7 @@ export const EvalsIframe = React.memo(() => {
         (url ? (
           <iframe className="size-full" src={url} />
         ) : code ? (
-          <div className="flex size-full items-center justify-center">
+          <div className="flex size-full items-center justify-center bg-neutral-50">
             <div
               className="styled-form overflow-auto p-4 text-sm"
               dangerouslySetInnerHTML={{ __html: code }}
@@ -65,7 +65,7 @@ export const EvalsIframe = React.memo(() => {
             <FormFillerFloater instruction={instruction} important={important} />
           </div>
         ) : (
-          <div className="flex size-full items-center justify-center text-sm text-gray-400">
+          <div className="flex size-full items-center justify-center bg-neutral-50 text-sm text-gray-400">
             Select a document to view or run a prompt to generate a form.
           </div>
         ))}
