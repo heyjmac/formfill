@@ -7,11 +7,12 @@ export const EvalsCodeSnippet = React.memo(() => {
   const [important, setImportant] = useState('');
   const [isCopying, setIsCopying] = useState(false);
   const [code, setCode] = useState('');
+  const [formCode, setFormCode] = useState('');
   const preRef = useRef(null);
 
   useEffect(() => {
-    events.emit('evals:code', { code });
-  }, [code]);
+    events.emit('evals:code', { code: formCode, instruction, important });
+  }, [formCode, important, instruction]);
 
   useEffect(() => {
     const unsubscribe = events.on('evals:input', ({ formFields, instruction, important }) => {
@@ -32,29 +33,33 @@ export const EvalsCodeSnippet = React.memo(() => {
     }`;
 
     if (type === 'textarea') {
-      return `<textarea ${baseAttrs}></textarea>`;
+      return `<label>${name}<textarea ${baseAttrs}></textarea></label>`;
     }
 
     if (type === 'select-one') {
-      return `<select ${baseAttrs}>
+      return `<label>${name}<select ${baseAttrs}>
   <option value="">Select...</option>
   <option value="option1">Option 1</option>
   <option value="option2">Option 2</option>
-</select>`;
+</select></label>`;
     }
 
-    return `<input type="${type}" ${baseAttrs} />`;
+    return `<label>${name}<input type="${type}" placeholder="${name}" ${baseAttrs} /></label>`;
   }, []);
 
   useEffect(() => {
-    setCode(`<FormFillerFloater
+    if (formFields.length === 0) return;
+    const formCode = `<form>
+  ${formFields?.map(generateInput).join('\n  ')}
+</form>`;
+    const code = `<FormFillerFloater
   instruction="${instruction}"
   important="${important}"
 />
 
-<form>
-  ${formFields?.map(generateInput).join('\n  ')}
-</form>`);
+${formCode}`;
+    setCode(code);
+    setFormCode(formCode);
   }, [formFields, generateInput, important, instruction]);
 
   const visuallySelectPre = useCallback(() => {

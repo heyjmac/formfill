@@ -435,6 +435,17 @@ export const EvalsInput = () => {
     setIsLoading(false);
   }, [expectedMap, formFields, files, instruction, important, times]);
 
+  const handleNew = useCallback(() => {
+    setSelectedGroupId(null);
+    setRenameValue('');
+    setInstruction('');
+    setImportant('');
+    setFormFields([]);
+    setExpectedMap({});
+    setFiles([]);
+    localStorage.removeItem('evalsInput:lastGroupId');
+  }, []);
+
   const handleLoadPrevious = useCallback(
     (e) => {
       const id = Number(e.target.value);
@@ -454,7 +465,7 @@ export const EvalsInput = () => {
         setRenameValue(group.name || '');
       }
     },
-    [inputGroups],
+    [handleNew, inputGroups],
   );
 
   const handleSave = useCallback(
@@ -518,17 +529,6 @@ export const EvalsInput = () => {
       }),
     [selectedGroupId],
   );
-
-  const handleNew = useCallback(() => {
-    setSelectedGroupId(null);
-    setRenameValue('');
-    setInstruction('');
-    setImportant('');
-    setFormFields([]);
-    setExpectedMap({});
-    setFiles([]);
-    localStorage.removeItem('evalsInput:lastGroupId');
-  }, []);
 
   const handleExportInput = useCallback(() => {
     exportInputGroups(selectedGroupId);
