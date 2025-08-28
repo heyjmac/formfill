@@ -2,9 +2,30 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 const toTitleCase = (str) => {
+  const ignore = [
+    'da',
+    'do',
+    'de',
+    'das',
+    'dos',
+    'e',
+    'em',
+    'no',
+    'na',
+    'nos',
+    'nas',
+    'a',
+    'o',
+    'as',
+    'os',
+  ];
   return str
     .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word, i) => {
+      word = word.toLowerCase();
+      if (i > 0 && ignore.includes(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
     .join(' ');
 };
 
