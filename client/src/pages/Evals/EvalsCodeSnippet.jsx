@@ -1,12 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
-export const EvalsCodeSnippet = () => {
-  const [formFields, setFormFields] = React.useState([]);
-  const [instruction, setInstruction] = React.useState('');
-  const [important, setImportant] = React.useState('');
-  const [isCopying, setIsCopying] = React.useState(false);
+export const EvalsCodeSnippet = React.memo(() => {
+  const [formFields, setFormFields] = useState([]);
+  const [instruction, setInstruction] = useState('');
+  const [important, setImportant] = useState('');
+  const [isCopying, setIsCopying] = useState(false);
+  const [code, setCode] = useState('');
   const preRef = useRef(null);
+
+  useEffect(() => {
+    events.emit('evals:code', { code });
+  }, [code]);
 
   useEffect(() => {
     const unsubscribe = events.on('evals:input', ({ formFields, instruction, important }) => {
@@ -41,17 +46,17 @@ export const EvalsCodeSnippet = () => {
     return `<input type="${type}" ${baseAttrs} />`;
   }, []);
 
-  const code = useMemo(
-    () => `<FormFillerFloater
+  useEffect(() => {
+    setCode(`<FormFillerFloater
   instruction="${instruction}"
   important="${important}"
 />
 
 <form>
   ${formFields?.map(generateInput).join('\n  ')}
-</form>`,
-    [formFields, generateInput, important, instruction],
-  );
+</form>`);
+  }, [formFields, generateInput, important, instruction]);
+
   const visuallySelectPre = useCallback(() => {
     const el = preRef.current;
     if (!el) return;
@@ -112,4 +117,4 @@ export const EvalsCodeSnippet = () => {
       )}
     </>
   );
-};
+});
