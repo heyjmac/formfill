@@ -43,7 +43,7 @@ export const EvalsResults = () => {
         <h2 className="text-lg font-normal">Processing Runs</h2>
         <button
           onClick={handlePrint}
-          className="hidden rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 md:block"
+          className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 print:hidden"
         >
           Print / Save as PDF
         </button>

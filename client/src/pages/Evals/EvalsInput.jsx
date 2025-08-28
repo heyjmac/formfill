@@ -959,7 +959,7 @@ export const EvalsInput = () => {
               className="h-[40px] w-20 rounded border border-neutral-300 px-3  text-sm"
             />
             <button
-              className="hidden h-[40px] cursor-pointer rounded bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 md:block"
+              className="h-[40px] cursor-pointer rounded bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 print:hidden"
               onClick={handleSubmit}
               disabled={
                 isLoading ||
@@ -969,7 +969,10 @@ export const EvalsInput = () => {
                 formFields.some((f) => !f.name)
               }
             >
-              {isLoading ? 'Processing...' : 'Process Documents'}
+              <span className="hidden md:inline">
+                {isLoading ? 'Processing...' : 'Process Documents'}
+              </span>
+              <span className="md:hidden">{isLoading ? 'Running...' : 'Run'}</span>
             </button>
           </div>
         </div>
