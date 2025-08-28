@@ -2,32 +2,32 @@ import React, { useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 export const EvalsSummary = () => {
-  const [avg_f1, setAvgF1] = useState(0);
-  const [avg_latency_ms, setAvgLatencyMs] = useState(0);
-  const [avg_precision, setAvgPrecision] = useState(0);
-  const [avg_recall, setAvgRecall] = useState(0);
-  const [total_cost_usd, setTotalCostUsd] = useState(0);
-  const [total_files, setTotalFiles] = useState(0);
-  const [total_runs, setTotalRuns] = useState(0);
+  const [avgF1, setAvgF1] = useState(0);
+  const [avgLatencyMs, setAvgLatencyMs] = useState(0);
+  const [avgPrecision, setAvgPrecision] = useState(0);
+  const [avgRecall, setAvgRecall] = useState(0);
+  const [totalCostUsd, setTotalCostUsd] = useState(0);
+  const [totalFiles, setTotalFiles] = useState(0);
+  const [totalRuns, setTotalRuns] = useState(0);
   const summaryRef = useRef(null);
 
   useEffect(() => {
     const handler = ({
-      avg_f1,
-      avg_latency_ms,
-      avg_precision,
-      avg_recall,
-      total_cost_usd,
-      total_files,
-      total_runs,
+      avgF1,
+      avgLatencyMs,
+      avgPrecision,
+      avgRecall,
+      totalCostUsd,
+      totalFiles,
+      totalRuns,
     }) => {
-      setAvgF1(avg_f1);
-      setAvgLatencyMs(avg_latency_ms);
-      setAvgPrecision(avg_precision);
-      setAvgRecall(avg_recall);
-      setTotalCostUsd(total_cost_usd);
-      setTotalFiles(total_files);
-      setTotalRuns(total_runs);
+      setAvgF1(avgF1);
+      setAvgLatencyMs(avgLatencyMs);
+      setAvgPrecision(avgPrecision);
+      setAvgRecall(avgRecall);
+      setTotalCostUsd(totalCostUsd);
+      setTotalFiles(totalFiles);
+      setTotalRuns(totalRuns);
 
       setTimeout(() => {
         summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -39,36 +39,36 @@ export const EvalsSummary = () => {
 
   return (
     <div ref={summaryRef} className="break-inside-avoid">
-      {total_files ? (
+      {totalFiles ? (
         <div className="rounded border border-neutral-300 bg-gray-50 p-6">
           <div className="grid grid-cols-4 gap-4">
             <div>
               <p className="text-xs text-gray-500">Files Processed</p>
-              <p className="text-xl">{total_files}</p>
+              <p className="text-xl">{totalFiles}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Total Runs</p>
-              <p className="text-xl">{total_runs}</p>
+              <p className="text-xl">{totalRuns}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Avg Latency</p>
-              <p className="text-xl">{avg_latency_ms}</p>
+              <p className="text-xl">{avgLatencyMs}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Total Cost</p>
-              <p className="text-xl">${total_cost_usd}</p>
+              <p className="text-xl">${totalCostUsd}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Avg Precision</p>
-              <p className="text-xl">{(avg_precision * 100).toFixed(2)}%</p>
+              <p className="text-xl">{(avgPrecision * 100).toFixed(2)}%</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Avg Recall</p>
-              <p className="text-xl">{(avg_recall * 100).toFixed(2)}%</p>
+              <p className="text-xl">{(avgRecall * 100).toFixed(2)}%</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Avg F1 Score</p>
-              <p className="text-xl">{(avg_f1 * 100).toFixed(2)}%</p>
+              <p className="text-xl">{(avgF1 * 100).toFixed(2)}%</p>
             </div>
           </div>
         </div>

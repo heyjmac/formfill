@@ -318,7 +318,7 @@ export const FormFillerFlow = React.memo(
             </span>
             <input
               type="file"
-              className="hidden"
+              className="print:hidden"
               ref={fileRef}
               multiple
               accept=".pdf,.doc,.docx,.txt,.xlsx,.xls,.ppt,.pptx,.csv,.html,.md,.json,.xml,.png,.jpg,.jpeg,.webp,.mp3,.wav,.mp4,.mov"

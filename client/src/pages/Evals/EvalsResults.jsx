@@ -43,7 +43,7 @@ export const EvalsResults = () => {
         <h2 className="text-lg font-normal">Processing Runs</h2>
         <button
           onClick={handlePrint}
-          className="hidden rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 md:block"
+          className="rounded border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-gray-50 print:hidden"
         >
           Print / Save as PDF
         </button>
@@ -56,12 +56,27 @@ export const EvalsResults = () => {
             open
           >
             <summary className="flex cursor-pointer items-center justify-between p-4">
-              <div className="flex items-center">
+              <div className="flex items-center gap-1">
                 <span className="material-symbols-outlined mr-2 text-gray-600">analytics</span>
-                <span>{`Iteration ${run.run}`}</span>
-                {run.file && <span className="text-xs text-gray-500"> ({run.file})</span>}
+                <span>{run.file}</span>
+                {run.file && <span className="text-xs text-gray-500">(Iteration {run.run})</span>}
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
+                <button
+                  className="rounded px-3 py-1 text-sm text-blue-700 hover:bg-neutral-100"
+                  onClick={() => {
+                    const expected = {
+                      [run.file]: run.compare.details.reduce((acc, curr) => {
+                        acc[curr.key] = curr.got;
+                        return acc;
+                      }, {}),
+                    };
+                    events.emit('evals:overwriteExpected', expected);
+                  }}
+                >
+                  Use this as Expected
+                </button>
+
                 <span>
                   Response Time: {run.latency_ms ? (run.latency_ms / 1000).toFixed(2) + 's' : '—'}
                 </span>

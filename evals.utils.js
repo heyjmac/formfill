@@ -64,18 +64,16 @@ const deepEq = (a, b) => {
     if (ka.length !== kb.length) return false;
     return ka.every((k) => deepEq(a[k], b[k]));
   }
-  if (typeof a === 'string' && typeof b === 'string') return a.trim() === b.trim();
-  return String(a).trim() === String(b).trim();
+  if (typeof a === 'string' && typeof b === 'string') return a?.trim() === b?.trim();
+  return String(a)?.trim() === String(b)?.trim();
 };
 
 const looseEq = (a, b) => {
   if (a === b) return true;
   if (a == null || b == null) return false;
-
-  const sa = a.trim().toLowerCase();
-  const sb = b.trim().toLowerCase();
-
-  return;
+  if (typeof a === 'string' && typeof b === 'string') return a?.trim() === b?.trim();
+  if (typeof a === 'number' && typeof b === 'number') return a === b;
+  return String(a)?.trim() === String(b)?.trim();
 };
 
 export const compare = (expected, got) => {
