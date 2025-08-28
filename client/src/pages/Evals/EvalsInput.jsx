@@ -85,6 +85,63 @@ const loadInputGroups = (callback) => {
   });
 };
 
+const exportInputGroups = () => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readonly');
+    const store = tx.objectStore(STORE_INPUTS);
+    const request = store.getAll();
+    request.onsuccess = async () => {
+      const groups = await Promise.all(
+        request.result.map(async (group) => {
+          const files = await Promise.all(
+            (group.files || []).map((file) => {
+              return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  resolve({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    content: reader.result,
+                  });
+                };
+                reader.readAsDataURL(file);
+              });
+            }),
+          );
+          return { ...group, files };
+        }),
+      );
+      const blob = new Blob([JSON.stringify(groups)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'backup.json';
+      a.click();
+    };
+  });
+};
+
+const importInputGroups = (file) => {
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const groups = JSON.parse(reader.result);
+    for (const group of groups) {
+      const files = (group.files || []).map((f) => {
+        const arr = f.content.split(',');
+        const mime = f.type;
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        return new File([u8arr], f.name, { type: mime });
+      });
+      saveInputGroup({ ...group, files });
+    }
+  };
+  reader.readAsText(file);
+};
+
 export const EvalsInput = () => {
   const [instruction, setInstruction] = useState('');
   const [important, setImportant] = useState('');
@@ -447,14 +504,34 @@ export const EvalsInput = () => {
             }}
           />
         )}
-        <select onChange={handleLoadPrevious}>
-          <option value="">History</option>
-          {inputGroups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name || `Eval #${g.id}`}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select onChange={handleLoadPrevious}>
+            <option value="">History</option>
+            {inputGroups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name || `Eval #${g.id}`}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={exportInputGroups}
+            className="rounded px-2 py-1 hover:bg-gray-100"
+            title="Download"
+          >
+            <span className="material-symbols-outlined">download</span>
+          </button>
+
+          <label className="cursor-pointer rounded px-2 py-1 hover:bg-gray-100" title="Import">
+            <span className="material-symbols-outlined">upload</span>
+            <input
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={(e) => importInputGroups(e.target.files[0])}
+            />
+          </label>
+        </div>
       </div>
       <div className="space-y-6 p-6">
         {/* Top Controls */}
