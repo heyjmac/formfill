@@ -85,6 +85,89 @@ const loadInputGroups = (callback) => {
   });
 };
 
+const exportInputGroups = (selectedGroupId) => {
+  openDB((db) => {
+    const tx = db.transaction(STORE_INPUTS, 'readonly');
+    const store = tx.objectStore(STORE_INPUTS);
+    const request = store.get(selectedGroupId); // only the selected group
+    request.onsuccess = async () => {
+      const group = request.result;
+      if (!group) return console.warn('[export] No input group found for ID:', selectedGroupId);
+
+      const files = await Promise.all(
+        (group.files || []).map((file) => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                content: reader.result,
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        }),
+      );
+
+      const filename = (group.name || 'evals-backup').replace(/\s+/g, '_').toLowerCase();
+      const blob = new Blob([JSON.stringify([{ ...group, files }])], {
+        type: 'application/json',
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.json`;
+      a.click();
+    };
+  });
+};
+
+const importInputGroups = (file, setInputGroups) => {
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      console.log('[import] File loaded, parsing JSON...');
+      const groups = JSON.parse(reader.result);
+      console.log(`[import] Found ${groups.length} group(s)`);
+
+      for (const group of groups) {
+        console.log(`[import] Processing group: ${group.name || 'Unnamed'} (id: ${group.id})`);
+
+        const files = (group.files || []).map((f, i) => {
+          console.log(`[import] Restoring file ${i + 1}/${group.files.length}: ${f.name}`);
+          const base64 = f.content.split(',')[1];
+          const byteString = atob(base64);
+          const mime = f.type;
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          return new File([ab], f.name, { type: mime });
+        });
+
+        const { id, ...data } = group;
+        await new Promise((resolve) => {
+          console.log(`[import] Saving group: ${data.name}`);
+          saveInputGroup({ ...data, files }, (newId) => {
+            console.log(`[import] Group saved with new id: ${newId}`);
+            resolve();
+          });
+        });
+      }
+
+      console.log('[import] Reloading input groups into state...');
+      loadInputGroups(setInputGroups);
+    } catch (e) {
+      console.error('[import] Import failed:', e);
+    }
+  };
+  reader.readAsText(file);
+};
+
 export const EvalsInput = () => {
   const [instruction, setInstruction] = useState('');
   const [important, setImportant] = useState('');
@@ -343,6 +426,10 @@ export const EvalsInput = () => {
   const handleLoadPrevious = useCallback(
     (e) => {
       const id = Number(e.target.value);
+      if (!id) {
+        handleNew();
+        return;
+      }
       setSelectedGroupId(id);
       localStorage.setItem('evalsInput:lastGroupId', id);
       const group = inputGroups.find((g) => g.id === id);
@@ -431,30 +518,62 @@ export const EvalsInput = () => {
     localStorage.removeItem('evalsInput:lastGroupId');
   }, []);
 
+  const handleExportInput = useCallback(() => {
+    exportInputGroups(selectedGroupId);
+  }, [selectedGroupId]);
+
+  const handleImportInput = useCallback(
+    (e) => importInputGroups(e.target.files[0], setInputGroups),
+    [],
+  );
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
-        <h2 className="text-lg">Processing Input</h2>
-        {selectedGroupId && (
+        {selectedGroupId ? (
           <input
             type="text"
             placeholder="Rename group"
-            className="ml-2 rounded border-none px-2 py-1 text-center text-base font-semibold"
+            className="ml-2 rounded border-none p-0 text-lg"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={() => {
               renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
             }}
           />
+        ) : (
+          <h2 className="text-lg">New Input</h2>
         )}
-        <select onChange={handleLoadPrevious}>
-          <option value="">History</option>
-          {inputGroups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name || `Eval #${g.id}`}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <button onClick={handleNew} className="rounded px-2 py-1 hover:bg-gray-100" title="New">
+            <span className="material-symbols-outlined">add_circle_outline</span>
+          </button>
+          <button
+            onClick={handleExportInput}
+            className="rounded px-2 py-1 hover:bg-gray-100"
+            title="Export"
+          >
+            <span className="material-symbols-outlined">open_in_new</span>
+          </button>
+          <label className="cursor-pointer rounded px-2 py-1 hover:bg-gray-100" title="Import">
+            <span className="material-symbols-outlined">cloud_upload</span>
+            <input
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={handleImportInput}
+            />
+          </label>
+          <select onChange={handleLoadPrevious}>
+            <option value="">History</option>
+            {inputGroups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name || `Eval #${g.id}`}
+              </option>
+            ))}
+            <option value="">+ New form</option>
+          </select>
+        </div>
       </div>
       <div className="space-y-6 p-6">
         {/* Top Controls */}
@@ -893,19 +1012,6 @@ export const EvalsInput = () => {
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center justify-center gap-2">
-            {selectedGroupId && (
-              <button
-                onClick={handleNew}
-                className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
-                title="Start a new input"
-              >
-                <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
-                  add
-                </span>
-                New
-              </button>
-            )}
-
             {selectedGroupId ? (
               <>
                 <button
