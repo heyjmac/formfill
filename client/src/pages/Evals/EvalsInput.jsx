@@ -85,7 +85,7 @@ const loadInputGroups = (callback) => {
   });
 };
 
-const exportInputGroups = () => {
+const exportInputGroups = (selectedGroupId) => {
   openDB((db) => {
     const tx = db.transaction(STORE_INPUTS, 'readonly');
     const store = tx.objectStore(STORE_INPUTS);
@@ -112,31 +112,58 @@ const exportInputGroups = () => {
           return { ...group, files };
         }),
       );
+
+      const current = groups.find((g) => g.id === selectedGroupId);
+      const filename = current?.name?.replace(/\s+/g, '_').toLowerCase() || 'evals-backup';
+
       const blob = new Blob([JSON.stringify(groups)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'backup.json';
+      a.download = `${filename}.json`;
       a.click();
     };
   });
 };
 
-const importInputGroups = (file) => {
+const importInputGroups = (file, setInputGroups) => {
   const reader = new FileReader();
   reader.onload = async () => {
-    const groups = JSON.parse(reader.result);
-    for (const group of groups) {
-      const files = (group.files || []).map((f) => {
-        const arr = f.content.split(',');
-        const mime = f.type;
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) u8arr[n] = bstr.charCodeAt(n);
-        return new File([u8arr], f.name, { type: mime });
-      });
-      saveInputGroup({ ...group, files });
+    try {
+      console.log('[import] File loaded, parsing JSON...');
+      const groups = JSON.parse(reader.result);
+      console.log(`[import] Found ${groups.length} group(s)`);
+
+      for (const group of groups) {
+        console.log(`[import] Processing group: ${group.name || 'Unnamed'} (id: ${group.id})`);
+
+        const files = (group.files || []).map((f, i) => {
+          console.log(`[import] Restoring file ${i + 1}/${group.files.length}: ${f.name}`);
+          const base64 = f.content.split(',')[1];
+          const byteString = atob(base64);
+          const mime = f.type;
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          return new File([ab], f.name, { type: mime });
+        });
+
+        const { id, ...data } = group;
+        await new Promise((resolve) => {
+          console.log(`[import] Saving group: ${data.name}`);
+          saveInputGroup({ ...data, files }, (newId) => {
+            console.log(`[import] Group saved with new id: ${newId}`);
+            resolve();
+          });
+        });
+      }
+
+      console.log('[import] Reloading input groups into state...');
+      loadInputGroups(setInputGroups);
+    } catch (e) {
+      console.error('[import] Import failed:', e);
     }
   };
   reader.readAsText(file);
@@ -488,6 +515,15 @@ export const EvalsInput = () => {
     localStorage.removeItem('evalsInput:lastGroupId');
   }, []);
 
+  const handleExportInput = useCallback(() => {
+    exportInputGroups(selectedGroupId);
+  }, [selectedGroupId]);
+
+  const handleImportInput = useCallback(
+    (e) => importInputGroups(e.target.files[0], setInputGroups),
+    [],
+  );
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
@@ -515,7 +551,7 @@ export const EvalsInput = () => {
           </select>
 
           <button
-            onClick={exportInputGroups}
+            onClick={handleExportInput}
             className="rounded px-2 py-1 hover:bg-gray-100"
             title="Download"
           >
@@ -528,7 +564,7 @@ export const EvalsInput = () => {
               type="file"
               accept="application/json"
               className="hidden"
-              onChange={(e) => importInputGroups(e.target.files[0])}
+              onChange={handleImportInput}
             />
           </label>
         </div>
