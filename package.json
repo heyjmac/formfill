@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "evals": "node evals",
-    "build": "npm --prefix client run build",
+    "build": "npm --prefix client install && npm --prefix client run build",
     "serve": "node index.js",
     "start": "npm run build && node index.js",
     "dev": "concurrently -k \"npm --prefix client run build -- --watch\" \"nodemon --watch index.js --watch tools.js --ext js,mjs --exec 'node index.js'\""
