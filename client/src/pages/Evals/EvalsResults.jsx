@@ -120,18 +120,20 @@ export const EvalsResults = () => {
                     <div className="border-b border-neutral-300 bg-gray-50 p-3 font-medium">
                       Extracted Fields
                     </div>
-                    {run.compare.details.map((field, idx) => (
-                      <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
-                        <div className="flex justify-between">
-                          <p className="text-sm font-medium">{field.key}</p>
-                          <span className="material-symbols-outlined text-sm">
-                            {field.ok ? 'check_circle' : 'cancel'}
-                          </span>
+                    <div className="divide-y divide-neutral-300">
+                      {run.compare.details.map((field, idx) => (
+                        <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
+                          <div className="flex justify-between">
+                            <p className="text-sm font-medium">{field.key}</p>
+                            <span className="material-symbols-outlined text-sm">
+                              {field.ok ? 'check_circle' : 'cancel'}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
+                          <p className="mt-1">Got: {field.got}</p>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
-                        <p className="mt-1">Got: {field.got}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </>
               ) : (
