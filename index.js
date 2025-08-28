@@ -418,7 +418,7 @@ app.post(
 app.get('/', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
-app.get('/evals', (req, res) => {
+app.get('/:param', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
