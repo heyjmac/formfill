@@ -125,13 +125,15 @@ const exportInputGroups = (selectedGroupId) => {
   });
 };
 
-const importInputGroups = (file, setInputGroups) => {
+const importInputGroups = (file, setInputGroups, setSelectedGroupId) => {
   const reader = new FileReader();
   reader.onload = async () => {
     try {
       console.log('[import] File loaded, parsing JSON...');
       const groups = JSON.parse(reader.result);
       console.log(`[import] Found ${groups.length} group(s)`);
+
+      let lastImportedId = null;
 
       for (const group of groups) {
         console.log(`[import] Processing group: ${group.name || 'Unnamed'} (id: ${group.id})`);
@@ -151,16 +153,22 @@ const importInputGroups = (file, setInputGroups) => {
 
         const { id, ...data } = group;
         await new Promise((resolve) => {
-          console.log(`[import] Saving group: ${data.name}`);
           saveInputGroup({ ...data, files }, (newId) => {
             console.log(`[import] Group saved with new id: ${newId}`);
+            lastImportedId = newId;
             resolve();
           });
         });
       }
 
-      console.log('[import] Reloading input groups into state...');
-      loadInputGroups(setInputGroups);
+      console.log('[import] Reloading input groups...');
+      loadInputGroups((groups) => {
+        setInputGroups(groups);
+        if (lastImportedId) {
+          localStorage.setItem('evalsInput:lastGroupId', lastImportedId);
+          setSelectedGroupId(lastImportedId);
+        }
+      });
     } catch (e) {
       console.error('[import] Import failed:', e);
     }
@@ -523,7 +531,7 @@ export const EvalsInput = () => {
   }, [selectedGroupId]);
 
   const handleImportInput = useCallback(
-    (e) => importInputGroups(e.target.files[0], setInputGroups),
+    (e) => importInputGroups(e.target.files[0], setInputGroups, setSelectedGroupId),
     [],
   );
 
@@ -564,7 +572,7 @@ export const EvalsInput = () => {
               onChange={handleImportInput}
             />
           </label>
-          <select onChange={handleLoadPrevious}>
+          <select value={selectedGroupId || ''} onChange={handleLoadPrevious}>
             <option value="">History</option>
             {inputGroups.map((g) => (
               <option key={g.id} value={g.id}>
