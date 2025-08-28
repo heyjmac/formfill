@@ -103,14 +103,6 @@ export const EvalsResults = () => {
                       <p>{(run.f1 * 100).toFixed(2)}%</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Tokens</p>
-                      <p>{run.tokens?.totalTokenCount}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Latency ms</p>
-                      <p>{run.latency_ms ? run.latency_ms : '—'}</p>
-                    </div>
-                    <div>
                       <p className="text-xs text-gray-500">Cost</p>
                       <p>${run.total_cost}</p>
                     </div>
@@ -120,7 +112,7 @@ export const EvalsResults = () => {
                     <div className="flex items-center justify-between border-b border-neutral-300 bg-gray-50 p-3 font-medium">
                       Extracted Fields
                       <button
-                        className="cursor-pointer rounded px-3 py-1 text-sm text-blue-700 hover:bg-neutral-100"
+                        className="-mr-3 cursor-pointer rounded px-3 py-1 text-sm text-blue-700 hover:text-blue-500"
                         onClick={() => {
                           const expected = {
                             [run.file]: run.compare.details.reduce((acc, curr) => {
