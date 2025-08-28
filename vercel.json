@@ -5,21 +5,9 @@
       "src": "index.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": [
-          "client/dist/**",
-          "node_modules/react/**",
-          "node_modules/react-dom/**",
-          "node_modules/react-apexcharts/**",
-          "node_modules/@babel/**",
-          "node_modules/tailwindcss/**"
-        ]
+        "includeFiles": ["client/dist/**"]
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.js"
-    }
-  ]
+  "routes": [{ "src": "/(.*)", "dest": "/index.js" }]
 }
