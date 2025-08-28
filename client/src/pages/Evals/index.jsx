@@ -7,8 +7,8 @@ import { EvalsIframe } from './EvalsIframe';
 
 export const Evals = () => {
   return (
-    <div className="flex min-h-screen bg-white">
-      <div className="mx-auto max-w-4xl space-y-8 px-4">
+    <div className="flex h-screen bg-white">
+      <div className="mx-auto max-w-4xl flex-1 space-y-8 overflow-y-scroll px-4">
         <header className="border-b py-6">
           <div className="text-2xl font-normal">Form Filler Playground</div>
           <p className="mt-1 text-sm text-gray-600">Playground for testing prompts</p>

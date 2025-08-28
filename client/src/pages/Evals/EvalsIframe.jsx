@@ -40,7 +40,7 @@ export const EvalsIframe = React.memo(() => {
   return (
     <div
       className={`relative h-screen border-l border-neutral-300 transition-all ${
-        isOpen ? 'w-1/2' : 'w-0'
+        isOpen ? 'w-1/3' : 'w-0'
       }`}
     >
       <button
