@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { use, useCallback, useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
 export const EvalsCodeSnippet = React.memo(() => {
@@ -44,7 +44,7 @@ export const EvalsCodeSnippet = React.memo(() => {
 </select></label>`;
     }
 
-    return `<label>${name}<input type="${type}" placeholder="${name}" ${baseAttrs} /></label>`;
+    return `<label>${name}<input type="${type}" ${baseAttrs} /></label>`;
   }, []);
 
   useEffect(() => {
