@@ -424,3 +424,5 @@ app.get('/evals', (req, res) => {
 
 // 7. Start Server
 app.listen(3000, () => console.log('http://localhost:3000'));
+
+export default app;
