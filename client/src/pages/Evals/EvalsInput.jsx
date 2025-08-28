@@ -151,7 +151,7 @@ const importInputGroups = (file, setInputGroups, setSelectedGroupId) => {
           return new File([ab], f.name, { type: mime });
         });
 
-        const { id, ...data } = group;
+        const { id: _id, ...data } = group;
         await new Promise((resolve) => {
           saveInputGroup({ ...data, files }, (newId) => {
             console.log(`[import] Group saved with new id: ${newId}`);
@@ -187,17 +187,24 @@ export const EvalsInput = () => {
   const [inputGroups, setInputGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [iframeUrl, setIframeUrl] = useState('');
   const expectedRef = useRef();
 
   useEffect(() => {
-    const unsubscribe = events.on('evals:overwriteExpected', (newExpected) => {
+    const unsubscribe1 = events.on('evals:overwriteExpected', (newExpected) => {
       setExpectedMap((prev) => ({ ...prev, ...newExpected }));
 
       setTimeout(() => {
         expectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 600);
     });
-    return () => unsubscribe();
+    const unsubscribe2 = events.on('evals:iframe', ({ url }) => {
+      setIframeUrl(url);
+    });
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
   }, []);
 
   useEffect(() => {
@@ -219,16 +226,6 @@ export const EvalsInput = () => {
       }
     }
   }, [inputGroups]);
-
-  useEffect(() => {
-    events.emit('evals:input', {
-      instruction,
-      important,
-      formFields,
-      expected: expectedMap,
-      files,
-    });
-  }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
   useEffect(() => {
     if (!selectedGroupId) return;
@@ -413,6 +410,13 @@ export const EvalsInput = () => {
 
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
+    events.emit('evals:input', {
+      instruction,
+      important,
+      formFields,
+      expected: expectedMap,
+      files,
+    });
     const body = new FormData();
     body.append('instruction', instruction);
     body.append('important', important);
@@ -535,6 +539,23 @@ export const EvalsInput = () => {
     [],
   );
 
+  const handleChangeGroupName = useCallback((e) => setRenameValue(e.target.value), []);
+  const handleBlurGroupName = useCallback(() => {
+    renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
+  }, [selectedGroupId, renameValue]);
+
+  const handleChangeInstruction = useCallback((e) => setInstruction(e.target.value), []);
+  const handleChangeImportant = useCallback((e) => setImportant(e.target.value), []);
+
+  const handleDownloadFile = useCallback((file) => {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
@@ -544,10 +565,8 @@ export const EvalsInput = () => {
             placeholder="Rename group"
             className="ml-2 rounded border-none p-0 text-lg"
             value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onBlur={() => {
-              renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
-            }}
+            onChange={handleChangeGroupName}
+            onBlur={handleBlurGroupName}
           />
         ) : (
           <h2 className="text-lg">New Form</h2>
@@ -572,15 +591,28 @@ export const EvalsInput = () => {
               onChange={handleImportInput}
             />
           </label>
-          <select value={selectedGroupId || ''} onChange={handleLoadPrevious}>
-            <option value="">History</option>
-            {inputGroups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name || `Eval #${g.id}`}
-              </option>
-            ))}
-            <option value="">+ New form</option>
-          </select>
+          <div className="relative">
+            <select
+              value={selectedGroupId || ''}
+              onChange={handleLoadPrevious}
+              className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+            >
+              {inputGroups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name || `Eval #${g.id}`}
+                </option>
+              ))}
+              <option value="">+ New form</option>
+            </select>
+            <button
+              className="flex items-center gap-1 rounded px-2 py-1 hover:bg-gray-100"
+              title="History"
+              tabIndex={-1}
+            >
+              History
+              <span className="material-symbols-outlined">expand_more</span>
+            </button>
+          </div>
         </div>
       </div>
       <div className="space-y-6 p-6">
@@ -593,7 +625,7 @@ export const EvalsInput = () => {
             <textarea
               id="instruction"
               value={instruction}
-              onChange={(e) => setInstruction(e.target.value)}
+              onChange={handleChangeInstruction}
               className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
@@ -604,7 +636,7 @@ export const EvalsInput = () => {
             <textarea
               id="important"
               value={important}
-              onChange={(e) => setImportant(e.target.value)}
+              onChange={handleChangeImportant}
               className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
@@ -612,26 +644,48 @@ export const EvalsInput = () => {
         {/* File Upload */}
         <div>
           <label className="mb-2 block text-sm">Files</label>
-          {files.map((file) => (
-            <div
-              key={file.name}
-              className="mb-2 flex items-center justify-between rounded border border-neutral-300  bg-gray-50 p-4"
-            >
-              <div className="flex items-center">
-                <span className="material-symbols-outlined mr-3 text-gray-600">description</span>
-                <div>
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+          {files.map((file) => {
+            return (
+              <div
+                key={file.name}
+                className="mb-2 flex items-center justify-between rounded border border-neutral-300  bg-gray-50 p-4"
+              >
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-3 text-gray-600">description</span>
+                  <div>
+                    <p className="font-medium">{file.name}</p>
+                    <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const url = URL.createObjectURL(file);
+                      events.emit('evals:iframe', { url });
+                    }}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Download file"
+                  >
+                    <span className="material-symbols-outlined">visibility</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownloadFile(file)}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Download file"
+                  >
+                    <span className="material-symbols-outlined">download</span>
+                  </button>
+                  <button
+                    onClick={() => handleRemoveFile(file.name)}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Remove file"
+                  >
+                    <span className="material-symbols-outlined">delete</span>
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => handleRemoveFile(file.name)}
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
-              >
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          ))}
+            );
+          })}
           <div className="mt-2 flex space-x-2">
             <label className="inline-flex cursor-pointer items-center rounded border border-neutral-300  px-4 py-2 hover:bg-gray-50">
               <span className="material-symbols-outlined mr-2">upload_file</span>
