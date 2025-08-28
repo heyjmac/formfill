@@ -147,7 +147,7 @@ export const EvalsResults = () => {
                               <div className="flex gap-2">
                                 <input
                                   type="checkbox"
-                                  checked={field._checked ?? true}
+                                  checked={field._checked ?? field.ok}
                                   onChange={(e) => {
                                     setResults((prev) =>
                                       prev.map((r, ri) =>
