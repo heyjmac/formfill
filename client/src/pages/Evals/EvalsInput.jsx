@@ -587,15 +587,28 @@ export const EvalsInput = () => {
               onChange={handleImportInput}
             />
           </label>
-          <select value={selectedGroupId || ''} onChange={handleLoadPrevious}>
-            <option value="">History</option>
-            {inputGroups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name || `Eval #${g.id}`}
-              </option>
-            ))}
-            <option value="">+ New form</option>
-          </select>
+          <div className="relative">
+            <select
+              value={selectedGroupId || ''}
+              onChange={handleLoadPrevious}
+              className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+            >
+              {inputGroups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name || `Eval #${g.id}`}
+                </option>
+              ))}
+              <option value="">+ New form</option>
+            </select>
+            <button
+              className="flex items-center gap-1 rounded px-2 py-1 hover:bg-gray-100"
+              title="History"
+              tabIndex={-1}
+            >
+              History
+              <span className="material-symbols-outlined">expand_more</span>
+            </button>
+          </div>
         </div>
       </div>
       <div className="space-y-6 p-6">
