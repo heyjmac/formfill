@@ -151,7 +151,7 @@ const importInputGroups = (file, setInputGroups, setSelectedGroupId) => {
           return new File([ab], f.name, { type: mime });
         });
 
-        const { id, ...data } = group;
+        const { id: _id, ...data } = group;
         await new Promise((resolve) => {
           saveInputGroup({ ...data, files }, (newId) => {
             console.log(`[import] Group saved with new id: ${newId}`);
@@ -535,6 +535,23 @@ export const EvalsInput = () => {
     [],
   );
 
+  const handleChangeGroupName = useCallback((e) => setRenameValue(e.target.value), []);
+  const handleBlurGroupName = useCallback(() => {
+    renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
+  }, [selectedGroupId, renameValue]);
+
+  const handleChangeInstruction = useCallback((e) => setInstruction(e.target.value), []);
+  const handleChangeImportant = useCallback((e) => setImportant(e.target.value), []);
+
+  const handleDownloadFile = useCallback((file) => {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-md border border-neutral-300">
       <div className="flex items-center  justify-between border-b border-neutral-300 bg-gray-50 p-4">
@@ -544,10 +561,8 @@ export const EvalsInput = () => {
             placeholder="Rename group"
             className="ml-2 rounded border-none p-0 text-lg"
             value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onBlur={() => {
-              renameInputGroup(selectedGroupId, renameValue, () => loadInputGroups(setInputGroups));
-            }}
+            onChange={handleChangeGroupName}
+            onBlur={handleBlurGroupName}
           />
         ) : (
           <h2 className="text-lg">New Form</h2>
@@ -593,7 +608,7 @@ export const EvalsInput = () => {
             <textarea
               id="instruction"
               value={instruction}
-              onChange={(e) => setInstruction(e.target.value)}
+              onChange={handleChangeInstruction}
               className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
@@ -604,7 +619,7 @@ export const EvalsInput = () => {
             <textarea
               id="important"
               value={important}
-              onChange={(e) => setImportant(e.target.value)}
+              onChange={handleChangeImportant}
               className="w-full rounded border border-neutral-300  px-3 py-2"
             />
           </div>
@@ -624,12 +639,22 @@ export const EvalsInput = () => {
                   <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                 </div>
               </div>
-              <button
-                onClick={() => handleRemoveFile(file.name)}
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
-              >
-                <span className="material-symbols-outlined">delete</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDownloadFile(file)}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="Download file"
+                >
+                  <span className="material-symbols-outlined">download</span>
+                </button>
+                <button
+                  onClick={() => handleRemoveFile(file.name)}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                  title="Remove file"
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                </button>
+              </div>
             </div>
           ))}
           <div className="mt-2 flex space-x-2">
