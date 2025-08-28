@@ -187,17 +187,24 @@ export const EvalsInput = () => {
   const [inputGroups, setInputGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [iframeUrl, setIframeUrl] = useState('');
   const expectedRef = useRef();
 
   useEffect(() => {
-    const unsubscribe = events.on('evals:overwriteExpected', (newExpected) => {
+    const unsubscribe1 = events.on('evals:overwriteExpected', (newExpected) => {
       setExpectedMap((prev) => ({ ...prev, ...newExpected }));
 
       setTimeout(() => {
         expectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 600);
     });
-    return () => unsubscribe();
+    const unsubscribe2 = events.on('evals:iframe', ({ url }) => {
+      setIframeUrl(url);
+    });
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
   }, []);
 
   useEffect(() => {
@@ -219,16 +226,6 @@ export const EvalsInput = () => {
       }
     }
   }, [inputGroups]);
-
-  useEffect(() => {
-    events.emit('evals:input', {
-      instruction,
-      important,
-      formFields,
-      expected: expectedMap,
-      files,
-    });
-  }, [instruction, important, times, formFields, files, files.length, expectedMap]);
 
   useEffect(() => {
     if (!selectedGroupId) return;
@@ -413,6 +410,13 @@ export const EvalsInput = () => {
 
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
+    events.emit('evals:input', {
+      instruction,
+      important,
+      formFields,
+      expected: expectedMap,
+      files,
+    });
     const body = new FormData();
     body.append('instruction', instruction);
     body.append('important', important);
@@ -640,36 +644,48 @@ export const EvalsInput = () => {
         {/* File Upload */}
         <div>
           <label className="mb-2 block text-sm">Files</label>
-          {files.map((file) => (
-            <div
-              key={file.name}
-              className="mb-2 flex items-center justify-between rounded border border-neutral-300  bg-gray-50 p-4"
-            >
-              <div className="flex items-center">
-                <span className="material-symbols-outlined mr-3 text-gray-600">description</span>
-                <div>
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+          {files.map((file) => {
+            return (
+              <div
+                key={file.name}
+                className="mb-2 flex items-center justify-between rounded border border-neutral-300  bg-gray-50 p-4"
+              >
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-3 text-gray-600">description</span>
+                  <div>
+                    <p className="font-medium">{file.name}</p>
+                    <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const url = URL.createObjectURL(file);
+                      events.emit('evals:iframe', { url });
+                    }}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Download file"
+                  >
+                    <span className="material-symbols-outlined">visibility</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownloadFile(file)}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Download file"
+                  >
+                    <span className="material-symbols-outlined">download</span>
+                  </button>
+                  <button
+                    onClick={() => handleRemoveFile(file.name)}
+                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                    title="Remove file"
+                  >
+                    <span className="material-symbols-outlined">delete</span>
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleDownloadFile(file)}
-                  className="cursor-pointer text-gray-500 hover:text-gray-700"
-                  title="Download file"
-                >
-                  <span className="material-symbols-outlined">download</span>
-                </button>
-                <button
-                  onClick={() => handleRemoveFile(file.name)}
-                  className="cursor-pointer text-gray-500 hover:text-gray-700"
-                  title="Remove file"
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="mt-2 flex space-x-2">
             <label className="inline-flex cursor-pointer items-center rounded border border-neutral-300  px-4 py-2 hover:bg-gray-50">
               <span className="material-symbols-outlined mr-2">upload_file</span>
