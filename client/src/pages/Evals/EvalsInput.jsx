@@ -518,7 +518,137 @@ export const EvalsInput = () => {
         <div className="break-inside-avoid">
           <label className="mb-2 block text-sm">Form Fields</label>
           <div className="overflow-hidden rounded border border-neutral-300">
-            <table className="w-full text-sm">
+            <div className="divide-y divide-neutral-300 md:hidden [&>*:nth-child(even)]:bg-neutral-50">
+              {formFields.map((field, i) => (
+                <div key={i} className="space-y-2 rounded p-3">
+                  <input
+                    type="text"
+                    placeholder="Field name"
+                    value={field.name}
+                    onChange={(e) => updateField(i, 'name', e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-sm font-semibold"
+                  />
+                  <select
+                    value={field.type}
+                    onChange={(e) => updateField(i, 'type', e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-sm"
+                  >
+                    {[
+                      'text',
+                      'email',
+                      'select-one',
+                      'number',
+                      'date',
+                      'tel',
+                      'checkbox',
+                      'radio',
+                      'range',
+                      'time',
+                      'textarea',
+                    ].map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Description"
+                    value={field.description}
+                    onChange={(e) => updateField(i, 'description', e.target.value)}
+                    className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-sm text-gray-500"
+                  />
+                  {field.type === 'select-one' ? (
+                    <div className="flex flex-wrap items-center gap-2 rounded border border-neutral-300 bg-white px-2 py-1 text-sm">
+                      {(field.options || []).map((opt, idx) => (
+                        <span
+                          key={idx}
+                          className="flex items-center gap-1 rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-700"
+                        >
+                          {opt.text}
+                          <button
+                            onClick={() => {
+                              const options = [...(field.options || [])];
+                              options.splice(idx, 1);
+                              updateField(i, 'options', options);
+                              updateField(
+                                i,
+                                'format',
+                                options.map((o) => `"${o.value}"`).join(', '),
+                              );
+                            }}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      <input
+                        type="text"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const val = e.target.value.trim().replace(/^"|"$/g, '');
+                            if (val) {
+                              const options = [...(field.options || []), { value: val, text: val }];
+                              updateField(i, 'options', options);
+                              updateField(
+                                i,
+                                'format',
+                                options.map((o) => `"${o.value}"`).join(', '),
+                              );
+                              e.target.value = '';
+                            }
+                          }
+                        }}
+                        placeholder="Add option"
+                        className="flex-1 bg-transparent bg-white text-sm outline-none"
+                      />
+                    </div>
+                  ) : field.type === 'number' || field.type === 'range' ? (
+                    <input
+                      type="text"
+                      value={field.format}
+                      onChange={(e) => updateField(i, 'format', e.target.value)}
+                      placeholder="min-max"
+                      className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-sm text-gray-500"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={field.format}
+                      onChange={(e) => updateField(i, 'format', e.target.value)}
+                      placeholder="Format (optional)"
+                      className="w-full rounded border border-neutral-300 bg-white px-2 py-1 text-sm text-gray-500"
+                    />
+                  )}
+                  <div className="flex justify-end space-x-2 pt-2">
+                    <button
+                      onClick={() => moveField(i, -1)}
+                      disabled={i === 0}
+                      className="text-sm text-gray-500 disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => moveField(i, 1)}
+                      disabled={i === formFields.length - 1}
+                      className="text-sm text-gray-500 disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                    <button onClick={() => duplicateField(i)} className="text-sm text-gray-500">
+                      Duplicate
+                    </button>
+                    <button onClick={() => removeField(i)} className="text-sm text-red-600">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <table className="hidden w-full text-sm md:table">
               <thead className="border-b border-neutral-300  bg-gray-50">
                 <tr>
                   <th className="p-3 text-left">Field Name</th>
