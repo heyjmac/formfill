@@ -14,6 +14,21 @@ export const EvalsResults = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setResults((prev) =>
+      prev.map((run) => {
+        if (!run.compare?.details) return run;
+        return {
+          ...run,
+          compare: {
+            ...run.compare,
+            details: run.compare.details.map((d) => ({ ...d, _checked: true })),
+          },
+        };
+      }),
+    );
+  }, []);
+
   const handlePrint = useCallback(() => {
     if (typeof window === 'undefined') return;
     const details = Array.from(document.querySelectorAll('details'));
@@ -62,21 +77,6 @@ export const EvalsResults = () => {
                 {run.file && <span className="text-xs text-gray-500">(Iteration {run.run})</span>}
               </div>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
-                <button
-                  className="rounded px-3 py-1 text-sm text-blue-700 hover:bg-neutral-100"
-                  onClick={() => {
-                    const expected = {
-                      [run.file]: run.compare.details.reduce((acc, curr) => {
-                        acc[curr.key] = curr.got;
-                        return acc;
-                      }, {}),
-                    };
-                    events.emit('evals:overwriteExpected', expected);
-                  }}
-                >
-                  Use this as Expected
-                </button>
-
                 <span>
                   Response Time: {run.latency_ms ? (run.latency_ms / 1000).toFixed(2) + 's' : '—'}
                 </span>
@@ -117,21 +117,66 @@ export const EvalsResults = () => {
                   </div>
 
                   <div className="rounded border border-neutral-300">
-                    <div className="border-b border-neutral-300 bg-gray-50 p-3 font-medium">
+                    <div className="flex items-center justify-between border-b border-neutral-300 bg-gray-50 p-3 font-medium">
                       Extracted Fields
+                      <button
+                        className="cursor-pointer rounded px-3 py-1 text-sm text-blue-700 hover:bg-neutral-100"
+                        onClick={() => {
+                          const expected = {
+                            [run.file]: run.compare.details.reduce((acc, curr) => {
+                              if (curr._checked) acc[curr.key] = curr.got;
+                              return acc;
+                            }, {}),
+                          };
+                          events.emit('evals:overwriteExpected', expected);
+                        }}
+                      >
+                        Use selected as Expected
+                      </button>
                     </div>
-                    <div className="divide-y divide-neutral-300">
+                    <div>
                       {run.compare.details.map((field, idx) => (
-                        <div key={idx} className={`p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}>
-                          <div className="flex justify-between">
-                            <p className="text-sm font-medium">{field.key}</p>
-                            <span className="material-symbols-outlined text-sm">
-                              {field.ok ? 'check_circle' : 'cancel'}
-                            </span>
+                        <label key={idx}>
+                          <div
+                            className={`border-b border-neutral-300 p-4 ${field.ok ? 'bg-green-50' : 'bg-red-50'}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium">{field.key}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={field._checked ?? true}
+                                  onChange={(e) => {
+                                    setResults((prev) =>
+                                      prev.map((r, ri) =>
+                                        ri === i
+                                          ? {
+                                              ...r,
+                                              compare: {
+                                                ...r.compare,
+                                                details: r.compare.details.map((f, fi) =>
+                                                  fi === idx
+                                                    ? { ...f, _checked: e.target.checked }
+                                                    : f,
+                                                ),
+                                              },
+                                            }
+                                          : r,
+                                      ),
+                                    );
+                                  }}
+                                />
+                                <span className="material-symbols-outlined text-sm">
+                                  {field.ok ? 'check_circle' : 'cancel'}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
+                            <p className="mt-1">Got: {field.got}</p>
                           </div>
-                          <p className="mt-1 text-xs text-gray-500">Expected: {field.expected}</p>
-                          <p className="mt-1">Got: {field.got}</p>
-                        </div>
+                        </label>
                       ))}
                     </div>
                   </div>
