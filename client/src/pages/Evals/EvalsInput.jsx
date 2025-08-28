@@ -439,7 +439,7 @@ export const EvalsInput = () => {
           <input
             type="text"
             placeholder="Rename group"
-            className="ml-2 rounded border border-neutral-300 px-2 py-1 text-sm"
+            className="ml-2 rounded border-none px-2 py-1 text-center text-base font-semibold"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={() => {
@@ -626,21 +626,27 @@ export const EvalsInput = () => {
                     <button
                       onClick={() => moveField(i, -1)}
                       disabled={i === 0}
-                      className="text-sm text-gray-500 disabled:opacity-30"
+                      className="cursor-pointer text-sm text-gray-500 disabled:opacity-30"
                     >
                       ↑
                     </button>
                     <button
                       onClick={() => moveField(i, 1)}
                       disabled={i === formFields.length - 1}
-                      className="text-sm text-gray-500 disabled:opacity-30"
+                      className="cursor-pointer text-sm text-gray-500 disabled:opacity-30"
                     >
                       ↓
                     </button>
-                    <button onClick={() => duplicateField(i)} className="text-sm text-gray-500">
+                    <button
+                      onClick={() => duplicateField(i)}
+                      className="cursor-pointer text-sm text-gray-500"
+                    >
                       Duplicate
                     </button>
-                    <button onClick={() => removeField(i)} className="text-sm text-red-600">
+                    <button
+                      onClick={() => removeField(i)}
+                      className="cursor-pointer text-sm text-red-600"
+                    >
                       Delete
                     </button>
                   </div>
@@ -704,7 +710,7 @@ export const EvalsInput = () => {
                     </td>
                     <td className="p-3 text-gray-500">
                       {field.type === 'select-one' ? (
-                        <div className="flex flex-wrap items-center gap-2 border-0 border-neutral-300 bg-transparent px-2 py-1 text-sm">
+                        <div className="flex max-w-[100px] flex-wrap items-center gap-2 border-0 border-neutral-300 bg-transparent px-2 py-1 text-sm">
                           {(field.options || []).map((opt, idx) => (
                             <span
                               key={idx}
