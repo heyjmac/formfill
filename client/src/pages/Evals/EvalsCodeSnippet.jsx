@@ -1,12 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
 
-export const EvalsCodeSnippet = () => {
-  const [formFields, setFormFields] = React.useState([]);
-  const [instruction, setInstruction] = React.useState('');
-  const [important, setImportant] = React.useState('');
-  const [isCopying, setIsCopying] = React.useState(false);
+export const EvalsCodeSnippet = React.memo(() => {
+  const [formFields, setFormFields] = useState([]);
+  const [instruction, setInstruction] = useState('');
+  const [important, setImportant] = useState('');
+  const [isCopying, setIsCopying] = useState(false);
+  const [code, setCode] = useState('');
+  const [formCode, setFormCode] = useState('');
   const preRef = useRef(null);
+
+  useEffect(() => {
+    events.emit('evals:code', { code: formCode, instruction, important });
+  }, [formCode, important, instruction]);
 
   useEffect(() => {
     const unsubscribe = events.on('evals:input', ({ formFields, instruction, important }) => {
@@ -27,31 +33,35 @@ export const EvalsCodeSnippet = () => {
     }`;
 
     if (type === 'textarea') {
-      return `<textarea ${baseAttrs}></textarea>`;
+      return `<label>${name}<textarea ${baseAttrs}></textarea></label>`;
     }
 
     if (type === 'select-one') {
-      return `<select ${baseAttrs}>
+      return `<label>${name}<select ${baseAttrs}>
   <option value="">Select...</option>
   <option value="option1">Option 1</option>
   <option value="option2">Option 2</option>
-</select>`;
+</select></label>`;
     }
 
-    return `<input type="${type}" ${baseAttrs} />`;
+    return `<label>${name}<input type="${type}" ${baseAttrs} /></label>`;
   }, []);
 
-  const code = useMemo(
-    () => `<FormFillerFloater
+  useEffect(() => {
+    if (formFields.length === 0) return;
+    const formCode = `<form>
+  ${formFields?.map(generateInput).join('\n  ')}
+</form>`;
+    const code = `<FormFillerFloater
   instruction="${instruction}"
   important="${important}"
 />
 
-<form>
-  ${formFields?.map(generateInput).join('\n  ')}
-</form>`,
-    [formFields, generateInput, important, instruction],
-  );
+${formCode}`;
+    setCode(code);
+    setFormCode(formCode);
+  }, [formFields, generateInput, important, instruction]);
+
   const visuallySelectPre = useCallback(() => {
     const el = preRef.current;
     if (!el) return;
@@ -83,21 +93,37 @@ export const EvalsCodeSnippet = () => {
     }
   }, [clearSelection, code, visuallySelectPre]);
 
+  const handleDemo = useCallback(() => {
+    events.emit('evals:iframe', { url: null });
+  }, []);
+
   return (
     <>
       {instruction && (
-        <div className="break-inside-avoid border-b border-neutral-300 bg-gray-50 p-4">
+        <div
+          id="codeSnippet"
+          className="break-inside-avoid rounded border border-neutral-300 bg-neutral-50 p-4"
+        >
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center justify-between">
-              <span className="text-sm font-medium">Generated Form Code</span>
-              <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">
-                expand_more
-              </span>
+              <span className="text-sm font-medium">Generated Form</span>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex h-[40px] cursor-pointer items-center gap-1 rounded border border-neutral-300 bg-white px-3 transition-colors print:hidden"
+                  onClick={handleDemo}
+                >
+                  <span className="material-symbols-outlined">visibility</span>
+                  <span>Play with demo</span>
+                </button>
+                <span className="material-symbols-outlined transition-transform group-open:rotate-180">
+                  expand_more
+                </span>
+              </div>
             </summary>
-            <div className="relative mt-3 rounded bg-gray-900 p-3 font-mono text-sm text-gray-100">
+            <div className="relative mt-3 rounded bg-neutral-900 p-3 font-mono text-sm text-neutral-100">
               <button
                 onClick={copyToClipboard}
-                className="absolute right-3 top-3 rounded bg-gray-700 px-2 py-1 text-xs text-white hover:bg-gray-600"
+                className="absolute right-3 top-3 rounded bg-neutral-700 px-2 py-1 text-xs text-white hover:bg-neutral-600"
               >
                 {isCopying ? 'Copied!' : 'Copy'}
               </button>
@@ -112,4 +138,4 @@ export const EvalsCodeSnippet = () => {
       )}
     </>
   );
-};
+});

@@ -30,7 +30,9 @@ export const EvalsSummary = () => {
       setTotalRuns(totalRuns);
 
       setTimeout(() => {
-        summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document
+          .getElementById('codeSnippet')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 600);
     };
     events.on('evals:summary', handler);

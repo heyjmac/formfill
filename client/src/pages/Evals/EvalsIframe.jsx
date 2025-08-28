@@ -1,16 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { events } from '../../ai-components/utils/events';
+import { FormFillerFloater } from '../../ai-components/FormFiller';
+import './style.css';
 
 export const EvalsIframe = React.memo(() => {
   const [isOpen, setIsOpen] = useState(false);
+  const [instruction, setInstruction] = useState('');
+  const [important, setImportant] = useState('');
   const [url, setUrl] = useState('');
+  const [code, setCode] = useState('');
 
   useEffect(() => {
-    const unsubscribe = events.on('evals:iframe', ({ url }) => {
+    const unsubscribe1 = events.on('evals:iframe', ({ url }) => {
       setUrl(url);
       setIsOpen(true);
     });
-    return () => unsubscribe();
+    const unsubscribe2 = events.on('evals:code', ({ code, instruction, important }) => {
+      setCode(code);
+      setInstruction(instruction);
+      setImportant(important);
+    });
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
   }, []);
 
   useEffect(() => {
@@ -20,15 +33,13 @@ export const EvalsIframe = React.memo(() => {
       }
     };
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
     <div
       className={`relative h-screen border-l border-neutral-300 transition-all ${
-        isOpen ? 'w-1/2' : 'w-0'
+        isOpen ? 'w-1/3' : 'w-0'
       }`}
     >
       <button
@@ -44,9 +55,17 @@ export const EvalsIframe = React.memo(() => {
       {isOpen &&
         (url ? (
           <iframe className="size-full" src={url} />
+        ) : code ? (
+          <div className="flex size-full items-center justify-center bg-neutral-50">
+            <div
+              className="styled-form overflow-auto p-4 text-sm"
+              dangerouslySetInnerHTML={{ __html: code }}
+            ></div>
+            <FormFillerFloater instruction={instruction} important={important} />
+          </div>
         ) : (
-          <div className="flex size-full items-center justify-center text-sm text-gray-400">
-            No document selected
+          <div className="flex size-full items-center justify-center bg-neutral-50 text-sm text-gray-400">
+            Select a document to view or run a prompt to generate a form.
           </div>
         ))}
     </div>

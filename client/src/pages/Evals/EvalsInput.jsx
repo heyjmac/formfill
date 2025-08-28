@@ -435,6 +435,17 @@ export const EvalsInput = () => {
     setIsLoading(false);
   }, [expectedMap, formFields, files, instruction, important, times]);
 
+  const handleNew = useCallback(() => {
+    setSelectedGroupId(null);
+    setRenameValue('');
+    setInstruction('');
+    setImportant('');
+    setFormFields([]);
+    setExpectedMap({});
+    setFiles([]);
+    localStorage.removeItem('evalsInput:lastGroupId');
+  }, []);
+
   const handleLoadPrevious = useCallback(
     (e) => {
       const id = Number(e.target.value);
@@ -454,7 +465,7 @@ export const EvalsInput = () => {
         setRenameValue(group.name || '');
       }
     },
-    [inputGroups],
+    [handleNew, inputGroups],
   );
 
   const handleSave = useCallback(
@@ -518,17 +529,6 @@ export const EvalsInput = () => {
       }),
     [selectedGroupId],
   );
-
-  const handleNew = useCallback(() => {
-    setSelectedGroupId(null);
-    setRenameValue('');
-    setInstruction('');
-    setImportant('');
-    setFormFields([]);
-    setExpectedMap({});
-    setFiles([]);
-    localStorage.removeItem('evalsInput:lastGroupId');
-  }, []);
 
   const handleExportInput = useCallback(() => {
     exportInputGroups(selectedGroupId);
@@ -1133,7 +1133,7 @@ export const EvalsInput = () => {
               className="h-[40px] w-20 rounded border border-neutral-300 px-3  text-sm"
             />
             <button
-              className="h-[40px] cursor-pointer rounded bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 print:hidden"
+              className="flex h-[40px] cursor-pointer items-center gap-1 rounded bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 print:hidden"
               onClick={handleSubmit}
               disabled={
                 isLoading ||
@@ -1143,10 +1143,10 @@ export const EvalsInput = () => {
                 formFields.some((f) => !f.name)
               }
             >
-              <span className="hidden md:inline">
-                {isLoading ? 'Processing...' : 'Process Documents'}
+              <span>{isLoading ? 'Running...' : 'Run'}</span>
+              <span className="material-symbols-outlined">
+                {isLoading ? 'hourglass_empty' : 'play_arrow'}
               </span>
-              <span className="md:hidden">{isLoading ? 'Running...' : 'Run'}</span>
             </button>
           </div>
         </div>

@@ -1,0 +1,34 @@
+.styled-form {
+  margin: 24px auto;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: sans-serif;
+}
+
+.styled-form form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  justify-items: end;
+}
+
+.styled-form label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #222;
+  margin-right: 12px;
+}
+
+.styled-form input {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-left: 12px;
+}
+
+.styled-form input:focus {
+  border-color: #2563eb;
+}
