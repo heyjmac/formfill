@@ -68,7 +68,14 @@ export const EvalsSummary = () => {
             </div>
             <div>
               <p className="text-xs text-gray-500">Avg F1 Score</p>
-              <p className="text-xl">{(avgF1 * 100).toFixed(2)}%</p>
+              <p className="flex items-center gap-2 text-xl">
+                <span
+                  className={`size-3 rounded-full ${
+                    avgF1 < 0.6 ? 'bg-red-500' : avgF1 < 0.7 ? 'bg-orange-400' : 'bg-green-500'
+                  }`}
+                />
+                {(avgF1 * 100).toFixed(2)}%
+              </p>
             </div>
           </div>
         </div>
