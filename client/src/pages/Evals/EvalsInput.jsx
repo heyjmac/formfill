@@ -161,18 +161,6 @@ export const EvalsInput = () => {
     return () => clearTimeout(timeout);
   }, [instruction, important, formFields, expectedMap, files, selectedGroupId, renameValue]);
 
-  const moveField = useCallback(
-    (index, direction) => {
-      const updated = [...formFields];
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= updated.length) return;
-
-      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-      setFormFields(updated);
-    },
-    [formFields],
-  );
-
   const handleFileUpload = useCallback(
     (e) => {
       const uploaded = Array.from(e.target.files);
@@ -249,6 +237,40 @@ export const EvalsInput = () => {
       setExpectedMap(updatedMap);
     },
     [expectedMap, formFields],
+  );
+
+  const duplicateField = useCallback(
+    (index) => {
+      const original = formFields[index];
+      const baseName = original.name;
+      const newName = baseName ? `${baseName}_copy` : '';
+      const copy = { ...original, name: newName };
+
+      const updated = [...formFields];
+      updated.splice(index + 1, 0, copy);
+
+      const updatedMap = { ...expectedMap };
+      Object.keys(updatedMap).forEach((file) => {
+        const value = updatedMap[file][baseName] ?? '';
+        updatedMap[file][newName] = value;
+      });
+
+      setFormFields(updated);
+      setExpectedMap(updatedMap);
+    },
+    [formFields, expectedMap],
+  );
+
+  const moveField = useCallback(
+    (index, direction) => {
+      const updated = [...formFields];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= updated.length) return;
+
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      setFormFields(updated);
+    },
+    [formFields],
   );
 
   const handleAddExpectedField = useCallback((fileName, newField) => {
@@ -625,6 +647,7 @@ export const EvalsInput = () => {
                           onClick={() => moveField(i, -1)}
                           disabled={i === 0}
                           className="cursor-pointer text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                          title="Move up"
                         >
                           ↑
                         </button>
@@ -632,12 +655,23 @@ export const EvalsInput = () => {
                           onClick={() => moveField(i, 1)}
                           disabled={i === formFields.length - 1}
                           className="cursor-pointer text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                          title="Move down"
                         >
                           ↓
                         </button>
                         <button
+                          onClick={() => duplicateField(i)}
+                          className="cursor-pointer text-gray-400 hover:text-gray-600"
+                          title="Duplicate field"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                            content_copy
+                          </span>
+                        </button>
+                        <button
                           onClick={() => removeField(i)}
                           className="cursor-pointer text-gray-400 hover:text-gray-600"
+                          title="Remove field"
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                             delete
@@ -727,6 +761,7 @@ export const EvalsInput = () => {
               <button
                 onClick={handleNew}
                 className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
+                title="Start a new input"
               >
                 <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                   add
@@ -740,6 +775,7 @@ export const EvalsInput = () => {
                 <button
                   className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
                   onClick={handleSave}
+                  title="Save"
                 >
                   <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                     save
@@ -748,6 +784,7 @@ export const EvalsInput = () => {
                 <button
                   className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
                   onClick={handleSaveAs}
+                  title="Save as new version"
                 >
                   <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                     file_copy
@@ -758,6 +795,7 @@ export const EvalsInput = () => {
               <button
                 className="flex h-[40px] cursor-pointer items-center rounded border border-neutral-300 px-4 transition-colors hover:bg-gray-50"
                 onClick={handleSaveAs}
+                title="Save"
               >
                 <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                   save
@@ -769,6 +807,7 @@ export const EvalsInput = () => {
               <button
                 className="flex h-[40px] cursor-pointer items-center rounded border border-red-700 px-4 text-red-700 transition-colors hover:bg-gray-50"
                 onClick={handleDelete}
+                title="Delete this input"
               >
                 <span className="material-symbols-outlined mr-1" style={{ fontSize: '18px' }}>
                   delete

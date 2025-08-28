@@ -7,7 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { calculateGeminiCosts, compare, runEval } from './evals.utils.js';
+import { runEval } from './evals.utils.js';
 import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
@@ -377,13 +377,13 @@ app.post(
       fs.unlinkSync(file.path);
     }
     const summary = {
-      total_files: files.length,
-      total_runs: results.length,
-      avg_latency_ms: null,
-      avg_precision: null,
-      avg_recall: null,
-      avg_f1: null,
-      total_cost_usd: 0,
+      totalFiles: files.length,
+      totalRuns: results.length,
+      avgLatencyMs: null,
+      avgPrecision: null,
+      avgRecall: null,
+      avgF1: null,
+      totalCostUsd: 0,
     };
 
     let latencySum = 0;
@@ -394,7 +394,7 @@ app.post(
 
     for (const r of results) {
       if (r.latency_ms != null) latencySum += r.latency_ms;
-      if (r.total_cost) summary.total_cost_usd += parseFloat(r.total_cost);
+      if (r.total_cost) summary.totalCostUsd += parseFloat(r.total_cost);
 
       if (r.precision != null && r.recall != null && r.f1 != null) {
         precisionSum += r.precision;
@@ -404,13 +404,13 @@ app.post(
       }
     }
 
-    summary.avg_latency_ms = results.length ? Math.round(latencySum / results.length) : null;
-    summary.avg_precision = metricCount ? +(precisionSum / metricCount).toFixed(4) : null;
-    summary.avg_recall = metricCount ? +(recallSum / metricCount).toFixed(4) : null;
-    summary.avg_f1 = metricCount ? +(f1Sum / metricCount).toFixed(4) : null;
-    summary.total_cost_usd = +summary.total_cost_usd.toFixed(6);
+    summary.avgLatencyMs = results.length ? Math.round(latencySum / results.length) : null;
+    summary.avgPrecision = metricCount ? +(precisionSum / metricCount).toFixed(4) : null;
+    summary.avgRecall = metricCount ? +(recallSum / metricCount).toFixed(4) : null;
+    summary.avgF1 = metricCount ? +(f1Sum / metricCount).toFixed(4) : null;
+    summary.totalCostUsd = +summary.totalCostUsd.toFixed(6);
 
-    res.json({ input, total_runs: results.length, summary, results });
+    res.json({ input, totalRuns: results.length, summary, results });
   },
 );
 

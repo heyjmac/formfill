@@ -266,18 +266,18 @@ const postFormFill = async ({ instruction, important, formFields, filePath }) =>
     }
 
     const avg = counted ? Math.round((sum / counted) * 100) : null;
-    const avg_latency_ms = latCount ? Math.round(latSum / latCount) : null;
+    const avgLatencyMs = latCount ? Math.round(latSum / latCount) : null;
     const summary = {
-      total_files: pdfs.length,
+      totalFiles: pdfs.length,
       with_expected: counted,
       average_percent: avg,
-      average_latency_ms: avg_latency_ms,
+      average_latency_ms: avgLatencyMs,
       STRICT,
       timestamp: new Date().toISOString(),
     };
     fs.writeFileSync(path.join(blockResultDir, 'summary.json'), JSON.stringify(summary, null, 2));
     console.log(
-      `\nDone ${blockName}. Avg${avg === null ? ': n/a' : `: ${avg}%`} • Avg latency${avg_latency_ms === null ? ': n/a' : `: ${avg_latency_ms}ms`}`,
+      `\nDone ${blockName}. Avg${avg === null ? ': n/a' : `: ${avg}%`} • Avg latency${avgLatencyMs === null ? ': n/a' : `: ${avgLatencyMs}ms`}`,
     );
   }
 })();
