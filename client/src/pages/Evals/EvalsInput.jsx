@@ -161,6 +161,18 @@ export const EvalsInput = () => {
     return () => clearTimeout(timeout);
   }, [instruction, important, formFields, expectedMap, files, selectedGroupId, renameValue]);
 
+  const moveField = useCallback(
+    (index, direction) => {
+      const updated = [...formFields];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= updated.length) return;
+
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      setFormFields(updated);
+    },
+    [formFields],
+  );
+
   const handleFileUpload = useCallback(
     (e) => {
       const uploaded = Array.from(e.target.files);
@@ -277,6 +289,14 @@ export const EvalsInput = () => {
       };
     });
   }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.cursor = 'wait';
+    } else {
+      document.body.style.cursor = 'default';
+    }
+  }, [isLoading]);
 
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
@@ -600,14 +620,30 @@ export const EvalsInput = () => {
                       )}
                     </td>
                     <td className="p-3 text-right">
-                      <button
-                        onClick={() => removeField(i)}
-                        className="cursor-pointer text-gray-400 hover:text-gray-600"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                          delete
-                        </span>
-                      </button>
+                      <div className="flex items-center justify-end space-x-1">
+                        <button
+                          onClick={() => moveField(i, -1)}
+                          disabled={i === 0}
+                          className="cursor-pointer text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          onClick={() => moveField(i, 1)}
+                          disabled={i === formFields.length - 1}
+                          className="cursor-pointer text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        >
+                          ↓
+                        </button>
+                        <button
+                          onClick={() => removeField(i)}
+                          className="cursor-pointer text-gray-400 hover:text-gray-600"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                            delete
+                          </span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

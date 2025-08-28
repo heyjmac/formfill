@@ -54,7 +54,7 @@ const deepEq = (a, b) => {
     if (ka.length !== kb.length) return false;
     return ka.every((k) => deepEq(a[k], b[k]));
   }
-  if (typeof a === 'string' && typeof b === 'string') return a.trim() === b.trim();
+  if (typeof a === 'string' && typeof b === 'string') return a?.trim() === b?.trim();
   return String(a).trim() === String(b).trim();
 };
 
