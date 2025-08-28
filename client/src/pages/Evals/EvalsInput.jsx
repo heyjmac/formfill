@@ -550,7 +550,7 @@ export const EvalsInput = () => {
             }}
           />
         ) : (
-          <h2 className="text-lg">New Input</h2>
+          <h2 className="text-lg">New Form</h2>
         )}
         <div className="flex items-center gap-2">
           <button onClick={handleNew} className="rounded px-2 py-1 hover:bg-gray-100" title="New">
