@@ -4,6 +4,24 @@ import { events } from '../../ai-components/utils/events';
 const DB_NAME = 'evalsDB';
 const STORE_INPUTS = 'inputGroups';
 
+const clean = (str) =>
+  str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w.-]/g, '_')
+    .toLowerCase();
+
+const generateUniqueName = (name, existingNames) => {
+  const [base, ext] = name.includes('.') ? name.split(/\.(?=[^.]+$)/) : [name, ''];
+  let uniqueName = name;
+  let counter = 1;
+  while (existingNames.has(uniqueName)) {
+    uniqueName = `${base}_${counter}${ext ? '.' + ext : ''}`;
+    counter++;
+  }
+  return uniqueName;
+};
+
 const openDB = (callback) => {
   const request = indexedDB.open(DB_NAME, 2);
   request.onupgradeneeded = (e) => {
@@ -252,7 +270,17 @@ export const EvalsInput = () => {
 
   const handleFileUpload = useCallback(
     (e) => {
-      const uploaded = Array.from(e.target.files);
+      const uploaded = [];
+      const existingNames = new Set([...files.map((f) => f.name)]);
+
+      Array.from(e.target.files).forEach((file) => {
+        const cleaned = clean(file.name);
+        const unique = generateUniqueName(cleaned, existingNames);
+        console.log({ unique, cleaned, existingNames });
+        existingNames.add(unique);
+        uploaded.push(new File([file], unique, { type: file.type }));
+      });
+
       setFiles((prev) => [...prev, ...uploaded]);
 
       const updatedMap = { ...expectedMap };
@@ -263,8 +291,9 @@ export const EvalsInput = () => {
         });
       });
       setExpectedMap(updatedMap);
+      e.target.value = null;
     },
-    [formFields, expectedMap],
+    [files, formFields, expectedMap],
   );
 
   const handleRemoveFile = useCallback(
