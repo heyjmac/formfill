@@ -187,23 +187,24 @@ export const EvalsInput = () => {
   const [inputGroups, setInputGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
-  const [iframeUrl, setIframeUrl] = useState('');
   const expectedRef = useRef();
 
   useEffect(() => {
     const unsubscribe1 = events.on('evals:overwriteExpected', (newExpected) => {
-      setExpectedMap((prev) => ({ ...prev, ...newExpected }));
+      setExpectedMap((prev) => {
+        const merged = { ...prev };
+        for (const file in newExpected) {
+          merged[file] = { ...(prev[file] || {}), ...newExpected[file] };
+        }
+        return merged;
+      });
 
       setTimeout(() => {
         expectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 600);
     });
-    const unsubscribe2 = events.on('evals:iframe', ({ url }) => {
-      setIframeUrl(url);
-    });
     return () => {
       unsubscribe1();
-      unsubscribe2();
     };
   }, []);
 
