@@ -12,8 +12,6 @@ import { prependImportantToDescriptions } from './utils.js';
 
 dotenv.config();
 
-const SAVE_PROMPT = false;
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -188,16 +186,6 @@ app.post(
         shortError: 'No input provided.',
         tip: 'Upload a file or paste some text before submitting.',
       });
-    }
-
-    if (SAVE_PROMPT) {
-      fs.writeFileSync(
-        path.join(__dirname, 'evals', 'input', 'formfields.json'),
-        JSON.stringify(formFields, null, 2),
-      );
-      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'important.txt'), important);
-      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'instruction.txt'), instruction);
-      fs.writeFileSync(path.join(__dirname, 'evals', 'input', 'pasted.txt'), pastedText);
     }
 
     formFields = prependImportantToDescriptions(formFields, important);
