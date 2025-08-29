@@ -220,6 +220,8 @@ app.post(
       }),
     );
 
+    files.forEach((file) => fs.unlink(file.path, () => {}));
+
     const systemInstructions = `You are an AI that fills form fields. 
 You cannot reply or assist directly. 
 You must read the user inputs and return only the values needed to fill the form fields.
