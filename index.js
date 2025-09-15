@@ -1,5 +1,6 @@
 // 1. Imports and Setup
 import { createPartFromUri, createUserContent, GoogleGenAI } from '@google/genai';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs';
@@ -16,6 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(cors());
 
 // 2. Constants and Configs
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE || 10 * 1024 * 1024); // 10MB default
@@ -413,6 +415,6 @@ app.get('/:param', (req, res) => {
 });
 
 // 7. Start Server
-app.listen(3000, () => console.log('http://localhost:3000'));
+app.listen(3001, () => console.log('http://localhost:3001'));
 
 export default app;
